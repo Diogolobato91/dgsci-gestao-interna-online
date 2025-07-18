@@ -60,15 +60,8 @@ const LoginForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
-        {/* Logo e Header */}
+        {/* Header */}
         <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <img 
-              src={cbmpaLogo} 
-              alt="CBMPA Logo" 
-              className="h-20 w-20 object-contain"
-            />
-          </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">
               Sistema Interno DGSCI

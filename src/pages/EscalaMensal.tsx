@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Download, Users, Clock } from 'lucide-react';
+import { Calendar, Download, Users, Clock, MessageCircle } from 'lucide-react';
 
 const EscalaMensal: React.FC = () => {
   const [visualizacao, setVisualizacao] = useState<'semanal' | 'mensal'>('semanal');
@@ -12,41 +12,41 @@ const EscalaMensal: React.FC = () => {
       dia: 'Segunda-feira',
       data: '14 de Janeiro',
       isToday: false,
-      chefePlantao: 'Cap. Silva',
-      peritoDia: 'Ten. Santos',
-      auxiliar: 'Sd. Oliveira'
+      chefePlantao: { nome: 'Cap. Silva', whatsapp: '5591999999999' },
+      peritoDia: { nome: 'Ten. Santos', whatsapp: '5591888888888' },
+      auxiliar: { nome: 'Sd. Oliveira', whatsapp: '5591777777777' }
     },
     {
       dia: 'Terça-feira',
       data: '15 de Janeiro',
       isToday: true,
-      chefePlantao: 'Maj. Costa',
-      peritoDia: 'Ten. Lima',
-      auxiliar: 'Cb. Ferreira'
+      chefePlantao: { nome: 'Maj. Costa', whatsapp: '5591666666666' },
+      peritoDia: { nome: 'Ten. Lima', whatsapp: '5591555555555' },
+      auxiliar: { nome: 'Cb. Ferreira', whatsapp: '5591444444444' }
     },
     {
       dia: 'Quarta-feira',
       data: '16 de Janeiro',
       isToday: false,
-      chefePlantao: 'Cap. Rodrigues',
-      peritoDia: 'Ten. Almeida',
-      auxiliar: 'Sd. Pereira'
+      chefePlantao: { nome: 'Cap. Rodrigues', whatsapp: '5591333333333' },
+      peritoDia: { nome: 'Ten. Almeida', whatsapp: '5591222222222' },
+      auxiliar: { nome: 'Sd. Pereira', whatsapp: '5591111111111' }
     },
     {
       dia: 'Quinta-feira',
       data: '17 de Janeiro',
       isToday: false,
-      chefePlantao: 'Cap. Mendes',
-      peritoDia: 'Ten. Carvalho',
-      auxiliar: 'Cb. Moreira'
+      chefePlantao: { nome: 'Cap. Mendes', whatsapp: '5591987654321' },
+      peritoDia: { nome: 'Ten. Carvalho', whatsapp: '5591123456789' },
+      auxiliar: { nome: 'Cb. Moreira', whatsapp: '5591246813579' }
     },
     {
       dia: 'Sexta-feira',
       data: '18 de Janeiro',
       isToday: false,
-      chefePlantao: 'Maj. Barbosa',
-      peritoDia: 'Ten. Martins',
-      auxiliar: 'Sd. Ribeiro'
+      chefePlantao: { nome: 'Maj. Barbosa', whatsapp: '5591135792468' },
+      peritoDia: { nome: 'Ten. Martins', whatsapp: '5591864297531' },
+      auxiliar: { nome: 'Sd. Ribeiro', whatsapp: '5591975318642' }
     }
   ];
 
@@ -123,21 +123,48 @@ const EscalaMensal: React.FC = () => {
                         <Users className="h-4 w-4 text-primary" />
                         <span className="font-medium">Chefe de Plantão</span>
                       </div>
-                      <p className="text-muted-foreground pl-6">{dia.chefePlantao}</p>
+                      <div className="flex items-center gap-2 pl-6">
+                        <p className="text-muted-foreground">{dia.chefePlantao.nome}</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => window.open(`https://wa.me/${dia.chefePlantao.whatsapp}`, '_blank')}
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-primary" />
+                        <Users className="h-4 w-4 text-primary" />
                         <span className="font-medium">Perito do Dia</span>
                       </div>
-                      <p className="text-muted-foreground pl-6">{dia.peritoDia}</p>
+                      <div className="flex items-center gap-2 pl-6">
+                        <p className="text-muted-foreground">{dia.peritoDia.nome}</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => window.open(`https://wa.me/${dia.peritoDia.whatsapp}`, '_blank')}
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-primary" />
                         <span className="font-medium">Auxiliar/Condutor</span>
                       </div>
-                      <p className="text-muted-foreground pl-6">{dia.auxiliar}</p>
+                      <div className="flex items-center gap-2 pl-6">
+                        <p className="text-muted-foreground">{dia.auxiliar.nome}</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => window.open(`https://wa.me/${dia.auxiliar.whatsapp}`, '_blank')}
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
