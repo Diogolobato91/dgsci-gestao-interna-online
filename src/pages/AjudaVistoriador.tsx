@@ -74,11 +74,11 @@ const AjudaVistoriador: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Header de Pesquisa */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Search className="h-5 w-5 text-primary" />
             Pesquisa Rápida
           </CardTitle>
@@ -91,22 +91,24 @@ const AjudaVistoriador: React.FC = () => {
                 placeholder="Digite sua dúvida ou termo de pesquisa..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 text-base"
+                className="pl-10 text-sm sm:text-base h-12"
               />
             </div>
             
             {/* Filtros */}
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
               {filters.map((filter) => (
                 <Button
                   key={filter.id}
                   variant={selectedFilter === filter.id ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedFilter(filter.id)}
-                  className="gap-2"
+                  className="gap-1 text-xs h-auto py-2"
                 >
                   <Filter className="h-3 w-3" />
-                  {filter.label} ({filter.count})
+                  <span className="hidden sm:inline">{filter.label}</span>
+                  <span className="sm:hidden">{filter.label.split(' ')[0]}</span>
+                  <span className="text-[10px]">({filter.count})</span>
                 </Button>
               ))}
             </div>
@@ -116,12 +118,12 @@ const AjudaVistoriador: React.FC = () => {
 
       {/* Resultados da Pesquisa */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h2 className="text-lg font-semibold">
             Resultados da Pesquisa ({filteredResults.length})
           </h2>
           {searchTerm && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground truncate">
               Resultados para: "{searchTerm}"
             </p>
           )}
@@ -129,35 +131,35 @@ const AjudaVistoriador: React.FC = () => {
 
         {filteredResults.length === 0 ? (
           <Card>
-            <CardContent className="text-center py-12">
-              <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nenhum resultado encontrado</h3>
-              <p className="text-muted-foreground">
+            <CardContent className="text-center py-8 sm:py-12">
+              <AlertTriangle className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-base sm:text-lg font-medium mb-2">Nenhum resultado encontrado</h3>
+              <p className="text-muted-foreground text-sm">
                 Tente ajustar os termos de pesquisa ou filtros selecionados.
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {filteredResults.map((result) => (
               <Card key={result.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-lg mb-2 text-foreground">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-base sm:text-lg mb-2 text-foreground">
                         {result.titulo}
                       </h3>
-                      <p className="text-muted-foreground text-sm mb-3">
+                      <p className="text-muted-foreground text-sm mb-3 line-clamp-2 sm:line-clamp-none">
                         {result.resumo}
                       </p>
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
                         {result.tags.map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
+                          <Badge key={index} variant="secondary" className="text-[10px] sm:text-xs">
                             {tag}
                           </Badge>
                         ))}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <FileText className="h-3 w-3" />
                           {result.documento}
@@ -168,11 +170,11 @@ const AjudaVistoriador: React.FC = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="ml-4 space-y-2">
-                      <Button size="sm">
+                    <div className="flex flex-row lg:flex-col gap-2 lg:ml-4">
+                      <Button size="sm" className="flex-1 lg:flex-none text-xs">
                         Visualizar
                       </Button>
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button variant="outline" size="sm" className="flex-1 lg:flex-none lg:w-full text-xs">
                         Baixar PDF
                       </Button>
                     </div>

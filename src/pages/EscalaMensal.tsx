@@ -63,21 +63,21 @@ const EscalaMensal: React.FC = () => {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Controles de Visualização */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Calendar className="h-5 w-5 text-primary" />
               Escala de Serviço
             </CardTitle>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <Button
                 variant={visualizacao === 'semanal' ? 'default' : 'outline'}
                 onClick={() => setVisualizacao('semanal')}
                 size="sm"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto text-xs sm:text-sm"
               >
                 Visualização Semanal
               </Button>
@@ -85,7 +85,7 @@ const EscalaMensal: React.FC = () => {
                 variant={visualizacao === 'mensal' ? 'default' : 'outline'}
                 onClick={() => setVisualizacao('mensal')}
                 size="sm"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto text-xs sm:text-sm"
               >
                 Visualização Mensal
               </Button>
@@ -97,23 +97,27 @@ const EscalaMensal: React.FC = () => {
       {visualizacao === 'semanal' ? (
         <>
           {/* Visualização Semanal */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {diasSemana.map((dia, index) => (
-              <Card key={index} className={dia.isToday ? "border-primary" : ""}>
+              <Card key={index} className={`${dia.isToday ? "border-primary bg-primary/5" : ""} overflow-hidden`}>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-lg">
-                        {dia.dia}, {dia.data}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <h3 className="font-semibold text-base sm:text-lg">
+                        {dia.dia}
                       </h3>
+                      <span className="text-sm text-muted-foreground">
+                        {dia.data}
+                      </span>
                       {dia.isToday && (
-                        <Badge className="bg-primary">Hoje</Badge>
+                        <Badge className="bg-primary text-xs">Hoje</Badge>
                       )}
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="text-xs">
                         <Download className="h-3 w-3 mr-1" />
-                        Baixar JPG
+                        <span className="hidden sm:inline">Baixar JPG</span>
+                        <span className="sm:hidden">JPG</span>
                       </Button>
                     </div>
                   </div>
@@ -180,19 +184,19 @@ const EscalaMensal: React.FC = () => {
           {/* Seção de Sobreaviso */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 <Users className="h-5 w-5 text-primary" />
                 Sobreaviso da Semana
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {sobreaviso.map((militar, index) => (
-                  <div key={index} className="space-y-2">
+                  <div key={index} className="space-y-2 p-3 rounded-lg bg-muted/50">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{militar.funcao}</Badge>
+                      <Badge variant="outline" className="text-xs">{militar.funcao}</Badge>
                     </div>
-                    <p className="font-medium">{militar.nome}</p>
+                    <p className="font-medium text-sm sm:text-base">{militar.nome}</p>
                   </div>
                 ))}
               </div>
@@ -201,14 +205,14 @@ const EscalaMensal: React.FC = () => {
 
           {/* Ações da Semana */}
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button className="w-full sm:w-auto">
-                  <Download className="h-4 w-4 mr-2" />
+                <Button className="w-full sm:w-auto text-xs sm:text-sm">
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                   Baixar Escala da Semana (JPG)
                 </Button>
-                <Button variant="outline" className="w-full sm:w-auto">
-                  <Download className="h-4 w-4 mr-2" />
+                <Button variant="outline" className="w-full sm:w-auto text-xs sm:text-sm">
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                   Baixar Escala do Dia (JPG)
                 </Button>
               </div>
@@ -220,30 +224,35 @@ const EscalaMensal: React.FC = () => {
           {/* Visualização Mensal */}
           <Card>
             <CardHeader>
-              <CardTitle>Janeiro 2024</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">Janeiro 2024</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-7 gap-2 mb-4">
+            <CardContent className="p-3 sm:p-6">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-4">
                 {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
-                  <div key={dia} className="p-2 text-center font-medium text-muted-foreground">
+                  <div key={dia} className="p-1 sm:p-2 text-center font-medium text-muted-foreground text-xs sm:text-sm">
                     {dia}
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {calendarioMensal.map((dia) => (
                   <Card
                     key={dia.dia}
-                    className={`min-h-[80px] ${dia.isToday ? 'border-primary bg-primary/5' : ''}`}
+                    className={`min-h-[60px] sm:min-h-[80px] ${dia.isToday ? 'border-primary bg-primary/5' : ''}`}
                   >
-                    <CardContent className="p-2">
-                      <div className="font-medium text-sm mb-1">{dia.dia}</div>
+                    <CardContent className="p-1 sm:p-2">
+                      <div className="font-medium text-xs sm:text-sm mb-1">{dia.dia}</div>
                       <div className="space-y-1">
-                        {dia.militares.map((militar, index) => (
-                          <div key={index} className="text-xs text-muted-foreground truncate">
+                        {dia.militares.slice(0, 2).map((militar, index) => (
+                          <div key={index} className="text-[10px] sm:text-xs text-muted-foreground truncate">
                             {militar}
                           </div>
                         ))}
+                        {dia.militares.length > 2 && (
+                          <div className="text-[10px] sm:text-xs text-muted-foreground">
+                            +{dia.militares.length - 2}
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -254,9 +263,9 @@ const EscalaMensal: React.FC = () => {
 
           {/* Ações do Mês */}
           <Card>
-            <CardContent className="p-6">
-              <Button>
-                <Download className="h-4 w-4 mr-2" />
+            <CardContent className="p-4 sm:p-6">
+              <Button className="w-full sm:w-auto text-xs sm:text-sm">
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                 Baixar Escala do Mês (JPG)
               </Button>
             </CardContent>
