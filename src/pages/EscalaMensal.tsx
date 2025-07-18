@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Download, Users, Clock, MessageCircle } from 'lucide-react';
+import { Calendar, Download, Users, Clock, Phone } from 'lucide-react';
 
 const EscalaMensal: React.FC = () => {
   const [visualizacao, setVisualizacao] = useState<'semanal' | 'mensal'>('semanal');
@@ -72,11 +72,12 @@ const EscalaMensal: React.FC = () => {
               <Calendar className="h-5 w-5 text-primary" />
               Escala de Serviço
             </CardTitle>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <Button
                 variant={visualizacao === 'semanal' ? 'default' : 'outline'}
                 onClick={() => setVisualizacao('semanal')}
                 size="sm"
+                className="w-full sm:w-auto"
               >
                 Visualização Semanal
               </Button>
@@ -84,6 +85,7 @@ const EscalaMensal: React.FC = () => {
                 variant={visualizacao === 'mensal' ? 'default' : 'outline'}
                 onClick={() => setVisualizacao('mensal')}
                 size="sm"
+                className="w-full sm:w-auto"
               >
                 Visualização Mensal
               </Button>
@@ -117,20 +119,21 @@ const EscalaMensal: React.FC = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-primary" />
                         <span className="font-medium">Chefe de Plantão</span>
                       </div>
-                      <div className="flex items-center gap-2 pl-6">
+                      <div className="flex items-center justify-between pl-6">
                         <p className="text-muted-foreground">{dia.chefePlantao.nome}</p>
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => window.open(`https://wa.me/${dia.chefePlantao.whatsapp}`, '_blank')}
+                          className="ml-2"
                         >
-                          <MessageCircle className="h-3 w-3" />
+                          <Phone className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -139,14 +142,15 @@ const EscalaMensal: React.FC = () => {
                         <Users className="h-4 w-4 text-primary" />
                         <span className="font-medium">Perito do Dia</span>
                       </div>
-                      <div className="flex items-center gap-2 pl-6">
+                      <div className="flex items-center justify-between pl-6">
                         <p className="text-muted-foreground">{dia.peritoDia.nome}</p>
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => window.open(`https://wa.me/${dia.peritoDia.whatsapp}`, '_blank')}
+                          className="ml-2"
                         >
-                          <MessageCircle className="h-3 w-3" />
+                          <Phone className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -155,14 +159,15 @@ const EscalaMensal: React.FC = () => {
                         <Users className="h-4 w-4 text-primary" />
                         <span className="font-medium">Auxiliar/Condutor</span>
                       </div>
-                      <div className="flex items-center gap-2 pl-6">
+                      <div className="flex items-center justify-between pl-6">
                         <p className="text-muted-foreground">{dia.auxiliar.nome}</p>
                         <Button 
                           variant="outline" 
                           size="sm" 
                           onClick={() => window.open(`https://wa.me/${dia.auxiliar.whatsapp}`, '_blank')}
+                          className="ml-2"
                         >
-                          <MessageCircle className="h-3 w-3" />
+                          <Phone className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
@@ -197,12 +202,12 @@ const EscalaMensal: React.FC = () => {
           {/* Ações da Semana */}
           <Card>
             <CardContent className="p-6">
-              <div className="flex flex-wrap gap-3">
-                <Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button className="w-full sm:w-auto">
                   <Download className="h-4 w-4 mr-2" />
                   Baixar Escala da Semana (JPG)
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Download className="h-4 w-4 mr-2" />
                   Baixar Escala do Dia (JPG)
                 </Button>
