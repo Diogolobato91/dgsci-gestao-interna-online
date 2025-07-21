@@ -19,7 +19,7 @@ const ResponsivePageHeader: React.FC<ResponsivePageHeaderProps> = ({ title }) =>
     <header className="bg-card border-b border-border px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-40">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <SidebarTrigger className="lg:hidden">
+          <SidebarTrigger>
             <Menu className="h-5 w-5" />
           </SidebarTrigger>
           

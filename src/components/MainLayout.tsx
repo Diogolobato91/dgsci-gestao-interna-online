@@ -30,7 +30,7 @@ const MainLayout: React.FC = () => {
   const pageTitle = getPageTitle(location.pathname);
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
