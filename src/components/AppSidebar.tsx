@@ -48,18 +48,20 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="transition-all duration-300 ease-in-out">
       <SidebarHeader className="border-b border-border">
-        <div className="p-4">
-          <h1 className={`font-bold text-primary transition-all ${state === 'collapsed' ? 'text-lg' : 'text-xl'}`}>
+        <div className="p-4 flex items-center justify-center">
+          <h1 className="font-bold text-primary transition-all duration-300 ease-in-out text-center">
             {state === 'collapsed' ? 'D' : 'DGSCI'}
           </h1>
-          {state !== 'collapsed' && (
-            <p className="text-sm text-muted-foreground mt-1">
+        </div>
+        {state !== 'collapsed' && (
+          <div className="px-4 pb-2 transition-all duration-300 ease-in-out">
+            <p className="text-sm text-muted-foreground text-center">
               Perfil: {user.profile}
             </p>
-          )}
-        </div>
+          </div>
+        )}
       </SidebarHeader>
 
       <SidebarContent>
@@ -79,10 +81,14 @@ export function AppSidebar() {
                       <SidebarMenuButton asChild isActive={isActive(item.path)}>
                         <NavLink
                           to={item.path}
-                          className="flex items-center gap-3"
+                          className="flex items-center gap-3 transition-all duration-200 ease-in-out"
                         >
                           <Icon className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">{item.title}</span>
+                          {state !== 'collapsed' && (
+                            <span className="truncate transition-opacity duration-200 ease-in-out">
+                              {item.title}
+                            </span>
+                          )}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
