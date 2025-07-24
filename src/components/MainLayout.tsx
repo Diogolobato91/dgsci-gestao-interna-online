@@ -8,6 +8,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 const getPageTitle = (pathname: string): string => {
   const routes: Record<string, string> = {
     '/dashboard': 'Painel Principal',
+    '/sat-regionais': 'SAT\'s Regionais',
     '/ajuda-vistoriador': 'Ajuda Rápida ao Vistoriador',
     '/modelos-padronizados': 'Modelos Padronizados',
     '/modelos-auto-infracao': 'Modelos de Auto de Infração',

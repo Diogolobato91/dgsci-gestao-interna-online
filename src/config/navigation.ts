@@ -12,7 +12,8 @@ import {
   Shield,
   FileCheck,
   Gavel,
-  Building2
+  Building2,
+  MapPin
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
@@ -23,6 +24,12 @@ const commonItems: MenuItem[] = [
     title: 'Painel Principal',
     icon: LayoutDashboard,
     path: '/dashboard'
+  },
+  {
+    id: 'sat-regionais',
+    title: 'SAT\'s Regionais',
+    icon: MapPin,
+    path: '/sat-regionais'
   },
   {
     id: 'ajuda-vistoriador',
