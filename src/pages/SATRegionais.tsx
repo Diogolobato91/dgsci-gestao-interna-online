@@ -74,6 +74,21 @@ const SATRegionais: React.FC = () => {
     setIsDialogOpen(true);
   };
 
+  const handleAdd = () => {
+    if (!canEdit) {
+      toast({
+        title: "Acesso negado",
+        description: "Apenas Diretoria e Subdiretoria podem adicionar.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setEditingItem(null);
+    setFormData({});
+    setIsDialogOpen(true);
+  };
+
   const handleSave = () => {
     if (!formData.gbm || !formData.sat || !formData.municipios) {
       toast({
@@ -94,6 +109,19 @@ const SATRegionais: React.FC = () => {
         title: "Sucesso",
         description: "SAT atualizada com sucesso."
       });
+    } else {
+      const newId = (Math.max(...satData.map(item => parseInt(item.id))) + 1).toString();
+      const newSAT: SATData = {
+        id: newId,
+        gbm: formData.gbm!,
+        sat: formData.sat!,
+        municipios: formData.municipios!
+      };
+      setSatData(prev => [...prev, newSAT]);
+      toast({
+        title: "Sucesso",
+        description: "SAT adicionada com sucesso."
+      });
     }
 
     setIsDialogOpen(false);
@@ -105,10 +133,20 @@ const SATRegionais: React.FC = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">SAT's Regionais</CardTitle>
-          <p className="text-muted-foreground">
-            Superintendências de Ações Territoriais e seus municípios de atuação
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-2xl font-bold">SAT's Regionais</CardTitle>
+              <p className="text-muted-foreground">
+                Superintendências de Ações Territoriais e seus municípios de atuação
+              </p>
+            </div>
+            {canEdit && (
+              <Button onClick={handleAdd} className="shrink-0">
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar SAT
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -149,7 +187,7 @@ const SATRegionais: React.FC = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Editar SAT</DialogTitle>
+            <DialogTitle>{editingItem ? 'Editar SAT' : 'Adicionar SAT'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
