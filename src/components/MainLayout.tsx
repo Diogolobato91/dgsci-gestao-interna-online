@@ -20,7 +20,8 @@ const getPageTitle = (pathname: string): string => {
     '/relatorios': 'Relatórios',
     '/comissao-tecnica': 'Comissão Técnica',
     '/autorizacoes': 'Autorizações',
-    '/dashboard-geral': 'Dashboard Geral'
+    '/dashboard-geral': 'Dashboard Geral',
+    '/relacao-efetivo': 'Relação de Efetivo'
   };
   
   return routes[pathname] || 'DGSCI';

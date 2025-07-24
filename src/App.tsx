@@ -15,6 +15,7 @@ import EscalaMensal from "@/pages/EscalaMensal";
 import DashboardGeral from "@/pages/DashboardGeral";
 import ComissaoTecnica from "@/pages/ComissaoTecnica";
 import SATRegionais from "@/pages/SATRegionais";
+import RelacaoEfetivo from "@/pages/RelacaoEfetivo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const AppRoutes = () => (
         <Route path="comissao-tecnica" element={<ComissaoTecnica />} />
         <Route path="autorizacoes" element={<Dashboard />} />
         <Route path="dashboard-geral" element={<DashboardGeral />} />
+        <Route path="relacao-efetivo" element={<RelacaoEfetivo />} />
       </Route>
 
       {/* Redirecionamento padrão */}

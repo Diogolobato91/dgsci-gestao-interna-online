@@ -13,7 +13,8 @@ import {
   FileCheck,
   Gavel,
   Building2,
-  MapPin
+  MapPin,
+  UserCheck
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
@@ -101,6 +102,12 @@ export const navigationConfig: MenuConfig = {
       title: 'Relatórios',
       icon: BarChart3,
       path: '/relatorios'
+    },
+    {
+      id: 'relacao-efetivo',
+      title: 'Relação de Efetivo',
+      icon: UserCheck,
+      path: '/relacao-efetivo'
     }
   ],
   
@@ -117,6 +124,12 @@ export const navigationConfig: MenuConfig = {
       title: 'Autorizações',
       icon: CheckCircle,
       path: '/autorizacoes'
+    },
+    {
+      id: 'relacao-efetivo',
+      title: 'Relação de Efetivo',
+      icon: UserCheck,
+      path: '/relacao-efetivo'
     }
   ],
   
@@ -189,6 +202,13 @@ export const navigationConfig: MenuConfig = {
       title: 'Dashboard Geral',
       icon: TrendingUp,
       path: '/dashboard-geral',
+      section: 'Diretoria'
+    },
+    {
+      id: 'relacao-efetivo',
+      title: 'Relação de Efetivo',
+      icon: UserCheck,
+      path: '/relacao-efetivo',
       section: 'Diretoria'
     }
   ]
