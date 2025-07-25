@@ -7,13 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, BarChart3, DollarSign, TrendingUp, Calendar, Edit, PieChart, LineChart } from 'lucide-react';
+import { Search, Plus, BarChart3, DollarSign, TrendingUp, Calendar, Edit, PieChart as PieChartIcon, LineChart } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { PieChart as RechartsPie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart as RechartsLine, Line, Area, AreaChart } from 'recharts';
+import { PieChart, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart as RechartsLine, Line, Area, AreaChart, Pie } from 'recharts';
 
 interface AutorizacaoGBM {
   id: number;
@@ -406,7 +406,7 @@ const Autorizacoes: React.FC = () => {
     { name: 'GAB CMDO', value: autorizacoesGBM.filter(item => item.status === 'GAB CMDO').length, color: '#f59e0b' },
     { name: 'Não Autorizado', value: autorizacoesGBM.filter(item => item.status === 'Não Autorizado').length, color: '#ef4444' },
     { name: 'Correção SAT', value: autorizacoesGBM.filter(item => item.status === 'Correção SAT').length, color: '#6b7280' }
-  ].filter(item => item.value > 0);
+  ];
 
   // Dados para gráficos do controle de saldo
   const saldoChartData = [
@@ -579,20 +579,29 @@ const Autorizacoes: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <PieChart className="h-5 w-5" />
+                  <PieChartIcon className="h-5 w-5" />
                   Status das Autorizações
                 </CardTitle>
                 <CardDescription>Distribuição por status das operações SAT</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <RechartsPie data={pieChartData} cx="50%" cy="50%" innerRadius={60} outerRadius={120} dataKey="value">
-                    {pieChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
+                  <PieChart>
+                    <Pie 
+                      data={pieChartData} 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius={60} 
+                      outerRadius={120} 
+                      dataKey="value"
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
                     <Tooltip formatter={(value: number) => [value, 'Quantidade']} />
                     <Legend />
-                  </RechartsPie>
+                  </PieChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
@@ -873,27 +882,29 @@ const Autorizacoes: React.FC = () => {
                       </CardHeader>
                       <CardContent>
                         <ResponsiveContainer width="100%" height={200}>
-                          <RechartsPie
-                            data={[
-                              { name: 'SAT', value: controleSaldo.despesaSAT, color: '#ef4444' },
-                              { name: 'DGSCI', value: controleSaldo.totalDespesaDGSCI, color: '#f59e0b' },
-                              { name: 'Disponível', value: controleSaldo.saldoAtual, color: '#22c55e' }
-                            ]}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={80}
-                            dataKey="value"
-                          >
-                            {[
-                              { name: 'SAT', value: controleSaldo.despesaSAT, color: '#ef4444' },
-                              { name: 'DGSCI', value: controleSaldo.totalDespesaDGSCI, color: '#f59e0b' },
-                              { name: 'Disponível', value: controleSaldo.saldoAtual, color: '#22c55e' }
-                            ].map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
+                          <PieChart>
+                            <Pie
+                              data={[
+                                { name: 'SAT', value: controleSaldo.despesaSAT, color: '#ef4444' },
+                                { name: 'DGSCI', value: controleSaldo.totalDespesaDGSCI, color: '#f59e0b' },
+                                { name: 'Disponível', value: controleSaldo.saldoAtual, color: '#22c55e' }
+                              ]}
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={80}
+                              dataKey="value"
+                            >
+                              {[
+                                { name: 'SAT', value: controleSaldo.despesaSAT, color: '#ef4444' },
+                                { name: 'DGSCI', value: controleSaldo.totalDespesaDGSCI, color: '#f59e0b' },
+                                { name: 'Disponível', value: controleSaldo.saldoAtual, color: '#22c55e' }
+                              ].map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
                             <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
                             <Legend />
-                          </RechartsPie>
+                          </PieChart>
                         </ResponsiveContainer>
                       </CardContent>
                     </Card>
@@ -927,13 +938,21 @@ const Autorizacoes: React.FC = () => {
                       </CardHeader>
                       <CardContent>
                         <ResponsiveContainer width="100%" height={250}>
-                          <RechartsPie data={saldoChartData} cx="50%" cy="50%" outerRadius={80} dataKey="value">
-                            {saldoChartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
+                          <PieChart>
+                            <Pie 
+                              data={saldoChartData} 
+                              cx="50%" 
+                              cy="50%" 
+                              outerRadius={80} 
+                              dataKey="value"
+                            >
+                              {saldoChartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                              ))}
+                            </Pie>
                             <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
                             <Legend />
-                          </RechartsPie>
+                          </PieChart>
                         </ResponsiveContainer>
                       </CardContent>
                     </Card>
