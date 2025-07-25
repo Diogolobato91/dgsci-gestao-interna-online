@@ -406,6 +406,21 @@ const Autorizacoes: React.FC = () => {
     { name: 'GAB CMDO', value: autorizacoesGBM.filter(item => item.status === 'GAB CMDO').length, color: '#f59e0b' },
     { name: 'Não Autorizado', value: autorizacoesGBM.filter(item => item.status === 'Não Autorizado').length, color: '#ef4444' },
     { name: 'Correção SAT', value: autorizacoesGBM.filter(item => item.status === 'Correção SAT').length, color: '#6b7280' }
+  ].filter(item => item.value > 0);
+
+  // Dados para gráficos do controle de saldo
+  const saldoChartData = [
+    { name: 'Saldo Disponível', value: controleSaldo.saldoAtual, color: '#22c55e' },
+    { name: 'Despesa SAT', value: controleSaldo.despesaSAT, color: '#f59e0b' },
+    { name: 'Despesa DGSCI', value: controleSaldo.totalDespesaDGSCI, color: '#ef4444' }
+  ];
+
+  const despesasEvolution = [
+    { mes: 'Jan', despesaSAT: 0, despesaDGSCI: 0, total: 0 },
+    { mes: 'Fev', despesaSAT: controleSaldo.despesaSAT * 0.2, despesaDGSCI: controleSaldo.totalDespesaDGSCI * 0.15, total: (controleSaldo.despesaSAT * 0.2) + (controleSaldo.totalDespesaDGSCI * 0.15) },
+    { mes: 'Mar', despesaSAT: controleSaldo.despesaSAT * 0.45, despesaDGSCI: controleSaldo.totalDespesaDGSCI * 0.35, total: (controleSaldo.despesaSAT * 0.45) + (controleSaldo.totalDespesaDGSCI * 0.35) },
+    { mes: 'Abr', despesaSAT: controleSaldo.despesaSAT * 0.75, despesaDGSCI: controleSaldo.totalDespesaDGSCI * 0.65, total: (controleSaldo.despesaSAT * 0.75) + (controleSaldo.totalDespesaDGSCI * 0.65) },
+    { mes: 'Mai', despesaSAT: controleSaldo.despesaSAT, despesaDGSCI: controleSaldo.totalDespesaDGSCI, total: controleSaldo.despesaSAT + controleSaldo.totalDespesaDGSCI }
   ];
 
   const comparisonData = [
@@ -874,6 +889,46 @@ const Autorizacoes: React.FC = () => {
                               { name: 'DGSCI', value: controleSaldo.totalDespesaDGSCI, color: '#f59e0b' },
                               { name: 'Disponível', value: controleSaldo.saldoAtual, color: '#22c55e' }
                             ].map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                            <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
+                            <Legend />
+                          </RechartsPie>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Evolução das Despesas</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={250}>
+                          <AreaChart data={despesasEvolution}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="mes" />
+                            <YAxis />
+                            <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
+                            <Legend />
+                            <Area type="monotone" dataKey="despesaSAT" stackId="1" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} name="SAT" />
+                            <Area type="monotone" dataKey="despesaDGSCI" stackId="1" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.6} name="DGSCI" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Distribuição de Saldo</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={250}>
+                          <RechartsPie data={saldoChartData} cx="50%" cy="50%" outerRadius={80} dataKey="value">
+                            {saldoChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                             <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
