@@ -17,6 +17,7 @@ import ComissaoTecnica from "@/pages/ComissaoTecnica";
 import SATRegionais from "@/pages/SATRegionais";
 import RelacaoEfetivo from "@/pages/RelacaoEfetivo";
 import Pareceres from "@/pages/Pareceres";
+import Autorizacoes from "@/pages/Autorizacoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,7 +69,7 @@ const AppRoutes = () => (
         <Route path="escala-mensal" element={<EscalaMensal />} />
         <Route path="relatorios" element={<Dashboard />} />
         <Route path="comissao-tecnica" element={<ComissaoTecnica />} />
-        <Route path="autorizacoes" element={<Dashboard />} />
+        <Route path="autorizacoes" element={<Autorizacoes />} />
         <Route path="dashboard-geral" element={<DashboardGeral />} />
         <Route path="relacao-efetivo" element={<RelacaoEfetivo />} />
       </Route>
