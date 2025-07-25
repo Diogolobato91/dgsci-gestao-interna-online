@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Plus } from 'lucide-react';
+import { Pencil, Plus, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -56,10 +56,22 @@ const SATRegionais: React.FC = () => {
   const [editingItem, setEditingItem] = useState<SATData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<SATData>>({});
+  const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
   const { toast } = useToast();
 
   const canEdit = user?.profile === 'Diretoria' || user?.profile === 'Subdiretoria';
+
+  const filteredSatData = useMemo(() => {
+    if (!searchTerm.trim()) return satData;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return satData.filter(item => 
+      item.gbm.toLowerCase().includes(searchLower) ||
+      item.sat.toLowerCase().includes(searchLower) ||
+      item.municipios.toLowerCase().includes(searchLower)
+    );
+  }, [satData, searchTerm]);
 
   const handleEdit = (item: SATData) => {
     if (!canEdit) {
@@ -149,6 +161,17 @@ const SATRegionais: React.FC = () => {
               </Button>
             )}
           </div>
+          <div className="mt-4">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Pesquisar por GBM, SAT ou Município/Bairro..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -162,24 +185,32 @@ const SATRegionais: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {satData.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.gbm}</TableCell>
-                    <TableCell className="font-medium">{item.sat}</TableCell>
-                    <TableCell className="text-sm">{item.municipios}</TableCell>
-                    {canEdit && (
-                      <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(item)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    )}
+                {filteredSatData.length > 0 ? (
+                  filteredSatData.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.gbm}</TableCell>
+                      <TableCell className="font-medium">{item.sat}</TableCell>
+                      <TableCell className="text-sm">{item.municipios}</TableCell>
+                      {canEdit && (
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(item)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={canEdit ? 4 : 3} className="text-center text-muted-foreground py-8">
+                      Nenhum resultado encontrado para "{searchTerm}"
+                    </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>
