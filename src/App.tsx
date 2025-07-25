@@ -16,6 +16,7 @@ import DashboardGeral from "@/pages/DashboardGeral";
 import ComissaoTecnica from "@/pages/ComissaoTecnica";
 import SATRegionais from "@/pages/SATRegionais";
 import RelacaoEfetivo from "@/pages/RelacaoEfetivo";
+import Pareceres from "@/pages/Pareceres";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,7 +63,7 @@ const AppRoutes = () => (
         <Route path="modelos-auto-infracao" element={<ModelosAutoInfracao />} />
         <Route path="minhas-vistorias" element={<MinhasVistorias />} />
         <Route path="projetos" element={<Dashboard />} />
-        <Route path="pareceres" element={<Dashboard />} />
+        <Route path="pareceres" element={<Pareceres />} />
         <Route path="gestao-autos" element={<Dashboard />} />
         <Route path="escala-mensal" element={<EscalaMensal />} />
         <Route path="relatorios" element={<Dashboard />} />
