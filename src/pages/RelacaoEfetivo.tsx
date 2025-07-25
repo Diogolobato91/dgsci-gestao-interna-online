@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Trash2, Plus, Edit } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Trash2, Plus, Edit, Calendar, Users, Cake } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,6 +18,8 @@ interface Servidor {
   mf?: string;
   cpf?: string;
   dataNascimento?: string;
+  inicioFerias?: string;
+  fimFerias?: string;
 }
 
 const RelacaoEfetivo: React.FC = () => {
@@ -26,15 +29,15 @@ const RelacaoEfetivo: React.FC = () => {
   const canEdit = user?.profile === 'Diretoria' || user?.profile === 'Subdiretoria';
 
   const [servidores, setServidores] = useState<Servidor[]>([
-    { id: 1, postoGraduacao: 'CEL QOBM', nome: 'PABLO CRUZ DE OLIVEIRA', mf: '58335231', cpf: '622.034.602-53', dataNascimento: '04/08/1977' },
-    { id: 2, postoGraduacao: '1º CEL QOBM', nome: 'RAIMUNDO NONATO MOURA DA SILVA FILHO', mf: '57191260-1', cpf: '692.136.152-72', dataNascimento: '19/08/1961' },
+    { id: 1, postoGraduacao: 'CEL QOBM', nome: 'PABLO CRUZ DE OLIVEIRA', mf: '58335231', cpf: '622.034.602-53', dataNascimento: '04/08/1977', inicioFerias: '15/02/2025', fimFerias: '16/03/2025' },
+    { id: 2, postoGraduacao: '1º CEL QOBM', nome: 'RAIMUNDO NONATO MOURA DA SILVA FILHO', mf: '57191260-1', cpf: '692.136.152-72', dataNascimento: '19/08/1961', inicioFerias: '01/03/2025', fimFerias: '30/03/2025' },
     { id: 3, postoGraduacao: 'MAJ QOBM', nome: 'EDUARDO OLIVEIRA RIO BRANCO', mf: '54185213-1', cpf: '667.418.152-87', dataNascimento: '09/05/1980' },
-    { id: 4, postoGraduacao: 'CAP QOABM', nome: 'RONALDO FEIO DA COSTA', mf: '52118754', cpf: '236.133.602-25', dataNascimento: '14/06/1967' },
+    { id: 4, postoGraduacao: 'CAP QOABM', nome: 'RONALDO FEIO DA COSTA', mf: '52118754', cpf: '236.133.602-25', dataNascimento: '14/06/1967', inicioFerias: '10/04/2025', fimFerias: '09/05/2025' },
     { id: 5, postoGraduacao: '1º TEN QOABM', nome: 'LUIS CLAUDIO PINTO DIAS', mf: '55088804', cpf: '393.106.982-68', dataNascimento: '30/05/1970' },
-    { id: 6, postoGraduacao: '1º TEN QOBM', nome: 'IARA FERREIRA SANTOS', mf: '59325864', cpf: '393.966.412-34', dataNascimento: '01/06/1990' },
+    { id: 6, postoGraduacao: '1º TEN QOBM', nome: 'IARA FERREIRA SANTOS', mf: '59325864', cpf: '393.966.412-34', dataNascimento: '01/06/1990', inicioFerias: '20/03/2025', fimFerias: '18/04/2025' },
     { id: 7, postoGraduacao: '1º TEN QOBM', nome: 'ANA BEATRIZ MALHEIROS PIQUET SARGES', mf: '59326014', cpf: '012.525.162-90', dataNascimento: '30/05/1995' },
     { id: 8, postoGraduacao: '2º TEN QOABM', nome: 'JOSÉ EDUARDO CARREIRA ARAUJO', mf: '58269184', cpf: '711.670.802-20', dataNascimento: '25/11/1981' },
-    { id: 9, postoGraduacao: '2º TEN QOABM', nome: 'DANIEL SILVA CORREA', mf: '54184998-1', cpf: '609.702.002-34', dataNascimento: '20/05/1979' },
+    { id: 9, postoGraduacao: '2º TEN QOABM', nome: 'DANIEL SILVA CORREA', mf: '54184998-1', cpf: '609.702.002-34', dataNascimento: '20/05/1979', inicioFerias: '05/05/2025', fimFerias: '03/06/2025' },
     { id: 10, postoGraduacao: '2º TEN QOABM', nome: 'FABIO MAGALHÃES DE DEUS', mf: '54185062-1', cpf: '620.466.672-04', dataNascimento: '20/10/1976' },
     { id: 11, postoGraduacao: 'SUB TEN RR', nome: 'LUCIVALDO DOS REIS FERREIRA', mf: '55618053-1', cpf: '352.224.172-04', dataNascimento: '10/11/1968' },
     { id: 12, postoGraduacao: 'SUB TEN RR', nome: 'MARCO ANTONIO DA SILVA COSTA', mf: '33921122', cpf: '256.933.552-00', dataNascimento: '22/07/1967' },
@@ -43,7 +46,7 @@ const RelacaoEfetivo: React.FC = () => {
     { id: 15, postoGraduacao: '1º SGT', nome: 'LUIZ AUGUSTO SANTOS BAENA', mf: '56015334', cpf: '395.029.102-49', dataNascimento: '23/05/1969' },
     { id: 16, postoGraduacao: '1º SGT', nome: 'ICLANDO SARAIVA DAS CHAGAS', mf: '52103484', cpf: '333.067.102-53', dataNascimento: '28/10/1967' },
     { id: 17, postoGraduacao: '2º SGT', nome: 'CASSIO DIEGO NAZARENO OLIVEIRA DA SILVA', mf: '54185203-1', cpf: '776.927.802-34', dataNascimento: '20/04/1984' },
-    { id: 18, postoGraduacao: '3º SGT', nome: 'LEONORA PENNA BAIA', mf: '57189325-1', cpf: '693.040.682-15', dataNascimento: '19/16/1981' },
+    { id: 18, postoGraduacao: '3º SGT', nome: 'LEONORA PENNA BAIA', mf: '57189325-1', cpf: '693.040.682-15', dataNascimento: '19/06/1981' },
     { id: 19, postoGraduacao: '3º SGT', nome: 'EBER BESSA JUNIOR', mf: '57173338-1', cpf: '664.974.312-00', dataNascimento: '09/08/1978' },
     { id: 20, postoGraduacao: '3º SGT', nome: 'CARLOS AUGUSTO DE LIMA SANTOS', mf: '57173423-1', cpf: '745.946.052-49', dataNascimento: '03/06/1983' },
     { id: 21, postoGraduacao: '3º SGT', nome: 'ADERSON MARTINS SOUZA', mf: '57173455-1', cpf: '675.455.722-20', dataNascimento: '02/09/1981' },
@@ -72,7 +75,7 @@ const RelacaoEfetivo: React.FC = () => {
     { id: 44, postoGraduacao: 'CB', nome: 'NAYARA FERNANDA FREITAS DE SOUSA', mf: '59325531', cpf: '025.472.352-77', dataNascimento: '21/03/1994' },
     { id: 45, postoGraduacao: 'CB', nome: 'RAIANA PAMFOLHA BRAZZ DE OLIVEIRA', mf: '59322441', cpf: '008.084.812-58', dataNascimento: '29/05/1993' },
     { id: 46, postoGraduacao: 'CB', nome: 'FELIPE LOPES CARDOSO', mf: '59325231', cpf: '985.847.152-15', dataNascimento: '29/03/1990' },
-    { id: 47, postoGraduacao: 'CB', nome: 'RAFAEL LUIS DA SILVA SENA', mf: '59323141', cpf: '016.902.352-41', dataNascimento: '4/10/1996' },
+    { id: 47, postoGraduacao: 'CB', nome: 'RAFAEL LUIS DA SILVA SENA', mf: '59323141', cpf: '016.902.352-41', dataNascimento: '04/10/1996' },
     { id: 48, postoGraduacao: 'CB', nome: 'GISLAINE DAIANE DOS SANTOS REIS', mf: '59324751', cpf: '012.657.952-07', dataNascimento: '08/07/1993' },
     { id: 49, postoGraduacao: 'VC', nome: 'VALERIA RUANA PEREIRA DA COSTA', mf: '5977033', cpf: '052.408.052-61', dataNascimento: '30/04/2001' },
     { id: 50, postoGraduacao: 'VC', nome: 'DAVI SOUSA CARVALHO', mf: '8401496', cpf: '022.878.492-11', dataNascimento: '13/07/2002' },
@@ -96,8 +99,58 @@ const RelacaoEfetivo: React.FC = () => {
     nome: '',
     mf: '',
     cpf: '',
-    dataNascimento: ''
+    dataNascimento: '',
+    inicioFerias: '',
+    fimFerias: ''
   });
+
+  // Função para calcular próximos aniversariantes (próximos 60 dias)
+  const proximosAniversariantes = useMemo(() => {
+    const hoje = new Date();
+    const proximosMeses = new Date();
+    proximosMeses.setDate(hoje.getDate() + 60);
+    
+    return servidores.filter(servidor => {
+      if (!servidor.dataNascimento) return false;
+      
+      const [dia, mes] = servidor.dataNascimento.split('/').map(Number);
+      const anoAtual = hoje.getFullYear();
+      let aniversarioEsteAno = new Date(anoAtual, mes - 1, dia);
+      
+      // Se o aniversário já passou este ano, considerar o próximo ano
+      if (aniversarioEsteAno < hoje) {
+        aniversarioEsteAno = new Date(anoAtual + 1, mes - 1, dia);
+      }
+      
+      return aniversarioEsteAno <= proximosMeses;
+    }).sort((a, b) => {
+      const [diaA, mesA] = a.dataNascimento!.split('/').map(Number);
+      const [diaB, mesB] = b.dataNascimento!.split('/').map(Number);
+      return (mesA * 100 + diaA) - (mesB * 100 + diaB);
+    });
+  }, [servidores]);
+
+  // Função para calcular militares em férias nos próximos meses
+  const proximasFerias = useMemo(() => {
+    const hoje = new Date();
+    const proximosTresMeses = new Date();
+    proximosTresMeses.setMonth(hoje.getMonth() + 3);
+    
+    return servidores.filter(servidor => {
+      if (!servidor.inicioFerias) return false;
+      
+      const [dia, mes, ano] = servidor.inicioFerias.split('/').map(Number);
+      const inicioFerias = new Date(ano, mes - 1, dia);
+      
+      return inicioFerias >= hoje && inicioFerias <= proximosTresMeses;
+    }).sort((a, b) => {
+      const [diaA, mesA, anoA] = a.inicioFerias!.split('/').map(Number);
+      const [diaB, mesB, anoB] = b.inicioFerias!.split('/').map(Number);
+      const dataA = new Date(anoA, mesA - 1, diaA);
+      const dataB = new Date(anoB, mesB - 1, diaB);
+      return dataA.getTime() - dataB.getTime();
+    });
+  }, [servidores]);
 
   const handleEdit = (servidor: Servidor) => {
     setEditingServidor(servidor);
@@ -106,7 +159,9 @@ const RelacaoEfetivo: React.FC = () => {
       nome: servidor.nome,
       mf: servidor.mf || '',
       cpf: servidor.cpf || '',
-      dataNascimento: servidor.dataNascimento || ''
+      dataNascimento: servidor.dataNascimento || '',
+      inicioFerias: servidor.inicioFerias || '',
+      fimFerias: servidor.fimFerias || ''
     });
     setIsDialogOpen(true);
   };
@@ -118,7 +173,9 @@ const RelacaoEfetivo: React.FC = () => {
       nome: '',
       mf: '',
       cpf: '',
-      dataNascimento: ''
+      dataNascimento: '',
+      inicioFerias: '',
+      fimFerias: ''
     });
     setIsDialogOpen(true);
   };
@@ -231,6 +288,24 @@ const RelacaoEfetivo: React.FC = () => {
                       placeholder="dd/mm/aaaa"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="inicioFerias">Início das Férias</Label>
+                    <Input
+                      id="inicioFerias"
+                      value={formData.inicioFerias}
+                      onChange={(e) => setFormData({ ...formData, inicioFerias: e.target.value })}
+                      placeholder="dd/mm/aaaa"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fimFerias">Fim das Férias</Label>
+                    <Input
+                      id="fimFerias"
+                      value={formData.fimFerias}
+                      onChange={(e) => setFormData({ ...formData, fimFerias: e.target.value })}
+                      placeholder="dd/mm/aaaa"
+                    />
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
@@ -245,58 +320,167 @@ const RelacaoEfetivo: React.FC = () => {
           )}
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Posto/Graduação</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>MF</TableHead>
-                  <TableHead>CPF</TableHead>
-                  <TableHead>Data de Nascimento</TableHead>
-                  {canEdit && <TableHead className="w-24">Ações</TableHead>}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {servidores.map((servidor) => (
-                  <TableRow key={servidor.id}>
-                    <TableCell>
-                      <Badge variant="outline">{servidor.postoGraduacao}</Badge>
-                    </TableCell>
-                    <TableCell className="font-medium">{servidor.nome}</TableCell>
-                    <TableCell>{servidor.mf || '-'}</TableCell>
-                    <TableCell>{servidor.cpf || '-'}</TableCell>
-                    <TableCell>{servidor.dataNascimento || '-'}</TableCell>
-                    {canEdit && (
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(servidor)}
-                            className="h-8 w-8"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(servidor.id)}
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="mt-4 text-sm text-muted-foreground">
-            Total: {servidores.length} servidores
-          </div>
+          <Tabs defaultValue="efetivo" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="efetivo" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Efetivo Geral
+              </TabsTrigger>
+              <TabsTrigger value="aniversariantes" className="flex items-center gap-2">
+                <Cake className="h-4 w-4" />
+                Aniversariantes
+              </TabsTrigger>
+              <TabsTrigger value="ferias" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Próximas Férias
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="efetivo" className="mt-6">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Posto/Graduação</TableHead>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>MF</TableHead>
+                      <TableHead>CPF</TableHead>
+                      <TableHead>Data de Nascimento</TableHead>
+                      {canEdit && <TableHead className="w-24">Ações</TableHead>}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {servidores.map((servidor) => (
+                      <TableRow key={servidor.id}>
+                        <TableCell>
+                          <Badge variant="outline">{servidor.postoGraduacao}</Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">{servidor.nome}</TableCell>
+                        <TableCell>{servidor.mf || '-'}</TableCell>
+                        <TableCell>{servidor.cpf || '-'}</TableCell>
+                        <TableCell>{servidor.dataNascimento || '-'}</TableCell>
+                        {canEdit && (
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEdit(servidor)}
+                                className="h-8 w-8"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(servidor.id)}
+                                className="h-8 w-8 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="mt-4 text-sm text-muted-foreground">
+                Total: {servidores.length} servidores
+              </div>
+            </TabsContent>
+
+            <TabsContent value="aniversariantes" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Cake className="h-5 w-5" />
+                    Próximos Aniversariantes (60 dias)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {proximosAniversariantes.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Posto/Graduação</TableHead>
+                            <TableHead>Nome</TableHead>
+                            <TableHead>Data de Nascimento</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {proximosAniversariantes.map((servidor) => (
+                            <TableRow key={servidor.id}>
+                              <TableCell>
+                                <Badge variant="outline">{servidor.postoGraduacao}</Badge>
+                              </TableCell>
+                              <TableCell className="font-medium">{servidor.nome}</TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">{servidor.dataNascimento}</Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Nenhum aniversariante nos próximos 60 dias
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="ferias" className="mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Férias nos Próximos 3 Meses
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {proximasFerias.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Posto/Graduação</TableHead>
+                            <TableHead>Nome</TableHead>
+                            <TableHead>Início das Férias</TableHead>
+                            <TableHead>Fim das Férias</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {proximasFerias.map((servidor) => (
+                            <TableRow key={servidor.id}>
+                              <TableCell>
+                                <Badge variant="outline">{servidor.postoGraduacao}</Badge>
+                              </TableCell>
+                              <TableCell className="font-medium">{servidor.nome}</TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">{servidor.inicioFerias}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">{servidor.fimFerias}</Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Nenhuma féria programada nos próximos 3 meses
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
