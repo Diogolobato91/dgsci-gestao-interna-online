@@ -1,14 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   TrendingUp, 
-  ClipboardList, 
-  FileText, 
   DollarSign, 
   Users, 
-  AlertTriangle,
-  CheckCircle,
-  Clock
+  CheckCircle
 } from 'lucide-react';
 
 const DashboardGeral: React.FC = () => {
@@ -39,53 +36,10 @@ const DashboardGeral: React.FC = () => {
     }
   ];
 
-  const atividades = [
-    {
-      tipo: 'Análise de Projeto',
-      local: 'Edifício Comercial Centro',
-      responsavel: 'Cap. Silva',
-      status: 'Em andamento',
-      horario: '14:30'
-    },
-    {
-      tipo: 'Autorização',
-      local: 'Evento Temporário - Arena',
-      responsavel: 'Ten. Santos',
-      status: 'Aprovada',
-      horario: '13:45'
-    },
-    {
-      tipo: 'Auto de Infração',
-      local: 'Indústria Metalúrgica XYZ',
-      responsavel: 'Maj. Costa',
-      status: 'Lavrado',
-      horario: '12:15'
-    },
-    {
-      tipo: 'Parecer Técnico',
-      local: 'Hospital São Lucas',
-      responsavel: 'Cap. Lima',
-      status: 'Finalizado',
-      horario: '16:00'
-    }
-  ];
-
   const getTendenciaIcon = (tendencia: string) => {
     if (tendencia === 'up') return '↗️';
     if (tendencia === 'down') return '↘️';
     return '➡️';
-  };
-
-  const getStatusColor = (status: string) => {
-    const colors = {
-      'Em andamento': 'bg-blue-500',
-      'Aprovada': 'bg-green-500',
-      'Finalizado': 'bg-green-500',
-      'Lavrado': 'bg-red-500',
-      'Agendada': 'bg-yellow-500'
-    } as const;
-    
-    return colors[status as keyof typeof colors] || 'bg-gray-500';
   };
 
   return (
@@ -139,84 +93,6 @@ const DashboardGeral: React.FC = () => {
         })}
       </div>
 
-      {/* Seção Atividades em Tempo Real */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              Atividades em Tempo Real
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {atividades.map((atividade, index) => (
-                <div key={index} className="flex items-center gap-4 p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">{atividade.tipo}</span>
-                      <span className={`w-2 h-2 rounded-full ${getStatusColor(atividade.status)}`}></span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{atividade.local}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {atividade.responsavel} • {atividade.horario}
-                    </p>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {atividade.status}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Gráfico de Exemplo */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Projetos Analisados por Semana
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Gráfico Simulado */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Semana 1</span>
-                  <div className="flex-1 mx-4 bg-muted rounded h-2">
-                    <div className="bg-primary rounded h-2" style={{width: '85%'}}></div>
-                  </div>
-                  <span className="text-sm font-medium">42</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Semana 2</span>
-                  <div className="flex-1 mx-4 bg-muted rounded h-2">
-                    <div className="bg-primary rounded h-2" style={{width: '70%'}}></div>
-                  </div>
-                  <span className="text-sm font-medium">35</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Semana 3</span>
-                  <div className="flex-1 mx-4 bg-muted rounded h-2">
-                    <div className="bg-primary rounded h-2" style={{width: '95%'}}></div>
-                  </div>
-                  <span className="text-sm font-medium">47</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Semana 4</span>
-                  <div className="flex-1 mx-4 bg-muted rounded h-2">
-                    <div className="bg-primary rounded h-2" style={{width: '80%'}}></div>
-                  </div>
-                  <span className="text-sm font-medium">40</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Resumo Mensal */}
       <Card>
         <CardHeader>
@@ -233,12 +109,35 @@ const DashboardGeral: React.FC = () => {
               <p className="text-sm text-muted-foreground">Tempo Médio de Análise</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-blue-500">156</p>
-              <p className="text-sm text-muted-foreground">Projetos Processados</p>
+              <p className="text-3xl font-bold text-blue-500">R$ 245.380</p>
+              <p className="text-sm text-muted-foreground">Arrecadação Total</p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-bold text-yellow-500">95%</p>
               <p className="text-sm text-muted-foreground">Satisfação do Usuário</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Indicadores Operacionais */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Indicadores Operacionais</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-4 bg-muted rounded-lg">
+              <p className="text-2xl font-bold text-primary mb-2">156</p>
+              <p className="text-sm text-muted-foreground">Processos em Andamento</p>
+            </div>
+            <div className="text-center p-4 bg-muted rounded-lg">
+              <p className="text-2xl font-bold text-green-500 mb-2">89</p>
+              <p className="text-sm text-muted-foreground">Documentos Emitidos</p>
+            </div>
+            <div className="text-center p-4 bg-muted rounded-lg">
+              <p className="text-2xl font-bold text-blue-500 mb-2">12</p>
+              <p className="text-sm text-muted-foreground">Comissões Ativas</p>
             </div>
           </div>
         </CardContent>
