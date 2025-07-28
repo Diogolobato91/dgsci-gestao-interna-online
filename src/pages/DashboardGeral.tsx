@@ -14,22 +14,6 @@ import {
 const DashboardGeral: React.FC = () => {
   const indicadores = [
     {
-      titulo: 'Projetos Analisados',
-      valor: '156',
-      variacao: '+15%',
-      tendencia: 'up',
-      icon: FileText,
-      cor: 'text-blue-500'
-    },
-    {
-      titulo: 'Análises Pendentes',
-      valor: '23',
-      variacao: '-8%',
-      tendencia: 'down',
-      icon: Clock,
-      cor: 'text-yellow-500'
-    },
-    {
       titulo: 'Arrecadação (Taxas)',
       valor: 'R$ 89.450',
       variacao: '+18%',
@@ -44,14 +28,6 @@ const DashboardGeral: React.FC = () => {
       tendencia: 'up',
       icon: CheckCircle,
       cor: 'text-green-500'
-    },
-    {
-      titulo: 'Autos Lavrados',
-      valor: '18',
-      variacao: '-12%',
-      tendencia: 'down',
-      icon: AlertTriangle,
-      cor: 'text-red-500'
     },
     {
       titulo: 'Militares Ativos',
