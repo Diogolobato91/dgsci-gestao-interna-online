@@ -10,7 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import AjudaVistoriador from "@/pages/AjudaVistoriador";
 import ModelosPadronizados from "@/pages/ModelosPadronizados";
 import ModelosAutoInfracao from "@/pages/ModelosAutoInfracao";
-import MinhasVistorias from "@/pages/MinhasVistorias";
+
 import EscalaMensal from "@/pages/EscalaMensal";
 import DashboardGeral from "@/pages/DashboardGeral";
 import ComissaoTecnica from "@/pages/ComissaoTecnica";
@@ -62,7 +62,7 @@ const AppRoutes = () => (
         <Route path="ajuda-vistoriador" element={<AjudaVistoriador />} />
         <Route path="modelos-padronizados" element={<ModelosPadronizados />} />
         <Route path="modelos-auto-infracao" element={<ModelosAutoInfracao />} />
-        <Route path="minhas-vistorias" element={<MinhasVistorias />} />
+        
         <Route path="projetos" element={<Dashboard />} />
         <Route path="pareceres" element={<Pareceres />} />
         <Route path="gestao-autos" element={<Dashboard />} />

@@ -54,13 +54,7 @@ const commonItems: MenuItem[] = [
 
 export const navigationConfig: MenuConfig = {
   'Vistoria': [
-    ...commonItems,
-    {
-      id: 'minhas-vistorias',
-      title: 'Minhas Vistorias',
-      icon: ClipboardList,
-      path: '/minhas-vistorias'
-    }
+    ...commonItems
   ],
   
   'Análise': [
@@ -135,14 +129,6 @@ export const navigationConfig: MenuConfig = {
   
   'Diretoria': [
     ...commonItems,
-    // Seção Operacional Vistoria
-    {
-      id: 'dir-minhas-vistorias',
-      title: 'Minhas Vistorias',
-      icon: ClipboardList,
-      path: '/minhas-vistorias',
-      section: 'Operacional Vistoria'
-    },
     // Seção Operacional Análise
     {
       id: 'dir-projetos',

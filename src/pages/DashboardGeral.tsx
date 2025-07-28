@@ -14,11 +14,11 @@ import {
 const DashboardGeral: React.FC = () => {
   const indicadores = [
     {
-      titulo: 'Vistorias no Mês',
-      valor: '247',
-      variacao: '+12%',
+      titulo: 'Projetos Analisados',
+      valor: '156',
+      variacao: '+15%',
       tendencia: 'up',
-      icon: ClipboardList,
+      icon: FileText,
       cor: 'text-blue-500'
     },
     {
@@ -38,20 +38,20 @@ const DashboardGeral: React.FC = () => {
       cor: 'text-green-500'
     },
     {
-      titulo: 'Autos Lavrados',
+      titulo: 'Autorizações Emitidas',
       valor: '34',
       variacao: '+5%',
       tendencia: 'up',
-      icon: AlertTriangle,
-      cor: 'text-red-500'
-    },
-    {
-      titulo: 'Projetos Aprovados',
-      valor: '156',
-      variacao: '+15%',
-      tendencia: 'up',
       icon: CheckCircle,
       cor: 'text-green-500'
+    },
+    {
+      titulo: 'Autos Lavrados',
+      valor: '18',
+      variacao: '-12%',
+      tendencia: 'down',
+      icon: AlertTriangle,
+      cor: 'text-red-500'
     },
     {
       titulo: 'Militares Ativos',
@@ -65,17 +65,17 @@ const DashboardGeral: React.FC = () => {
 
   const atividades = [
     {
-      tipo: 'Vistoria',
-      local: 'Shopping Center Norte',
+      tipo: 'Análise de Projeto',
+      local: 'Edifício Comercial Centro',
       responsavel: 'Cap. Silva',
       status: 'Em andamento',
       horario: '14:30'
     },
     {
-      tipo: 'Análise',
-      local: 'Projeto Residencial Torres',
+      tipo: 'Autorização',
+      local: 'Evento Temporário - Arena',
       responsavel: 'Ten. Santos',
-      status: 'Finalizada',
+      status: 'Aprovada',
       horario: '13:45'
     },
     {
@@ -86,10 +86,10 @@ const DashboardGeral: React.FC = () => {
       horario: '12:15'
     },
     {
-      tipo: 'Vistoria',
+      tipo: 'Parecer Técnico',
       local: 'Hospital São Lucas',
       responsavel: 'Cap. Lima',
-      status: 'Agendada',
+      status: 'Finalizado',
       horario: '16:00'
     }
   ];
@@ -103,7 +103,8 @@ const DashboardGeral: React.FC = () => {
   const getStatusColor = (status: string) => {
     const colors = {
       'Em andamento': 'bg-blue-500',
-      'Finalizada': 'bg-green-500',
+      'Aprovada': 'bg-green-500',
+      'Finalizado': 'bg-green-500',
       'Lavrado': 'bg-red-500',
       'Agendada': 'bg-yellow-500'
     } as const;
@@ -199,7 +200,7 @@ const DashboardGeral: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Vistorias por Semana
+              Projetos Analisados por Semana
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -209,30 +210,30 @@ const DashboardGeral: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Semana 1</span>
                   <div className="flex-1 mx-4 bg-muted rounded h-2">
-                    <div className="bg-primary rounded h-2" style={{width: '80%'}}></div>
+                    <div className="bg-primary rounded h-2" style={{width: '85%'}}></div>
                   </div>
-                  <span className="text-sm font-medium">48</span>
+                  <span className="text-sm font-medium">42</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Semana 2</span>
                   <div className="flex-1 mx-4 bg-muted rounded h-2">
-                    <div className="bg-primary rounded h-2" style={{width: '65%'}}></div>
+                    <div className="bg-primary rounded h-2" style={{width: '70%'}}></div>
                   </div>
-                  <span className="text-sm font-medium">39</span>
+                  <span className="text-sm font-medium">35</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Semana 3</span>
                   <div className="flex-1 mx-4 bg-muted rounded h-2">
-                    <div className="bg-primary rounded h-2" style={{width: '90%'}}></div>
+                    <div className="bg-primary rounded h-2" style={{width: '95%'}}></div>
                   </div>
-                  <span className="text-sm font-medium">54</span>
+                  <span className="text-sm font-medium">47</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Semana 4</span>
                   <div className="flex-1 mx-4 bg-muted rounded h-2">
-                    <div className="bg-primary rounded h-2" style={{width: '75%'}}></div>
+                    <div className="bg-primary rounded h-2" style={{width: '80%'}}></div>
                   </div>
-                  <span className="text-sm font-medium">45</span>
+                  <span className="text-sm font-medium">40</span>
                 </div>
               </div>
             </div>

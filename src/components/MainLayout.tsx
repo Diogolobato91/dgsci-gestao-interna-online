@@ -12,7 +12,7 @@ const getPageTitle = (pathname: string): string => {
     '/ajuda-vistoriador': 'Ajuda Rápida ao Vistoriador',
     '/modelos-padronizados': 'Modelos Padronizados',
     '/modelos-auto-infracao': 'Modelos de Auto de Infração',
-    '/minhas-vistorias': 'Minhas Vistorias',
+    
     '/projetos': 'Projetos',
     '/pareceres': 'Pareceres',
     '/gestao-autos': 'Gestão de Autos',
