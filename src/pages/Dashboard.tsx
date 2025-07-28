@@ -126,26 +126,14 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Estatísticas Rápidas */}
+      {/* Estatísticas Administrativas */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">Vistorias do Mês</p>
-                <p className="text-lg sm:text-2xl font-bold text-primary">247</p>
-              </div>
-              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-3 sm:p-6">
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">Projetos Analisados</p>
-                <p className="text-lg sm:text-2xl font-bold text-primary">89</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">Documentos Emitidos</p>
+                <p className="text-lg sm:text-2xl font-bold text-primary">156</p>
               </div>
               <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             </div>
@@ -156,8 +144,20 @@ const Dashboard: React.FC = () => {
           <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">Autos Lavrados</p>
-                <p className="text-lg sm:text-2xl font-bold text-primary">34</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">Militares Ativos</p>
+                <p className="text-lg sm:text-2xl font-bold text-primary">45</p>
+              </div>
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-3 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">Escalas do Mês</p>
+                <p className="text-lg sm:text-2xl font-bold text-primary">8</p>
               </div>
               <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             </div>
@@ -168,10 +168,10 @@ const Dashboard: React.FC = () => {
           <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">Pendências</p>
-                <p className="text-lg sm:text-2xl font-bold text-destructive">12</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">Comunicados</p>
+                <p className="text-lg sm:text-2xl font-bold text-primary">4</p>
               </div>
-              <Bell className="h-6 w-6 sm:h-8 sm:w-8 text-destructive flex-shrink-0" />
+              <Bell className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
