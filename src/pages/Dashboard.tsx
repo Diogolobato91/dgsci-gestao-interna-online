@@ -156,10 +156,10 @@ const Dashboard: React.FC = () => {
               {comunicados.slice(0, 4).map(item => {
                 const getPrioridadeColor = (prioridade: string) => {
                   switch (prioridade) {
-                    case 'Alta': return 'border-red-500 bg-red-50 dark:bg-red-950/20';
-                    case 'Média': return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20';
-                    case 'Baixa': return 'border-green-500 bg-green-50 dark:bg-green-950/20';
-                    default: return 'border-primary bg-primary/5';
+                    case 'Alta': return 'border-l-red-500';
+                    case 'Média': return 'border-l-amber-500';
+                    case 'Baixa': return 'border-l-emerald-500';
+                    default: return 'border-l-primary';
                   }
                 };
 
@@ -178,80 +178,94 @@ const Dashboard: React.FC = () => {
                 const TipoIcon = getTipoIcon(item.tipo);
 
                 return (
-                  <div key={item.id} className={`border-l-4 rounded-r-lg p-3 sm:p-4 transition-all hover:shadow-sm ${getPrioridadeColor(item.prioridade)}`}>
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start gap-2 mb-2">
-                          <TipoIcon className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-semibold text-sm sm:text-base text-foreground line-clamp-1">
-                                {item.titulo}
-                              </h4>
-                              {item.novo && (
-                                <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
-                                  NOVO
-                                </Badge>
-                              )}
+                  <div key={item.id} className={`bg-card border border-border rounded-lg hover:shadow-md transition-all duration-200 ${getPrioridadeColor(item.prioridade)} border-l-4`}>
+                    <div className="p-4">
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start gap-3 mb-3">
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              <TipoIcon className="h-4 w-4 text-primary" />
                             </div>
-                            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2">
-                              {item.resumo}
-                            </p>
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <h4 className="font-semibold text-sm text-foreground leading-tight">
+                                  {item.titulo}
+                                </h4>
+                                {item.novo && (
+                                  <Badge variant="secondary" className="text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+                                    NOVO
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground leading-relaxed">
+                                {item.resumo}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Badge variant="outline" className="text-xs">{item.tipo}</Badge>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                              <Badge variant="outline" className="text-xs font-normal">
+                                {item.tipo}
+                              </Badge>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {item.data}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                {item.autor}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant="outline"
+                                className={`text-xs font-medium ${
+                                  item.prioridade === 'Alta' 
+                                    ? 'border-red-200 text-red-600 bg-red-50 dark:border-red-800 dark:text-red-400 dark:bg-red-950/30' 
+                                    : item.prioridade === 'Média' 
+                                    ? 'border-amber-200 text-amber-600 bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:bg-amber-950/30'
+                                    : 'border-emerald-200 text-emerald-600 bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:bg-emerald-950/30'
+                                }`}
+                              >
+                                {item.prioridade}
+                              </Badge>
+                              <Button variant="ghost" size="sm" className="text-xs h-8 px-3 hover:bg-primary/10">
+                                <Eye className="h-3 w-3 mr-1" />
+                                Ver
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {item.data}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {item.autor}
-                          </div>
-                          <Badge 
-                            variant={item.prioridade === 'Alta' ? 'destructive' : item.prioridade === 'Média' ? 'default' : 'secondary'} 
-                            className="text-xs"
-                          >
-                            {item.prioridade}
-                          </Badge>
                         </div>
                       </div>
-                      
-                      <Button variant="ghost" size="sm" className="text-xs self-start flex-shrink-0">
-                        <Eye className="h-3 w-3 mr-1" />
-                        Ver
-                      </Button>
                     </div>
                   </div>
                 );
               })}
             </div>
             
-            <div className="mt-4 pt-4 border-t space-y-2">
+            <div className="mt-6 pt-4 border-t space-y-3">
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1 text-xs sm:text-sm">
+                <Button variant="outline" className="flex-1 text-sm">
                   Ver Todos ({comunicados.length})
                 </Button>
-                <Button variant="default" size="sm" className="text-xs">
-                  + Novo Comunicado
+                <Button variant="default" size="sm" className="text-sm px-4">
+                  + Novo
                 </Button>
               </div>
-              <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                  Alta Prioridade
+              <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-0.5 bg-red-500 rounded"></div>
+                  <span>Alta</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                  Média Prioridade
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-0.5 bg-amber-500 rounded"></div>
+                  <span>Média</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  Baixa Prioridade
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-0.5 bg-emerald-500 rounded"></div>
+                  <span>Baixa</span>
                 </div>
               </div>
             </div>
