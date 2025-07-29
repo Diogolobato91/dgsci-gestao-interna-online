@@ -25,17 +25,12 @@ interface Servidor {
 
 // Hierarquia militar para ordenação
 const hierarquiaMilitar = [
-  'CEL QOBM',
-  '1º CEL QOBM',
-  'TCEL QOBM', 
-  'TC QOBM',
-  'MAJ QOBM',
-  'CAP QOABM',
-  'CAP QOBM',
-  '1º TEN QOABM',
-  '1º TEN QOBM',
-  '2º TEN QOABM', 
-  '2º TEN QOBM',
+  'CEL',
+  'TCEL',
+  'MAJ',
+  'CAP',
+  '1º TEN',
+  '2º TEN',
   'SUB TEN RR',
   'SUB TEN',
   '1º SGT',
