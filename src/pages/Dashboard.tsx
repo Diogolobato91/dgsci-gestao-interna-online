@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, FileText, Users, Calendar, TrendingUp, Cake } from 'lucide-react';
+import { Bell, FileText, Users, Calendar, TrendingUp, Cake, AlertCircle, Clock, User, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 const Dashboard: React.FC = () => {
   // Dados simulados dos servidores (mesmos dados do RelacaoEfetivo)
@@ -55,27 +55,68 @@ const Dashboard: React.FC = () => {
     
     return aniversariantes[0] || null;
   }, [servidores]);
-  const comunicados = [{
-    id: 1,
-    titulo: "Nova Instrução Técnica IT-01/2024",
-    data: "15/01/2024",
-    tipo: "Instrução Técnica"
-  }, {
-    id: 2,
-    titulo: "Atualização no Sistema de Vistorias",
-    data: "12/01/2024",
-    tipo: "Comunicado"
-  }, {
-    id: 3,
-    titulo: "Nota Técnica - Sistemas de Detecção",
-    data: "10/01/2024",
-    tipo: "Nota Técnica"
-  }, {
-    id: 4,
-    titulo: "Procedimentos para Análise de Projetos",
-    data: "08/01/2024",
-    tipo: "Procedimento"
-  }];
+  const comunicados = [
+    {
+      id: 1,
+      titulo: "Atualização Parecer Técnico - Sistemas de Alarme",
+      data: "29/07/2024",
+      tipo: "Parecer",
+      prioridade: "Alta",
+      novo: true,
+      autor: "Comissão Técnica",
+      resumo: "Nova diretriz para análise de sistemas de alarme em edificações comerciais"
+    },
+    {
+      id: 2,
+      titulo: "Mudança de Atuação - GBM Centro transferida para Bairro Novo",
+      data: "28/07/2024",
+      tipo: "Mudança Territorial",
+      prioridade: "Média",
+      novo: true,
+      autor: "Subdiretoria",
+      resumo: "A partir de 01/08/2024, GBM Centro atenderá região do Bairro Novo"
+    },
+    {
+      id: 3,
+      titulo: "Novo Modelo Padronizado - Laudo de Vistoria Simplificado",
+      data: "27/07/2024",
+      tipo: "Modelo Padronizado",
+      prioridade: "Média",
+      novo: false,
+      autor: "DGSCI",
+      resumo: "Disponível novo modelo para vistorias de baixa complexidade"
+    },
+    {
+      id: 4,
+      titulo: "Atualização Comissão Técnica - Procedimentos de Emergência",
+      data: "26/07/2024",
+      tipo: "Comissão Técnica",
+      prioridade: "Alta",
+      novo: false,
+      autor: "Comissão Técnica",
+      resumo: "Revisão dos protocolos de emergência em edificações públicas"
+    },
+    {
+      id: 5,
+      titulo: "Relatório Mensal de Atividades - Junho 2024",
+      data: "25/07/2024",
+      tipo: "Relatório",
+      prioridade: "Baixa",
+      novo: false,
+      autor: "Diretoria",
+      resumo: "Relatório consolidado das atividades de junho disponível para consulta"
+    },
+    {
+      id: 6,
+      titulo: "Nova Orientação - Ajuda Rápida ao Vistoriador",
+      data: "24/07/2024",
+      tipo: "Ajuda Vistoriador",
+      prioridade: "Média",
+      novo: false,
+      autor: "Setor Técnico",
+      resumo: "Adicionadas orientações sobre instalações elétricas em residências"
+    }
+  ];
   const acessoRapido = [{
     titulo: "Modelos Padronizados",
     descricao: "Acesse documentos e modelos oficiais",
@@ -95,34 +136,124 @@ const Dashboard: React.FC = () => {
   return <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
       {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-        {/* Comunicados e Notas Técnicas */}
+        {/* Comunicados Oficiais */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <Bell className="h-5 w-5 text-primary" />
-              Comunicados e Notas Técnicas
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-lg sm:text-xl">
+                <Bell className="h-5 w-5 text-primary" />
+                Comunicados Oficiais
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  {comunicados.filter(c => c.novo).length} novos
+                </Badge>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 sm:space-y-4">
-              {comunicados.map(item => <div key={item.id} className="border-l-4 border-primary pl-3 sm:pl-4 py-2">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-foreground text-sm sm:text-base truncate">{item.titulo}</h4>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                        {item.tipo} • {item.data}
-                      </p>
+            <div className="space-y-3">
+              {comunicados.slice(0, 4).map(item => {
+                const getPrioridadeColor = (prioridade: string) => {
+                  switch (prioridade) {
+                    case 'Alta': return 'border-red-500 bg-red-50 dark:bg-red-950/20';
+                    case 'Média': return 'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20';
+                    case 'Baixa': return 'border-green-500 bg-green-50 dark:bg-green-950/20';
+                    default: return 'border-primary bg-primary/5';
+                  }
+                };
+
+                const getTipoIcon = (tipo: string) => {
+                  switch (tipo) {
+                    case 'Parecer': return FileText;
+                    case 'Comissão Técnica': return Users;
+                    case 'Relatório': return TrendingUp;
+                    case 'Mudança Territorial': return AlertCircle;
+                    case 'Modelo Padronizado': return FileText;
+                    case 'Ajuda Vistoriador': return Users;
+                    default: return Bell;
+                  }
+                };
+
+                const TipoIcon = getTipoIcon(item.tipo);
+
+                return (
+                  <div key={item.id} className={`border-l-4 rounded-r-lg p-3 sm:p-4 transition-all hover:shadow-sm ${getPrioridadeColor(item.prioridade)}`}>
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-2 mb-2">
+                          <TipoIcon className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold text-sm sm:text-base text-foreground line-clamp-1">
+                                {item.titulo}
+                              </h4>
+                              {item.novo && (
+                                <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
+                                  NOVO
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2">
+                              {item.resumo}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className="text-xs">{item.tipo}</Badge>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {item.data}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {item.autor}
+                          </div>
+                          <Badge 
+                            variant={item.prioridade === 'Alta' ? 'destructive' : item.prioridade === 'Média' ? 'default' : 'secondary'} 
+                            className="text-xs"
+                          >
+                            {item.prioridade}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <Button variant="ghost" size="sm" className="text-xs self-start flex-shrink-0">
+                        <Eye className="h-3 w-3 mr-1" />
+                        Ver
+                      </Button>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-xs self-start sm:self-center">
-                      Ver
-                    </Button>
                   </div>
-                </div>)}
+                );
+              })}
             </div>
-            <div className="mt-4 pt-4 border-t">
-              <Button variant="outline" className="w-full text-xs sm:text-sm">
-                Ver Todos os Comunicados
-              </Button>
+            
+            <div className="mt-4 pt-4 border-t space-y-2">
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 text-xs sm:text-sm">
+                  Ver Todos ({comunicados.length})
+                </Button>
+                <Button variant="default" size="sm" className="text-xs">
+                  + Novo Comunicado
+                </Button>
+              </div>
+              <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                  Alta Prioridade
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                  Média Prioridade
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  Baixa Prioridade
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
