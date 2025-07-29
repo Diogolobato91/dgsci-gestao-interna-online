@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trash2, Plus, Edit, Calendar, Users, Cake } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +22,28 @@ interface Servidor {
   inicioFerias?: string;
   fimFerias?: string;
 }
+
+// Hierarquia militar para ordenação
+const hierarquiaMilitar = [
+  'CEL QOBM',
+  '1º CEL QOBM', 
+  'TC QOBM',
+  'MAJ QOBM',
+  'CAP QOABM',
+  'CAP QOBM',
+  '1º TEN QOABM',
+  '1º TEN QOBM',
+  '2º TEN QOABM', 
+  '2º TEN QOBM',
+  'SUB TEN RR',
+  'SUB TEN',
+  '1º SGT',
+  '2º SGT',
+  '3º SGT',
+  'CB',
+  'SD',
+  'VC'
+];
 
 const RelacaoEfetivo: React.FC = () => {
   const { user } = useAuth();
@@ -146,6 +169,20 @@ const RelacaoEfetivo: React.FC = () => {
     return proximosAniversariantes[0] || null;
   }, [proximosAniversariantes]);
 
+  // Função para ordenar servidores por hierarquia militar
+  const servidoresOrdenados = useMemo(() => {
+    return servidores.sort((a, b) => {
+      const ordemA = hierarquiaMilitar.indexOf(a.postoGraduacao);
+      const ordemB = hierarquiaMilitar.indexOf(b.postoGraduacao);
+      
+      // Se não encontrar na hierarquia, coloca no final
+      const indexA = ordemA === -1 ? hierarquiaMilitar.length : ordemA;
+      const indexB = ordemB === -1 ? hierarquiaMilitar.length : ordemB;
+      
+      return indexA - indexB;
+    });
+  }, [servidores]);
+
   // Função para calcular militares em férias nos próximos meses
   const proximasFerias = useMemo(() => {
     const hoje = new Date();
@@ -261,12 +298,21 @@ const RelacaoEfetivo: React.FC = () => {
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
                     <Label htmlFor="postoGraduacao">Posto/Graduação</Label>
-                    <Input
-                      id="postoGraduacao"
+                    <Select
                       value={formData.postoGraduacao}
-                      onChange={(e) => setFormData({ ...formData, postoGraduacao: e.target.value })}
-                      placeholder="Ex: CEL QOBM"
-                    />
+                      onValueChange={(value) => setFormData({ ...formData, postoGraduacao: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o posto/graduação" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {hierarquiaMilitar.map((posto) => (
+                          <SelectItem key={posto} value={posto}>
+                            {posto}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="nome">Nome</Label>
@@ -354,24 +400,28 @@ const RelacaoEfetivo: React.FC = () => {
             
             <TabsContent value="efetivo" className="mt-6">
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Posto/Graduação</TableHead>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>MF</TableHead>
-                      <TableHead>CPF</TableHead>
-                      <TableHead>Data de Nascimento</TableHead>
-                      {canEdit && <TableHead className="w-24">Ações</TableHead>}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {servidores.map((servidor) => (
-                      <TableRow key={servidor.id}>
-                        <TableCell>
-                          <Badge variant="outline">{servidor.postoGraduacao}</Badge>
-                        </TableCell>
-                        <TableCell className="font-medium">{servidor.nome}</TableCell>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16">Ordem</TableHead>
+                        <TableHead>Posto/Graduação</TableHead>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>MF</TableHead>
+                        <TableHead>CPF</TableHead>
+                        <TableHead>Data de Nascimento</TableHead>
+                        {canEdit && <TableHead className="w-24">Ações</TableHead>}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {servidoresOrdenados.map((servidor, index) => (
+                        <TableRow key={servidor.id}>
+                          <TableCell className="font-semibold text-primary">
+                            {index + 1}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{servidor.postoGraduacao}</Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">{servidor.nome}</TableCell>
                         <TableCell>{servidor.mf || '-'}</TableCell>
                         <TableCell>{servidor.cpf || '-'}</TableCell>
                         <TableCell>{servidor.dataNascimento || '-'}</TableCell>
@@ -403,7 +453,7 @@ const RelacaoEfetivo: React.FC = () => {
                 </Table>
               </div>
               <div className="mt-4 text-sm text-muted-foreground">
-                Total: {servidores.length} servidores
+                Total: {servidoresOrdenados.length} servidores
               </div>
             </TabsContent>
 

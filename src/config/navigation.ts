@@ -19,8 +19,42 @@ import {
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
-// Funcionalidades comuns a todos os perfis
-const commonItems: MenuItem[] = [
+// Funcionalidades comuns (sem vistoria)
+const commonItemsWithoutVistoria: MenuItem[] = [
+  {
+    id: 'dashboard',
+    title: 'Painel Principal',
+    icon: LayoutDashboard,
+    path: '/dashboard'
+  },
+  {
+    id: 'sat-regionais',
+    title: 'SAT\'s Regionais',
+    icon: MapPin,
+    path: '/sat-regionais'
+  },
+  {
+    id: 'ajuda-vistoriador',
+    title: 'Ajuda Rápida ao Vistoriador',
+    icon: HelpCircle,
+    path: '/ajuda-vistoriador'
+  },
+  {
+    id: 'modelos-padronizados',
+    title: 'Modelos Padronizados',
+    icon: FileText,
+    path: '/modelos-padronizados'
+  },
+  {
+    id: 'modelos-auto-infracao',
+    title: 'Modelos de Auto de Infração',
+    icon: AlertTriangle,
+    path: '/modelos-auto-infracao'
+  }
+];
+
+// Funcionalidades completas (com vistoria) - apenas para Vistoria, Subdiretoria e Diretoria
+const commonItemsComplete: MenuItem[] = [
   {
     id: 'dashboard',
     title: 'Painel Principal',
@@ -61,11 +95,11 @@ const commonItems: MenuItem[] = [
 
 export const navigationConfig: MenuConfig = {
   'Vistoria': [
-    ...commonItems
+    ...commonItemsComplete
   ],
   
   'Análise': [
-    ...commonItems,
+    ...commonItemsWithoutVistoria,
     {
       id: 'projetos',
       title: 'Projetos',
@@ -81,7 +115,7 @@ export const navigationConfig: MenuConfig = {
   ],
   
   'Multas': [
-    ...commonItems,
+    ...commonItemsWithoutVistoria,
     {
       id: 'gestao-autos',
       title: 'Gestão de Autos',
@@ -91,7 +125,7 @@ export const navigationConfig: MenuConfig = {
   ],
   
   'ADM': [
-    ...commonItems,
+    ...commonItemsWithoutVistoria,
     {
       id: 'escala-mensal',
       title: 'Escala Mensal',
@@ -113,7 +147,7 @@ export const navigationConfig: MenuConfig = {
   ],
   
   'Subdiretoria': [
-    ...commonItems,
+    ...commonItemsComplete,
     {
       id: 'comissao-tecnica',
       title: 'Comissão Técnica',
@@ -135,7 +169,7 @@ export const navigationConfig: MenuConfig = {
   ],
   
   'Diretoria': [
-    ...commonItems,
+    ...commonItemsComplete,
     // Seção Operacional Análise
     {
       id: 'dir-projetos',
