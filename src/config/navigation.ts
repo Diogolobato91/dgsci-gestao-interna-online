@@ -14,7 +14,8 @@ import {
   Gavel,
   Building2,
   MapPin,
-  UserCheck
+  UserCheck,
+  MessageSquare
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
@@ -25,6 +26,12 @@ const commonItems: MenuItem[] = [
     title: 'Painel Principal',
     icon: LayoutDashboard,
     path: '/dashboard'
+  },
+  {
+    id: 'vistoria',
+    title: 'Vistoria',
+    icon: MessageSquare,
+    path: '/vistoria'
   },
   {
     id: 'sat-regionais',

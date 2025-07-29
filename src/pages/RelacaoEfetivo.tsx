@@ -123,12 +123,28 @@ const RelacaoEfetivo: React.FC = () => {
       }
       
       return aniversarioEsteAno <= proximosMeses;
-    }).sort((a, b) => {
-      const [diaA, mesA] = a.dataNascimento!.split('/').map(Number);
-      const [diaB, mesB] = b.dataNascimento!.split('/').map(Number);
-      return (mesA * 100 + diaA) - (mesB * 100 + diaB);
-    });
+    }).map(servidor => {
+      const [dia, mes] = servidor.dataNascimento!.split('/').map(Number);
+      const anoAtual = hoje.getFullYear();
+      let aniversarioEsteAno = new Date(anoAtual, mes - 1, dia);
+      
+      if (aniversarioEsteAno < hoje) {
+        aniversarioEsteAno = new Date(anoAtual + 1, mes - 1, dia);
+      }
+      
+      const diasRestantes = Math.ceil((aniversarioEsteAno.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+      
+      return {
+        ...servidor,
+        diasParaAniversario: diasRestantes
+      };
+    }).sort((a, b) => a.diasParaAniversario - b.diasParaAniversario);
   }, [servidores]);
+
+  // Função para obter o próximo aniversariante
+  const proximoAniversariante = useMemo(() => {
+    return proximosAniversariantes[0] || null;
+  }, [proximosAniversariantes]);
 
   // Função para calcular militares em férias nos próximos meses
   const proximasFerias = useMemo(() => {
@@ -392,46 +408,65 @@ const RelacaoEfetivo: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="aniversariantes" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Cake className="h-5 w-5" />
-                    Próximos Aniversariantes (60 dias)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {proximosAniversariantes.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Posto/Graduação</TableHead>
-                            <TableHead>Nome</TableHead>
-                            <TableHead>Data de Nascimento</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {proximosAniversariantes.map((servidor) => (
-                            <TableRow key={servidor.id}>
-                              <TableCell>
-                                <Badge variant="outline">{servidor.postoGraduacao}</Badge>
-                              </TableCell>
-                              <TableCell className="font-medium">{servidor.nome}</TableCell>
-                              <TableCell>
-                                <Badge variant="secondary">{servidor.dataNascimento}</Badge>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Nenhum aniversariante nos próximos 60 dias
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                {proximosAniversariantes.length > 0 ? (
+                  proximosAniversariantes.map((servidor) => (
+                    <Card key={servidor.id} className="transition-all hover:shadow-md">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="relative">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                                <Cake className="h-6 w-6 text-primary" />
+                              </div>
+                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center font-semibold">
+                                {servidor.diasParaAniversario}
+                              </div>
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">{servidor.nome}</h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="text-xs">{servidor.postoGraduacao}</Badge>
+                                <span className="text-sm text-muted-foreground">
+                                  {servidor.dataNascimento}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-primary">
+                              {servidor.diasParaAniversario}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {servidor.diasParaAniversario === 1 ? 'dia' : 'dias'}
+                            </div>
+                          </div>
+                        </div>
+                        {servidor.diasParaAniversario <= 7 && (
+                          <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+                              <Calendar className="h-4 w-4" />
+                              <span className="text-sm font-medium">
+                                Aniversário se aproximando!
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <Card>
+                    <CardContent className="p-8">
+                      <div className="text-center text-muted-foreground">
+                        <Cake className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg font-medium">Nenhum aniversariante nos próximos 60 dias</p>
+                        <p className="text-sm mt-2">Os aniversários aparecerão aqui quando se aproximarem</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </TabsContent>
 
             <TabsContent value="ferias" className="mt-6">

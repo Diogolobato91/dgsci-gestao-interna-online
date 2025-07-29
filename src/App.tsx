@@ -10,6 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import AjudaVistoriador from "@/pages/AjudaVistoriador";
 import ModelosPadronizados from "@/pages/ModelosPadronizados";
 import ModelosAutoInfracao from "@/pages/ModelosAutoInfracao";
+import Vistoria from "@/pages/Vistoria";
 
 import EscalaMensal from "@/pages/EscalaMensal";
 import DashboardGeral from "@/pages/DashboardGeral";
@@ -58,6 +59,7 @@ const AppRoutes = () => (
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="vistoria" element={<Vistoria />} />
         <Route path="sat-regionais" element={<SATRegionais />} />
         <Route path="ajuda-vistoriador" element={<AjudaVistoriador />} />
         <Route path="modelos-padronizados" element={<ModelosPadronizados />} />
