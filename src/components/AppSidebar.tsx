@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { navigationConfig } from '@/config/navigation';
 import { MenuSection } from '@/types/navigation';
+import DateTimeDisplay from './DateTimeDisplay';
 import {
   Sidebar,
   SidebarContent,
@@ -62,6 +63,7 @@ export function AppSidebar() {
             </p>
           </div>
         )}
+        {state !== 'collapsed' && <DateTimeDisplay />}
       </SidebarHeader>
 
       <SidebarContent>

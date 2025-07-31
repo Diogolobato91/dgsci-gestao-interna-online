@@ -1,122 +1,21 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, FileText, Users, Calendar, TrendingUp, Cake, AlertCircle, Clock, User, Eye } from 'lucide-react';
+import { Bell, FileText, Users, Calendar, TrendingUp, Cake, AlertCircle, Clock, User, Eye, DollarSign, Shield, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useData } from '@/contexts/DataContext';
+import { format, differenceInDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 const Dashboard: React.FC = () => {
-  // Dados simulados dos servidores (mesmos dados do RelacaoEfetivo)
-  const servidores = [
-    { id: 1, postoGraduacao: 'CEL QOBM', nome: 'PABLO CRUZ DE OLIVEIRA', dataNascimento: '04/08/1977' },
-    { id: 2, postoGraduacao: '1º CEL QOBM', nome: 'RAIMUNDO NONATO MOURA DA SILVA FILHO', dataNascimento: '19/08/1961' },
-    { id: 3, postoGraduacao: 'MAJ QOBM', nome: 'EDUARDO OLIVEIRA RIO BRANCO', dataNascimento: '09/05/1980' },
-    { id: 49, postoGraduacao: 'VC', nome: 'VALERIA RUANA PEREIRA DA COSTA', dataNascimento: '30/04/2001' },
-    { id: 52, postoGraduacao: 'VC', nome: 'GABRIELA RODRIGUES MENDONÇA', dataNascimento: '11/07/2005' },
-    { id: 43, postoGraduacao: 'CB', nome: 'NARDINY DIEGO SOUZA ALVES', dataNascimento: '24/05/1990' },
-    { id: 17, postoGraduacao: '2º SGT', nome: 'CASSIO DIEGO NAZARENO OLIVEIRA DA SILVA', dataNascimento: '20/04/1984' },
-    { id: 24, postoGraduacao: '3º SGT', nome: 'SANDRO GONÇALVES DO NASCIMENTO', dataNascimento: '24/04/1987' },
-    { id: 53, postoGraduacao: 'VC', nome: 'TAYNA DOS SANTOS MACHADO', dataNascimento: '21/04/2005' },
-  ];
-
-  // Função para obter o próximo aniversariante
-  const proximoAniversariante = useMemo(() => {
-    const hoje = new Date();
-    const proximosMeses = new Date();
-    proximosMeses.setDate(hoje.getDate() + 60);
-    
-    const aniversariantes = servidores.filter(servidor => {
-      if (!servidor.dataNascimento) return false;
-      
-      const [dia, mes] = servidor.dataNascimento.split('/').map(Number);
-      const anoAtual = hoje.getFullYear();
-      let aniversarioEsteAno = new Date(anoAtual, mes - 1, dia);
-      
-      if (aniversarioEsteAno < hoje) {
-        aniversarioEsteAno = new Date(anoAtual + 1, mes - 1, dia);
-      }
-      
-      return aniversarioEsteAno <= proximosMeses;
-    }).map(servidor => {
-      const [dia, mes] = servidor.dataNascimento!.split('/').map(Number);
-      const anoAtual = hoje.getFullYear();
-      let aniversarioEsteAno = new Date(anoAtual, mes - 1, dia);
-      
-      if (aniversarioEsteAno < hoje) {
-        aniversarioEsteAno = new Date(anoAtual + 1, mes - 1, dia);
-      }
-      
-      const diasRestantes = Math.ceil((aniversarioEsteAno.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
-      
-      return {
-        ...servidor,
-        diasParaAniversario: diasRestantes
-      };
-    }).sort((a, b) => a.diasParaAniversario - b.diasParaAniversario);
-    
-    return aniversariantes[0] || null;
-  }, [servidores]);
-  const comunicados = [
-    {
-      id: 1,
-      titulo: "Atualização Parecer Técnico - Sistemas de Alarme",
-      data: "29/07/2024",
-      tipo: "Parecer",
-      prioridade: "Alta",
-      novo: true,
-      autor: "Comissão Técnica",
-      resumo: "Nova diretriz para análise de sistemas de alarme em edificações comerciais"
-    },
-    {
-      id: 2,
-      titulo: "Mudança de Atuação - GBM Centro transferida para Bairro Novo",
-      data: "28/07/2024",
-      tipo: "Mudança Territorial",
-      prioridade: "Média",
-      novo: true,
-      autor: "Subdiretoria",
-      resumo: "A partir de 01/08/2024, GBM Centro atenderá região do Bairro Novo"
-    },
-    {
-      id: 3,
-      titulo: "Novo Modelo Padronizado - Laudo de Vistoria Simplificado",
-      data: "27/07/2024",
-      tipo: "Modelo Padronizado",
-      prioridade: "Média",
-      novo: false,
-      autor: "DGSCI",
-      resumo: "Disponível novo modelo para vistorias de baixa complexidade"
-    },
-    {
-      id: 4,
-      titulo: "Atualização Comissão Técnica - Procedimentos de Emergência",
-      data: "26/07/2024",
-      tipo: "Comissão Técnica",
-      prioridade: "Alta",
-      novo: false,
-      autor: "Comissão Técnica",
-      resumo: "Revisão dos protocolos de emergência em edificações públicas"
-    },
-    {
-      id: 5,
-      titulo: "Relatório Mensal de Atividades - Junho 2024",
-      data: "25/07/2024",
-      tipo: "Relatório",
-      prioridade: "Baixa",
-      novo: false,
-      autor: "Diretoria",
-      resumo: "Relatório consolidado das atividades de junho disponível para consulta"
-    },
-    {
-      id: 6,
-      titulo: "Nova Orientação - Ajuda Rápida ao Vistoriador",
-      data: "24/07/2024",
-      tipo: "Ajuda Vistoriador",
-      prioridade: "Média",
-      novo: false,
-      autor: "Setor Técnico",
-      resumo: "Adicionadas orientações sobre instalações elétricas em residências"
-    }
-  ];
+  const { 
+    comunicados, 
+    proximoAniversariante, 
+    indicadores, 
+    totalMilitaresAtivos, 
+    totalAutorizacoesEmitidas,
+    currentDateTime 
+  } = useData();
   const acessoRapido = [{
     titulo: "Modelos Padronizados",
     descricao: "Acesse documentos e modelos oficiais",
@@ -134,6 +33,61 @@ const Dashboard: React.FC = () => {
     link: "/modelos-auto-infracao"
   }];
   return <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
+      {/* Indicadores no topo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium text-card-foreground">Militares Ativos</CardTitle>
+              <Users className="h-4 w-4 text-primary" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-card-foreground">{totalMilitaresAtivos}</div>
+            <p className="text-xs text-muted-foreground mt-1">Efetivo atual</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium text-card-foreground">Arrecadação</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-card-foreground">R$ {indicadores.arrecadacaoMensal.toLocaleString('pt-BR')}</div>
+            <p className="text-xs text-muted-foreground mt-1">Este mês</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium text-card-foreground">Autorizações</CardTitle>
+              <FileText className="h-4 w-4 text-blue-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-card-foreground">{totalAutorizacoesEmitidas}</div>
+            <p className="text-xs text-muted-foreground mt-1">Emitidas este mês</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium text-card-foreground">Processos</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-card-foreground">{indicadores.processosAndamento}</div>
+            <p className="text-xs text-muted-foreground mt-1">Em andamento</p>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Comunicados Oficiais */}
@@ -146,7 +100,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs">
-                  {comunicados.filter(c => c.novo).length} novos
+                  {comunicados.length} comunicados
                 </Badge>
               </div>
             </CardTitle>
@@ -156,21 +110,18 @@ const Dashboard: React.FC = () => {
               {comunicados.slice(0, 4).map(item => {
                 const getPrioridadeColor = (prioridade: string) => {
                   switch (prioridade) {
-                    case 'Alta': return 'border-l-red-500';
-                    case 'Média': return 'border-l-amber-500';
-                    case 'Baixa': return 'border-l-emerald-500';
+                    case 'alta': return 'border-l-red-500';
+                    case 'media': return 'border-l-amber-500';
+                    case 'baixa': return 'border-l-emerald-500';
                     default: return 'border-l-primary';
                   }
                 };
 
                 const getTipoIcon = (tipo: string) => {
                   switch (tipo) {
-                    case 'Parecer': return FileText;
-                    case 'Comissão Técnica': return Users;
-                    case 'Relatório': return TrendingUp;
-                    case 'Mudança Territorial': return AlertCircle;
-                    case 'Modelo Padronizado': return FileText;
-                    case 'Ajuda Vistoriador': return Users;
+                    case 'informativo': return Bell;
+                    case 'urgente': return AlertCircle;
+                    case 'normal': return FileText;
                     default: return Bell;
                   }
                 };
@@ -191,11 +142,9 @@ const Dashboard: React.FC = () => {
                                 <h4 className="font-semibold text-sm text-foreground leading-tight">
                                   {item.titulo}
                                 </h4>
-                                {item.novo && (
-                                  <Badge variant="secondary" className="text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
-                                    NOVO
-                                  </Badge>
-                                )}
+                                <Badge variant="secondary" className="text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                                  {item.tipo.toUpperCase()}
+                                </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground leading-relaxed">
                                 {item.resumo}
@@ -205,12 +154,9 @@ const Dashboard: React.FC = () => {
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                              <Badge variant="outline" className="text-xs font-normal">
-                                {item.tipo}
-                              </Badge>
                               <div className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {item.data}
+                                {format(new Date(item.data), "dd/MM/yyyy", { locale: ptBR })}
                               </div>
                               <div className="flex items-center gap-1">
                                 <User className="h-3 w-3" />
@@ -222,9 +168,9 @@ const Dashboard: React.FC = () => {
                               <Badge 
                                 variant="outline"
                                 className={`text-xs font-medium ${
-                                  item.prioridade === 'Alta' 
+                                  item.prioridade === 'alta' 
                                     ? 'border-red-200 text-red-600 bg-red-50 dark:border-red-800 dark:text-red-400 dark:bg-red-950/30' 
-                                    : item.prioridade === 'Média' 
+                                    : item.prioridade === 'media' 
                                     ? 'border-amber-200 text-amber-600 bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:bg-amber-950/30'
                                     : 'border-emerald-200 text-emerald-600 bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:bg-emerald-950/30'
                                 }`}
@@ -294,15 +240,17 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm sm:text-base truncate">{proximoAniversariante.nome}</h3>
+                    <h3 className="font-semibold text-sm sm:text-base truncate">{proximoAniversariante.patente} {proximoAniversariante.nome}</h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline" className="text-xs">{proximoAniversariante.postoGraduacao}</Badge>
+                      <Badge variant="outline" className="text-xs">{proximoAniversariante.patente}</Badge>
                       <span className="text-xs sm:text-sm text-muted-foreground">
-                        {proximoAniversariante.dataNascimento}
+                        {proximoAniversariante.email}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {proximoAniversariante.diasParaAniversario === 1 ? 'Amanhã!' : `Em ${proximoAniversariante.diasParaAniversario} dias`}
+                      {proximoAniversariante.diasParaAniversario === 0 ? 'Hoje!' : 
+                       proximoAniversariante.diasParaAniversario === 1 ? 'Amanhã!' : 
+                       `Em ${proximoAniversariante.diasParaAniversario} dias`}
                     </p>
                   </div>
                 </div>
