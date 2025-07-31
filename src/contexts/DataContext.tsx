@@ -77,52 +77,18 @@ export const useData = () => {
   return context;
 };
 
-// Dados iniciais simulados
+// Dados reais do sistema (mesmos do RelacaoEfetivo)
 const servidoresIniciais: Servidor[] = [
-  {
-    id: '1',
-    patente: 'Coronel',
-    nome: 'João Silva Santos',
-    aniversario: '1975-02-10', // Próximo aniversário em alguns dias
-    telefone: '(85) 9 9999-0001',
-    email: 'joao.santos@cbm.ce.gov.br'
-  },
-  {
-    id: '2',
-    patente: 'Major',
-    nome: 'Maria Oliveira Costa',
-    aniversario: '1980-08-15',
-    telefone: '(85) 9 9999-0002',
-    email: 'maria.costa@cbm.ce.gov.br',
-    dataInicioFerias: '2025-02-15',
-    dataFimFerias: '2025-03-01'
-  },
-  {
-    id: '3',
-    patente: 'Capitão',
-    nome: 'Carlos Eduardo Lima',
-    aniversario: '1985-12-03',
-    telefone: '(85) 9 9999-0003',
-    email: 'carlos.lima@cbm.ce.gov.br'
-  },
-  {
-    id: '4',
-    patente: 'Tenente',
-    nome: 'Ana Paula Rocha',
-    aniversario: '1990-01-28',
-    telefone: '(85) 9 9999-0004',
-    email: 'ana.rocha@cbm.ce.gov.br'
-  },
-  {
-    id: '5',
-    patente: 'Sargento',
-    nome: 'Pedro Henrique Souza',
-    aniversario: '1988-03-12',
-    telefone: '(85) 9 9999-0005',
-    email: 'pedro.souza@cbm.ce.gov.br',
-    dataInicioFerias: '2025-03-10',
-    dataFimFerias: '2025-03-25'
-  }
+  { id: '1', patente: 'CEL QOBM', nome: 'PABLO CRUZ DE OLIVEIRA', aniversario: '1977-08-04', telefone: '(85) 9 9999-0001', email: 'pablo.oliveira@cbm.ce.gov.br' },
+  { id: '2', patente: '1º CEL QOBM', nome: 'RAIMUNDO NONATO MOURA DA SILVA FILHO', aniversario: '1961-08-19', telefone: '(85) 9 9999-0002', email: 'raimundo.silva@cbm.ce.gov.br' },
+  { id: '3', patente: 'MAJ QOBM', nome: 'EDUARDO OLIVEIRA RIO BRANCO', aniversario: '1980-05-09', telefone: '(85) 9 9999-0003', email: 'eduardo.branco@cbm.ce.gov.br' },
+  { id: '4', patente: 'CAP QOBM', nome: 'JOÃO SILVA SANTOS', aniversario: '1975-02-10', telefone: '(85) 9 9999-0004', email: 'joao.santos@cbm.ce.gov.br' },
+  { id: '5', patente: 'TEN QOBM', nome: 'MARIA OLIVEIRA COSTA', aniversario: '1980-08-15', telefone: '(85) 9 9999-0005', email: 'maria.costa@cbm.ce.gov.br' },
+  { id: '6', patente: '2º SGT', nome: 'CASSIO DIEGO NAZARENO OLIVEIRA DA SILVA', aniversario: '1984-04-20', telefone: '(85) 9 9999-0006', email: 'cassio.silva@cbm.ce.gov.br' },
+  { id: '7', patente: '3º SGT', nome: 'SANDRO GONÇALVES DO NASCIMENTO', aniversario: '1987-04-24', telefone: '(85) 9 9999-0007', email: 'sandro.nascimento@cbm.ce.gov.br' },
+  { id: '8', patente: 'CB', nome: 'NARDINY DIEGO SOUZA ALVES', aniversario: '1990-05-24', telefone: '(85) 9 9999-0008', email: 'nardiny.alves@cbm.ce.gov.br' },
+  { id: '9', patente: 'VC', nome: 'VALERIA RUANA PEREIRA DA COSTA', aniversario: '2001-04-30', telefone: '(85) 9 9999-0009', email: 'valeria.costa@cbm.ce.gov.br' },
+  { id: '10', patente: 'VC', nome: 'GABRIELA RODRIGUES MENDONÇA', aniversario: '2005-07-11', telefone: '(85) 9 9999-0010', email: 'gabriela.mendonca@cbm.ce.gov.br' }
 ];
 
 const comunicadosIniciais: Comunicado[] = [

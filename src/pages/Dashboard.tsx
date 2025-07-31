@@ -33,61 +33,6 @@ const Dashboard: React.FC = () => {
     link: "/modelos-auto-infracao"
   }];
   return <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
-      {/* Indicadores no topo */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-medium text-card-foreground">Militares Ativos</CardTitle>
-              <Users className="h-4 w-4 text-primary" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">{totalMilitaresAtivos}</div>
-            <p className="text-xs text-muted-foreground mt-1">Efetivo atual</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-medium text-card-foreground">Arrecadação</CardTitle>
-              <DollarSign className="h-4 w-4 text-green-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">R$ {indicadores.arrecadacaoMensal.toLocaleString('pt-BR')}</div>
-            <p className="text-xs text-muted-foreground mt-1">Este mês</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-medium text-card-foreground">Autorizações</CardTitle>
-              <FileText className="h-4 w-4 text-blue-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">{totalAutorizacoesEmitidas}</div>
-            <p className="text-xs text-muted-foreground mt-1">Emitidas este mês</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-medium text-card-foreground">Processos</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">{indicadores.processosAndamento}</div>
-            <p className="text-xs text-muted-foreground mt-1">Em andamento</p>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Comunicados Oficiais */}
