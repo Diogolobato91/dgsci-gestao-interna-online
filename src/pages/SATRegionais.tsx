@@ -6,9 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Pencil, Plus, Search } from 'lucide-react';
+import { Pencil, Plus, Search, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
 
 interface SATData {
   id: string;
@@ -143,6 +144,58 @@ const SATRegionais: React.FC = () => {
     setFormData({});
   };
 
+  const handleDownloadExcel = () => {
+    // Criar array com todos os municípios
+    const allMunicipios: { municipio: string; gbm: string; sat: string }[] = [];
+    
+    satData.forEach(item => {
+      const municipios = item.municipios.split(',').map(m => m.trim()).filter(m => m.length > 0);
+      municipios.forEach(municipio => {
+        allMunicipios.push({
+          municipio: municipio,
+          gbm: item.gbm,
+          sat: item.sat
+        });
+      });
+    });
+
+    // Ordenar alfabeticamente por município
+    allMunicipios.sort((a, b) => a.municipio.localeCompare(b.municipio, 'pt-BR'));
+
+    // Criar dados para o Excel com contador
+    const excelData = allMunicipios.map((item, index) => ({
+      'Nº': index + 1,
+      'Município': item.municipio,
+      'GBM': item.gbm,
+      'CAT / SAT\'S': item.sat
+    }));
+
+    // Criar workbook e worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Definir larguras das colunas
+    const colWidths = [
+      { wch: 8 },  // Nº
+      { wch: 35 }, // Município
+      { wch: 15 }, // GBM
+      { wch: 20 }  // CAT / SAT'S
+    ];
+    ws['!cols'] = colWidths;
+
+    // Adicionar worksheet ao workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Municípios PA');
+
+    // Gerar e baixar arquivo
+    const today = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+    XLSX.writeFile(wb, `SAT_Regionais_Municipios_PA_${today}.xlsx`);
+
+    toast({
+      title: "Sucesso",
+      description: `Excel baixado com ${allMunicipios.length} municípios ordenados alfabeticamente.`
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -154,12 +207,18 @@ const SATRegionais: React.FC = () => {
                 Superintendências de Ações Territoriais e seus municípios de atuação
               </p>
             </div>
-            {canEdit && (
-              <Button onClick={handleAdd} className="shrink-0">
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar SAT
+            <div className="flex gap-2">
+              <Button onClick={handleDownloadExcel} variant="outline" className="shrink-0">
+                <Download className="h-4 w-4 mr-2" />
+                Baixar Excel
               </Button>
-            )}
+              {canEdit && (
+                <Button onClick={handleAdd} className="shrink-0">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar SAT
+                </Button>
+              )}
+            </div>
           </div>
           <div className="mt-4">
             <div className="relative w-full max-w-md">
