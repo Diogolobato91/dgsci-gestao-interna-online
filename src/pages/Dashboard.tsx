@@ -193,8 +193,8 @@ const Dashboard: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {proximoAniversariante.diasParaAniversario === 0 ? 'Hoje!' : 
-                       proximoAniversariante.diasParaAniversario === 1 ? 'Amanhã!' : 
+                      {proximoAniversariante.diasParaAniversario === 0 ? 'Hoje! 🎉' : 
+                       proximoAniversariante.diasParaAniversario === 1 ? 'Amanhã! 🎂' : 
                        `Em ${proximoAniversariante.diasParaAniversario} dias`}
                     </p>
                   </div>
