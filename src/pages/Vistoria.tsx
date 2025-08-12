@@ -366,6 +366,13 @@ const Vistoria: React.FC = () => {
                   </Select>
                 </div>
               </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={handleAdd} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Adicionar Atendimento
+                  </Button>
+                </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>
