@@ -11,6 +11,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Trash2, Plus, Edit, Users, MessageSquare, Calendar, Clock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from '@/components/ui/chart';
+import {
+  BarChart as ReBarChart,
+  Bar,
+  LineChart as ReLineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface Atendimento {
   id: number;
@@ -31,7 +47,6 @@ const Vistoria: React.FC = () => {
 
   // Lista de voluntários civis
   const voluntarios = [
-    'VALERIA RUANA PEREIRA DA COSTA',
     'DAVI SOUSA CARVALHO', 
     'DERIK MATHEUS FERREIRA DE ASSIS',
     'GABRIELA RODRIGUES MENDONÇA',
@@ -52,18 +67,6 @@ const Vistoria: React.FC = () => {
       dataAdicao: '10/06/2025',
       dataAtendimento: '09/06/2025',
       municipio: 'CENTRO DE ATIVIDADES TÉCNICAS',
-      cnpjProtocolo: '43.164.893/0001-03',
-      nomeSolicitante: 'Ruth Cardoso',
-      telefone: '91 9599-0439',
-      servico: 'RENOVAÇÃO DE SERVIÇO',
-      situacao: 'ATENDIDO',
-      voluntario: 'VALERIA RUANA PEREIRA DA COSTA'
-    },
-    {
-      id: 2,
-      dataAdicao: '10/06/2025',
-      dataAtendimento: '09/06/2025',
-      municipio: 'CENTRO DE ATIVIDADES TÉCNICAS',
       cnpjProtocolo: '00.299.220/0001-05',
       nomeSolicitante: 'NÃO SE IDENTIFICOU',
       telefone: '94 8812-4523',
@@ -72,7 +75,7 @@ const Vistoria: React.FC = () => {
       voluntario: 'DAVI SOUSA CARVALHO'
     },
     {
-      id: 3,
+      id: 2,
       dataAdicao: '10/06/2025',
       dataAtendimento: '09/06/2025',
       municipio: 'CENTRO DE ATIVIDADES TÉCNICAS',
@@ -100,23 +103,86 @@ const Vistoria: React.FC = () => {
     situacao: 'PENDENTE' as 'ATENDIDO' | 'PENDENTE'
   });
 
-  // Filtrar atendimentos por voluntário
-  const atendimentosFiltrados = useMemo(() => {
-    return atendimentos.filter(atendimento => atendimento.voluntario === selectedVoluntario);
-  }, [atendimentos, selectedVoluntario]);
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
-  // Estatísticas por voluntário
+  const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const anos = useMemo(() => {
+    const anoAtual = new Date().getFullYear();
+    return [anoAtual - 1, anoAtual, anoAtual + 1];
+  }, []);
+
+
+  // Helpers de data
+  const parseDateBr = (s: string) => {
+    const [d, m, y] = s.split('/').map((n) => parseInt(n, 10));
+    return new Date(y, m - 1, d);
+  };
+  const formatDateBr = (date: Date) => {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  };
+  const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+  const isInSelectedMonth = (s: string) => {
+    const d = parseDateBr(s);
+    return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+  };
+
+  // Configuração de cores/labels para os gráficos
+  const chartConfig = {
+    atendidos: { label: 'Atendidos', color: 'hsl(var(--primary))' },
+    pendentes: { label: 'Pendentes', color: 'hsl(var(--secondary))' },
+    total: { label: 'Total', color: 'hsl(var(--accent))' },
+  } as const;
+
+  // Filtrar atendimentos por voluntário e mês
+  const atendimentosFiltrados = useMemo(() => {
+    return atendimentos.filter(
+      (a) => a.voluntario === selectedVoluntario && isInSelectedMonth(a.dataAtendimento)
+    );
+  }, [atendimentos, selectedVoluntario, selectedMonth, selectedYear]);
+
+  // Estatísticas por voluntário no mês
   const estatisticasVoluntario = useMemo(() => {
-    const atendimentosVoluntario = atendimentos.filter(a => a.voluntario === selectedVoluntario);
-    const atendidos = atendimentosVoluntario.filter(a => a.situacao === 'ATENDIDO').length;
-    const pendentes = atendimentosVoluntario.filter(a => a.situacao === 'PENDENTE').length;
-    
+    const atendidos = atendimentosFiltrados.filter(a => a.situacao === 'ATENDIDO').length;
+    const pendentes = atendimentosFiltrados.filter(a => a.situacao === 'PENDENTE').length;
     return {
-      total: atendimentosVoluntario.length,
+      total: atendimentosFiltrados.length,
       atendidos,
       pendentes
     };
-  }, [atendimentos, selectedVoluntario]);
+  }, [atendimentosFiltrados]);
+
+  // Dados para gráficos (reagem ao mês/voluntário)
+  const dailyData = useMemo(() => {
+    const totalDias = daysInMonth(selectedYear, selectedMonth);
+    const base = Array.from({ length: totalDias }, (_, i) => ({
+      day: String(i + 1).padStart(2, '0'),
+      atendidos: 0,
+      pendentes: 0,
+      total: 0,
+    }));
+    atendimentosFiltrados.forEach((a) => {
+      const d = parseDateBr(a.dataAtendimento).getDate() - 1;
+      if (d >= 0 && d < base.length) {
+        if (a.situacao === 'ATENDIDO') base[d].atendidos += 1;
+        else base[d].pendentes += 1;
+        base[d].total += 1;
+      }
+    });
+    return base;
+  }, [atendimentosFiltrados, selectedMonth, selectedYear]);
+
+  const situacaoData = useMemo(() => {
+    const atendidos = atendimentosFiltrados.filter(a => a.situacao === 'ATENDIDO').length;
+    const pendentes = atendimentosFiltrados.filter(a => a.situacao === 'PENDENTE').length;
+    return [
+      { name: 'Atendidos', value: atendidos, key: 'atendidos' },
+      { name: 'Pendentes', value: pendentes, key: 'pendentes' },
+    ];
+  }, [atendimentosFiltrados]);
 
   const handleEdit = (atendimento: Atendimento) => {
     setEditingAtendimento(atendimento);
@@ -136,11 +202,13 @@ const Vistoria: React.FC = () => {
   const handleAdd = () => {
     setEditingAtendimento(null);
     const hoje = new Date();
-    const dataHoje = `${hoje.getDate().toString().padStart(2, '0')}/${(hoje.getMonth() + 1).toString().padStart(2, '0')}/${hoje.getFullYear()}`;
+    const diaPreferido = Math.min(hoje.getDate(), daysInMonth(selectedYear, selectedMonth));
+    const dataSelecionada = new Date(selectedYear, selectedMonth, diaPreferido);
+    const dataBr = formatDateBr(dataSelecionada);
     
     setFormData({
-      dataAdicao: dataHoje,
-      dataAtendimento: dataHoje,
+      dataAdicao: dataBr,
+      dataAtendimento: dataBr,
       municipio: '',
       cnpjProtocolo: '',
       nomeSolicitante: '',
@@ -252,11 +320,11 @@ const Vistoria: React.FC = () => {
             </div>
 
             {/* Seleção de Voluntário */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-end justify-between">
               <div className="space-y-2">
                 <Label htmlFor="voluntario">Selecionar Voluntário Civil</Label>
                 <Select value={selectedVoluntario} onValueChange={setSelectedVoluntario}>
-                  <SelectTrigger className="w-full sm:w-[400px]">
+                  <SelectTrigger className="w-full sm:w-[320px]">
                     <SelectValue placeholder="Selecione um voluntário" />
                   </SelectTrigger>
                   <SelectContent>
@@ -269,13 +337,35 @@ const Vistoria: React.FC = () => {
                 </Select>
               </div>
 
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={handleAdd} className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    Adicionar Atendimento
-                  </Button>
-                </DialogTrigger>
+              <div className="space-y-2">
+                <Label>Selecionar Mês/Ano</Label>
+                <div className="flex gap-2">
+                  <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(parseInt(v, 10))}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Mês" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {meses.map((m, idx) => (
+                        <SelectItem key={m} value={String(idx)}>
+                          {m}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(parseInt(v, 10))}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue placeholder="Ano" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {anos.map((a) => (
+                        <SelectItem key={a} value={String(a)}>
+                          {a}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>
@@ -379,80 +469,127 @@ const Vistoria: React.FC = () => {
               </Dialog>
             </div>
 
-            {/* Tabela de Atendimentos */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Atendimentos de {selectedVoluntario}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {atendimentosFiltrados.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Data Adição</TableHead>
-                          <TableHead>Data Atendimento</TableHead>
-                          <TableHead>Município</TableHead>
-                          <TableHead>CNPJ/Protocolo</TableHead>
-                          <TableHead>Nome Solicitante</TableHead>
-                          <TableHead>Telefone</TableHead>
-                          <TableHead>Serviço</TableHead>
-                          <TableHead>Situação</TableHead>
-                          <TableHead className="w-24">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {atendimentosFiltrados.map((atendimento) => (
-                          <TableRow key={atendimento.id}>
-                            <TableCell className="font-medium">{atendimento.dataAdicao}</TableCell>
-                            <TableCell>{atendimento.dataAtendimento}</TableCell>
-                            <TableCell>{atendimento.municipio}</TableCell>
-                            <TableCell>{atendimento.cnpjProtocolo}</TableCell>
-                            <TableCell>{atendimento.nomeSolicitante}</TableCell>
-                            <TableCell>{atendimento.telefone}</TableCell>
-                            <TableCell>{atendimento.servico}</TableCell>
-                            <TableCell>
-                              <Badge variant={atendimento.situacao === 'ATENDIDO' ? 'default' : 'secondary'}>
-                                {atendimento.situacao}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleEdit(atendimento)}
-                                  className="h-8 w-8"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDelete(atendimento.id)}
-                                  className="h-8 w-8 text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium">Nenhum atendimento registrado</p>
-                    <p className="text-sm mt-2">Adicione o primeiro atendimento para este voluntário</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <Tabs defaultValue="lista" className="w-full">
+              <TabsList>
+                <TabsTrigger value="lista">Lista</TabsTrigger>
+                <TabsTrigger value="graficos">Gráficos</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="lista">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Atendimentos de {selectedVoluntario}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {atendimentosFiltrados.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Data Adição</TableHead>
+                              <TableHead>Data Atendimento</TableHead>
+                              <TableHead>Município</TableHead>
+                              <TableHead>CNPJ/Protocolo</TableHead>
+                              <TableHead>Nome Solicitante</TableHead>
+                              <TableHead>Telefone</TableHead>
+                              <TableHead>Serviço</TableHead>
+                              <TableHead>Situação</TableHead>
+                              <TableHead className="w-24">Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {atendimentosFiltrados.map((atendimento) => (
+                              <TableRow key={atendimento.id}>
+                                <TableCell className="font-medium">{atendimento.dataAdicao}</TableCell>
+                                <TableCell>{atendimento.dataAtendimento}</TableCell>
+                                <TableCell>{atendimento.municipio}</TableCell>
+                                <TableCell>{atendimento.cnpjProtocolo}</TableCell>
+                                <TableCell>{atendimento.nomeSolicitante}</TableCell>
+                                <TableCell>{atendimento.telefone}</TableCell>
+                                <TableCell>{atendimento.servico}</TableCell>
+                                <TableCell>
+                                  <Badge variant={atendimento.situacao === 'ATENDIDO' ? 'default' : 'secondary'}>
+                                    {atendimento.situacao}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleEdit(atendimento)}
+                                      className="h-8 w-8"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleDelete(atendimento.id)}
+                                      className="h-8 w-8 text-destructive hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg font-medium">Nenhum atendimento registrado</p>
+                        <p className="text-sm mt-2">Adicione o primeiro atendimento para este voluntário</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="graficos">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Atendimentos por dia ({meses[selectedMonth]} / {selectedYear})</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ChartContainer config={chartConfig}>
+                        <ReBarChart data={dailyData}>
+                          <CartesianGrid vertical={false} />
+                          <XAxis dataKey="day" />
+                          <YAxis allowDecimals={false} />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Bar dataKey="atendidos" fill="var(--color-atendidos)" stackId="a" />
+                          <Bar dataKey="pendentes" fill="var(--color-pendentes)" stackId="a" />
+                        </ReBarChart>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Resumo do mês ({meses[selectedMonth]} / {selectedYear})</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ChartContainer config={chartConfig}>
+                        <ReBarChart data={situacaoData}>
+                          <CartesianGrid vertical={false} />
+                          <XAxis dataKey="name" />
+                          <YAxis allowDecimals={false} />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Bar dataKey="value" fill="var(--color-total)" />
+                        </ReBarChart>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </CardContent>
       </Card>

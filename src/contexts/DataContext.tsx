@@ -127,7 +127,7 @@ const servidoresIniciais: Servidor[] = [
   { id: '46', patente: 'CB', nome: 'FELIPE LOPES CARDOSO', aniversario: '1990-03-29', telefone: '(85) 9 9999-0046', email: 'felipe.cardoso@cbm.ce.gov.br' },
   { id: '47', patente: 'CB', nome: 'RAFAEL LUIS DA SILVA SENA', aniversario: '1996-10-04', telefone: '(85) 9 9999-0047', email: 'rafael.sena@cbm.ce.gov.br' },
   { id: '48', patente: 'CB', nome: 'GISLAINE DAIANE DOS SANTOS REIS', aniversario: '1993-07-08', telefone: '(85) 9 9999-0048', email: 'gislaine.reis@cbm.ce.gov.br' },
-  { id: '49', patente: 'VC', nome: 'VALERIA RUANA PEREIRA DA COSTA', aniversario: '2001-04-30', telefone: '(85) 9 9999-0049', email: 'valeria.costa@cbm.ce.gov.br' },
+  
   { id: '50', patente: 'VC', nome: 'DAVI SOUSA CARVALHO', aniversario: '2002-07-13', telefone: '(85) 9 9999-0050', email: 'davi.carvalho@cbm.ce.gov.br' },
   { id: '51', patente: 'VC', nome: 'DERIK MATHEUS FERREIRA DE ASSIS', aniversario: '2003-03-09', telefone: '(85) 9 9999-0051', email: 'derik.assis@cbm.ce.gov.br' },
   { id: '52', patente: 'VC', nome: 'GABRIELA RODRIGUES MENDONÇA', aniversario: '2005-07-11', telefone: '(85) 9 9999-0052', email: 'gabriela.mendonca@cbm.ce.gov.br' },
