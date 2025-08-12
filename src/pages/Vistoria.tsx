@@ -184,6 +184,8 @@ const Vistoria: React.FC = () => {
     ];
   }, [atendimentosFiltrados]);
 
+  const hasDailyData = useMemo(() => dailyData.some(d => d.atendidos > 0 || d.pendentes > 0), [dailyData]);
+  const hasSituacaoData = useMemo(() => situacaoData.some(s => s.value > 0), [situacaoData]);
   const handleEdit = (atendimento: Atendimento) => {
     setEditingAtendimento(atendimento);
     setFormData({
@@ -522,16 +524,20 @@ const Vistoria: React.FC = () => {
                       <CardTitle>Atendimentos por dia ({meses[selectedMonth]} / {selectedYear})</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ChartContainer config={chartConfig}>
-                        <ReBarChart data={dailyData}>
-                          <CartesianGrid vertical={false} />
-                          <XAxis dataKey="day" />
-                          <YAxis allowDecimals={false} />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="atendidos" fill="var(--color-atendidos)" stackId="a" />
-                          <Bar dataKey="pendentes" fill="var(--color-pendentes)" stackId="a" />
-                        </ReBarChart>
-                      </ChartContainer>
+                      {hasDailyData ? (
+                        <ChartContainer config={chartConfig} className="w-full h-[320px]">
+                          <ReBarChart data={dailyData}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="day" />
+                            <YAxis allowDecimals={false} />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Bar dataKey="atendidos" fill="var(--color-atendidos)" stackId="a" />
+                            <Bar dataKey="pendentes" fill="var(--color-pendentes)" stackId="a" />
+                          </ReBarChart>
+                        </ChartContainer>
+                      ) : (
+                        <div className="flex h-[320px] items-center justify-center text-muted-foreground">Sem dados para o mês selecionado</div>
+                      )}
                     </CardContent>
                   </Card>
 
@@ -540,15 +546,19 @@ const Vistoria: React.FC = () => {
                       <CardTitle>Resumo do mês ({meses[selectedMonth]} / {selectedYear})</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ChartContainer config={chartConfig}>
-                        <ReBarChart data={situacaoData}>
-                          <CartesianGrid vertical={false} />
-                          <XAxis dataKey="name" />
-                          <YAxis allowDecimals={false} />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="value" fill="var(--color-total)" />
-                        </ReBarChart>
-                      </ChartContainer>
+                      {hasSituacaoData ? (
+                        <ChartContainer config={chartConfig} className="w-full h-[320px]">
+                          <ReBarChart data={situacaoData}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="name" />
+                            <YAxis allowDecimals={false} />
+                            <ChartTooltip content={<ChartTooltipContent />} />
+                            <Bar dataKey="value" fill="var(--color-total)" />
+                          </ReBarChart>
+                        </ChartContainer>
+                      ) : (
+                        <div className="flex h-[320px] items-center justify-center text-muted-foreground">Sem dados para o mês selecionado</div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
