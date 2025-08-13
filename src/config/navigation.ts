@@ -149,6 +149,12 @@ export const navigationConfig: MenuConfig = {
   'Subdiretoria': [
     ...commonItemsComplete,
     {
+      id: 'controle-portarias',
+      title: 'Controle de Portarias',
+      icon: FileText,
+      path: '/controle-portarias'
+    },
+    {
       id: 'comissao-tecnica',
       title: 'Comissão Técnica',
       icon: Users,
