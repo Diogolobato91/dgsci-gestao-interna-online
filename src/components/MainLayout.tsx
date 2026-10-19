@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X, LogOut, LockKeyhole, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { navigationConfig } from '@/config/navigation';
+import { isFullAdministrator } from '@/features/records/recordAccess';
 
 export default function MainLayout() {
   const { user, logout } = useAuth();
@@ -10,11 +11,11 @@ export default function MainLayout() {
   const [open, setOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
-  const fullAccess = user.role === 'administrator' && user.allowedProfiles?.length === Object.keys(navigationConfig).length;
+  const fullAccess = isFullAdministrator(user);
   const items = fullAccess ? [...new Map(Object.values(navigationConfig).flat().map(item => [item.path, item])).values()] : navigationConfig[user.profile];
   const groups = [...new Set(items.map(item => item.section || 'Consulta compartilhada'))];
   const title = pathname === '/favoritos' ? 'Meus favoritos' : items.find(item => item.path === pathname)?.title || 'Portal DGSCI';
-  const integrated = ['/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
+  const integrated = ['/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/controle-portarias', '/cmt-sub-sats', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
   useEffect(() => { setOpen(false); document.title = `${title} · DGSCI`; window.scrollTo(0, 0); }, [pathname, title]);
   useEffect(() => {
     if (!open) return;

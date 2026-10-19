@@ -39,3 +39,14 @@ O código de revisão fica em uma branch própria. A publicação privada em Sit
 A logo foi substituída pela fornecida pelo usuário. A relação do efetivo agora consulta uma cópia privada do pecúlio de outubro, com 71 pessoas. O Controle de Autorizações | Diárias usa uma cópia única de 80 registros SAT, 7 DGSCI e 2 linhas distintas de saldo. Esses dados não estão incluídos na branch pública. As telas novas mostram erros de disponibilidade em vez de dados simulados.
 
 O projeto DGSCI no Supabase armazena o efetivo e o controle de diárias, com autenticação real, confirmação de e-mail e políticas por setor. `.env.local` e os dados reais não são versionados no GitHub. Não há sincronização automática das diárias. Consulte SUPABASE_PREPARACAO.md para primeiro acesso e configuração.
+
+## Comando SAT e portarias
+
+- CMT e SUB SAT'S: 33 unidades, importadas exclusivamente da aba Comandante/Subcomandante SAT. Somente ordem, SAT, postos/graduações e nomes; funcional e ambos os contatos pessoais excluídos inclusive do banco. Consulta para contas habilitadas.
+- Controle de Portarias: 50 registros em dez anos (2017–2026), conforme o nome de cada aba, inclusive registros parciais. As abas são anos de organização e não inferem a data do documento. Cinco registros não tinham link; nenhum foi inventado. Os outros 45 links foram preservados.
+- Cópias únicas para o banco, sem sincronização posterior com as planilhas. Planilhas brutas e importações ficam fora do repositório público.
+- Portarias: acesso e escrita restritos ao setor Subdiretoria, incluindo o superadministrador já autorizado a todos os setores. Diretoria isolada e outros setores não acessam nem pela API. Edição usa versão do registro para evitar sobrescrever alterações concorrentes.
+- É possível adicionar ano, cadastrar e editar portaria e manter o link existente. Upload de anexos fica para etapa futura.
+- Removidos os itens laterais Mapa territorial e Vistoria (atendimento online). O mapa continua disponível dentro de Estabelecimentos.
+
+Fontes: https://docs.google.com/spreadsheets/d/1PvFYLL1eXRdwkBLezQY4jkmc_qFlNSSM8R48lVN9oJ8/edit e https://docs.google.com/spreadsheets/d/1m3dF21UVDryF3U-d0p1FyDuCzs2SOWkNxsK9EPrd8Mo/edit

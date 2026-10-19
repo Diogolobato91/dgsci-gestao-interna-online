@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 import LoginForm from "@/components/LoginForm";
 import MainLayout from "@/components/MainLayout";
-const Vistoria = lazy(() => import("@/pages/Vistoria"));
+const SatCommands = lazy(() => import('@/features/records/SatCommandsPage'));
 
 const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
 const DashboardGeral = lazy(() => import("@/pages/DashboardGeral"));
@@ -73,8 +73,9 @@ const AppRoutes = () => (
         <Route path="comunicados" element={<SupportLibrary />} />
         <Route path="favoritos" element={<SupportLibrary />} />
         <Route path="estabelecimentos" element={<EstablishmentsWorkspace />} />
-        <Route path="mapa" element={<EstablishmentsWorkspace />} />
-        <Route path="vistoria" element={<Vistoria />} />
+        <Route path="mapa" element={<Navigate to="/estabelecimentos" replace />} />
+        <Route path="cmt-sub-sats" element={<SatCommands />} />
+        <Route path="vistoria" element={<Navigate to="/dashboard" replace />} />
         <Route path="sat-regionais" element={<SATRegionais />} />
         <Route path="ajuda-vistoriador" element={<SupportLibrary />} />
         <Route path="modelos-padronizados" element={<SupportLibrary />} />

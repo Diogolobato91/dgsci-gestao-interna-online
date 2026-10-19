@@ -21,7 +21,7 @@ import { MenuConfig, MenuItem } from '@/types/navigation';
 
 const integratedItems: MenuItem[] = [
   { id: 'estabelecimentos', title: 'Estabelecimentos', icon: Building2, path: '/estabelecimentos' },
-  { id: 'mapa', title: 'Mapa territorial', icon: MapPin, path: '/mapa' },
+  { id: 'sat-command', title: "CMT e SUB SAT'S", icon: Users, path: '/cmt-sub-sats' },
   { id: 'comunicados', title: 'Comunicados', icon: MessageSquare, path: '/comunicados' },
 ];
 
@@ -69,12 +69,6 @@ const commonItemsComplete: MenuItem[] = [
     path: '/dashboard'
   },
   ...integratedItems,
-  {
-    id: 'vistoria',
-    title: 'Vistoria',
-    icon: MessageSquare,
-    path: '/vistoria'
-  },
   {
     id: 'sat-regionais',
     title: 'SAT\'s Regionais',
@@ -160,7 +154,8 @@ export const navigationConfig: MenuConfig = {
       id: 'controle-portarias',
       title: 'Controle de Portarias',
       icon: FileText,
-      path: '/controle-portarias'
+      path: '/controle-portarias',
+      section: 'Subdiretoria'
     },
     {
       id: 'comissao-tecnica',
