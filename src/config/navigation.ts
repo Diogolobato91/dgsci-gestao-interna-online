@@ -19,6 +19,12 @@ import {
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
+const integratedItems: MenuItem[] = [
+  { id: 'estabelecimentos', title: 'Estabelecimentos', icon: Building2, path: '/estabelecimentos' },
+  { id: 'mapa', title: 'Mapa territorial', icon: MapPin, path: '/mapa' },
+  { id: 'comunicados', title: 'Comunicados', icon: MessageSquare, path: '/comunicados' },
+];
+
 // Funcionalidades comuns (sem vistoria)
 const commonItemsWithoutVistoria: MenuItem[] = [
   {
@@ -27,6 +33,7 @@ const commonItemsWithoutVistoria: MenuItem[] = [
     icon: LayoutDashboard,
     path: '/dashboard'
   },
+  ...integratedItems,
   {
     id: 'sat-regionais',
     title: 'SAT\'s Regionais',
@@ -61,6 +68,7 @@ const commonItemsComplete: MenuItem[] = [
     icon: LayoutDashboard,
     path: '/dashboard'
   },
+  ...integratedItems,
   {
     id: 'vistoria',
     title: 'Vistoria',

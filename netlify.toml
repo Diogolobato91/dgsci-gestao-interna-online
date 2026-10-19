@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# This branch is reviewed on the existing owner-private Sites publication.
+# Do not produce a public Netlify preview from a push or pull request.
+[context.deploy-preview]
+  command = "node scripts/private-review-only.cjs"
+
+[context.branch-deploy]
+  command = "node scripts/private-review-only.cjs"
