@@ -10,7 +10,8 @@ export default function MainLayout() {
   const [open, setOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
-  const items = navigationConfig[user.profile];
+  const fullAccess = user.role === 'administrator' && user.allowedProfiles?.length === Object.keys(navigationConfig).length;
+  const items = fullAccess ? [...new Map(Object.values(navigationConfig).flat().map(item => [item.path, item])).values()] : navigationConfig[user.profile];
   const groups = [...new Set(items.map(item => item.section || 'Consulta compartilhada'))];
   const title = pathname === '/favoritos' ? 'Meus favoritos' : items.find(item => item.path === pathname)?.title || 'Portal DGSCI';
   const integrated = ['/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
@@ -27,7 +28,7 @@ export default function MainLayout() {
     {open && <button className="shell-backdrop" aria-label="Fechar navegação" onClick={() => { setOpen(false); menuButton.current?.focus(); }} />}
     <aside id="portal-sidebar" className={`shell-sidebar ${open ? 'is-open' : ''}`} aria-label="Navegação principal">
       <div className="shell-brand"><img src="/portal/assets/dgsci-logo.png" alt="" width="42" height="42" /><div><strong>DGSCI<span>.</span></strong><small>GESTÃO E APOIO OPERACIONAL</small></div><button ref={closeButton} className="shell-close" onClick={() => { setOpen(false); menuButton.current?.focus(); }} aria-label="Fechar menu"><X size={19} /></button></div>
-      <div className="shell-profile"><span>SETOR</span><strong>{user.profile}</strong></div>
+      <div className="shell-profile"><span>{fullAccess ? 'PERFIL DE ACESSO' : 'SETOR'}</span><strong>{fullAccess ? 'Superadministrador' : user.profile}</strong></div>
       <nav>{groups.map(group => <div className="shell-nav-group" key={group}><p>{group}</p>{items.filter(item => (item.section || 'Consulta compartilhada') === group).map(({ id, path, title, icon: Icon }) => <NavLink key={id} to={path} className={({ isActive }) => `shell-nav-item ${isActive ? 'active' : ''}`}><Icon size={18} /><span>{title}</span><ChevronRight size={13} /></NavLink>)}</div>)}
         <div className="shell-nav-group"><p>MINHA CONSULTA</p><NavLink to="/favoritos" className={({ isActive }) => `shell-nav-item ${isActive ? 'active' : ''}`}><span>Meus favoritos</span><ChevronRight size={13} /></NavLink></div>
       </nav>
