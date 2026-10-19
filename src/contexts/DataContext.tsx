@@ -111,6 +111,7 @@ const comunicadosIniciais: Comunicado[] = [
 // Gerar escalas automáticas para o mês atual
 const gerarEscalasDoMes = (servidores: Servidor[]): Escala[] => {
   const escalas: Escala[] = [];
+  if (servidores.length === 0) return escalas;
   const hoje = new Date();
   const inicioMes = startOfMonth(hoje);
   const fimMes = endOfMonth(hoje);
@@ -141,7 +142,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [servidores, setServidores] = useState<Servidor[]>([]);
   const { data: staffSnapshot } = usePrivateSnapshot<{ registros: { id: string; postoGraduacao: string; nome: string; dataNascimento: string }[] }>('efetivo');
   useEffect(() => {
-    if (staffSnapshot) setServidores(staffSnapshot.registros.map(person => ({
+    setServidores((staffSnapshot?.registros ?? []).map(person => ({
       id: person.id, patente: person.postoGraduacao, nome: person.nome,
       aniversario: person.dataNascimento?.split('/').reverse().join('-') || undefined,
     })));
