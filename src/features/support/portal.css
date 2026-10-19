@@ -1275,3 +1275,9 @@
 .record-edit{padding:8px;border:1px solid #ddd;border-radius:5px;background:white}
 .record-dialog{max-height:90dvh;overflow-y:auto;background:#fff;color:#25272c}
 .record-form{display:grid;gap:10px}.record-form label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}.record-form input,.record-form textarea,.record-form select{width:100%;padding:10px;border:1px solid #ccc;border-radius:5px;background:white;color:#25272c}.record-form [role=alert]{color:#a80d26}.record-actions{display:flex;justify-content:flex-end;gap:16px;margin-top:12px}.record-form .portal-primary{padding:12px;border-radius:6px;background:#c8102e;color:white}
+
+.command-table th.command-cmt,.command-table td.command-cmt{background:#fff0f2;color:#7f1327;border-left:1px solid #e5bbc3}
+.command-table th.command-sub,.command-table td.command-sub{background:#edf1f5;color:#26384a;border-left:1px solid #cbd4df}
+.command-table thead tr:first-child th.command-cmt{background:#a80d26;color:white;text-align:center}
+.command-table thead tr:first-child th.command-sub{background:#293744;color:white;text-align:center}
+.support-section-editor{padding:12px;border:1px solid #ddd;border-radius:6px;display:grid;gap:7px}.record-form .record-check input,.record-form input[type=checkbox]{width:auto;margin-right:8px}

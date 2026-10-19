@@ -2,7 +2,7 @@ begin;
 insert into private.login_allowlist values
 ('test-sub@example.invalid','Teste','reader',array['Subdiretoria'],true),
 ('test-dir@example.invalid','Teste','administrator',array['Diretoria'],true),
-('test-super@example.invalid','Teste','administrator',array['Diretoria','Subdiretoria','ADM','Vistoria','Análise','Multas'],true);
+('test-super@example.invalid','Teste','administrator',array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'],true);
 insert into auth.users(id,email,aud,role) values
 ('10000000-0000-4000-8000-000000000001','test-sub@example.invalid','authenticated','authenticated'),
 ('10000000-0000-4000-8000-000000000002','test-dir@example.invalid','authenticated','authenticated'),

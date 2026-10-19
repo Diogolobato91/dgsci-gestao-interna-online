@@ -52,12 +52,7 @@ const commonItemsWithoutVistoria: MenuItem[] = [
     icon: FileText,
     path: '/modelos-padronizados'
   },
-  {
-    id: 'modelos-auto-infracao',
-    title: 'Modelos de Auto de Infração',
-    icon: AlertTriangle,
-    path: '/modelos-auto-infracao'
-  }
+
 ];
 
 // Funcionalidades completas (com vistoria) - apenas para Vistoria, Subdiretoria e Diretoria
@@ -87,16 +82,11 @@ const commonItemsComplete: MenuItem[] = [
     icon: FileText,
     path: '/modelos-padronizados'
   },
-  {
-    id: 'modelos-auto-infracao',
-    title: 'Modelos de Auto de Infração',
-    icon: AlertTriangle,
-    path: '/modelos-auto-infracao'
-  }
+
 ];
 
 export const navigationConfig: MenuConfig = {
-  'Vistoria': [
+  'Vistoriador': [
     ...commonItemsComplete
   ],
   
@@ -126,7 +116,7 @@ export const navigationConfig: MenuConfig = {
     }
   ],
   
-  'ADM': [
+  'Secretaria': [
     ...commonItemsWithoutVistoria,
     {
       id: 'escala-mensal',

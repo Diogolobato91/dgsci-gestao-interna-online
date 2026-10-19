@@ -11,7 +11,7 @@ export function usePrivateSnapshot<T>(name: 'efetivo' | 'diarias') {
     setData(null); setError('');
     if (!user) return;
     if (!supabase) { setError('A conexão com o Supabase não está configurada.'); return; }
-    if (!user.allowedProfiles?.some(profile => ['Diretoria','Subdiretoria','ADM'].includes(profile))) { setError('Sua conta não tem acesso a este controle.'); return; }
+    if (!user.allowedProfiles?.some(profile => ['Diretoria','Subdiretoria','Secretaria'].includes(profile))) { setError('Sua conta não tem acesso a este controle.'); return; }
     supabase.rpc(name === 'efetivo' ? 'get_staff_snapshot' : 'get_diarias_snapshot')
       .then(({ data: result, error: problem }) => {
         if (!current) return;

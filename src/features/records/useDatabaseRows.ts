@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 
-export function useDatabaseRows<T>(table: 'sat_commands' | 'ordinance_years' | 'ordinances', columns: string, order: string, enabled = true) {
+export function useDatabaseRows<T>(table: 'sat_commands' | 'ordinance_years' | 'ordinances' | 'sat_regions' | 'support_documents', columns: string, order: string, enabled = true) {
   const { user } = useAuth();
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);

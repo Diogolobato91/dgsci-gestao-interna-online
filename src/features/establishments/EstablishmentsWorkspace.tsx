@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Building2, MapPinned, BarChart3, BookOpen, RefreshCw, Info } from 'lucide-react';
+import { Building2, MapPinned, BarChart3, RefreshCw, Info } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
-const views = [{ id: 'companies', title: 'Estabelecimentos', Icon: Building2 }, { id: 'map', title: 'Mapa territorial', Icon: MapPinned }, { id: 'overview', title: 'Indicadores', Icon: BarChart3 }, { id: 'catalog', title: 'Catálogo de ocupações', Icon: BookOpen }];
+const views = [{ id: 'companies', title: 'Estabelecimentos', Icon: Building2 }, { id: 'map', title: 'Mapa territorial', Icon: MapPinned }, { id: 'overview', title: 'Indicadores', Icon: BarChart3 }];
 export default function EstablishmentsWorkspace() {
   const location = useLocation();
   const iframe = useRef<HTMLIFrameElement>(null);

@@ -1,0 +1,31 @@
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { supabase } from '@/lib/supabase';
+import type { SupportContent, ContentType } from './catalog';
+import { TYPE_LABELS } from './content';
+export default function SupportEditor({item,initialType,onClose,onSaved}:{item:SupportContent|null;initialType:ContentType;onClose:()=>void;onSaved:()=>void}){
+ const [title,setTitle]=useState(item?.title??'');const [description,setDescription]=useState(item?.description??'');const [area,setArea]=useState(item?.area??'Geral');const [type,setType]=useState<ContentType>(item?.type??initialType);
+ const [sections,setSections]=useState(item?.sections??[{title:'Conteúdo',text:''}]);const [checklist,setChecklist]=useState(item?.checklist?.join('\n')??'');const [demo,setDemo]=useState(item?.isDemo??false);
+ const [attachments,setAttachments]=useState(item?.attachments??[]);const [files,setFiles]=useState<File[]>([]);const [busy,setBusy]=useState(false);const [error,setError]=useState('');
+ return <Dialog open onOpenChange={open=>{if(!open&&!busy)onClose();}}><DialogContent className="record-dialog max-w-2xl"><DialogHeader><DialogTitle>{item?'Alterar conteúdo':'Adicionar conteúdo'}</DialogTitle><DialogDescription>Cadastro para consulta dos setores da DGSCI.</DialogDescription></DialogHeader><form className="record-form" onSubmit={async event=>{
+ event.preventDefault();if(!supabase||busy)return;setBusy(true);setError('');const uploaded:string[]=[];
+ try{
+ if(!title.trim())throw new Error('Informe o título.');
+ if(files.some(file=>file.size>20*1024*1024))throw new Error('Cada arquivo deve ter até 20 MB.');
+ const id=item?.id??crypto.randomUUID();const next=[...attachments];
+ for(const file of files){const path=id+'/'+crypto.randomUUID()+'-'+file.name.normalize('NFD').replace(/[^a-zA-Z0-9._-]/g,'_');const {error:problem}=await supabase.storage.from('dgsci-support').upload(path,file,{upsert:false,contentType:file.type||undefined});if(problem)throw new Error('Não foi possível anexar '+file.name+'. Confira o formato e a permissão.');uploaded.push(path);next.push({path,name:file.name});}
+ const values={type,title:title.trim(),description:description.trim(),area:area.trim()||'Geral',sections,checklist:checklist.split('\n').map(line=>line.trim()).filter(Boolean),attachments:next,is_demo:demo,date:[new Date().getFullYear(), String(new Date().getMonth()+1).padStart(2,'0'), String(new Date().getDate()).padStart(2,'0')].join('-'),format:next.length?'ARQUIVO':'LEITURA'};
+ const response=item?await supabase.from('support_documents').update(values).eq('id',id).eq('revision',item.revision).select('id'):await supabase.from('support_documents').insert({id,...values}).select('id');
+ if(response.error)throw new Error('Não foi possível salvar o conteúdo. Confira a conexão e sua permissão.');if(!response.data?.length)throw new Error('O conteúdo foi alterado durante a edição. Atualize a lista e tente novamente.');onSaved();onClose();
+ }catch(reason){if(uploaded.length)await supabase.storage.from('dgsci-support').remove(uploaded);setError(reason instanceof Error?reason.message:'Não foi possível salvar.');}finally{setBusy(false);}
+ }}>
+ <label htmlFor="support-type">Tipo</label><select id="support-type" value={type} onChange={event=>setType(event.target.value as ContentType)}>{Object.entries(TYPE_LABELS).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select>
+ <label htmlFor="support-title">Título</label><input id="support-title" required value={title} onChange={event=>setTitle(event.target.value)}/><label htmlFor="support-area">Área</label><input id="support-area" value={area} onChange={event=>setArea(event.target.value)}/><label htmlFor="support-description">Resumo</label><textarea id="support-description" rows={2} value={description} onChange={event=>setDescription(event.target.value)}/>
+ {sections.map((section,index)=><fieldset className="support-section-editor" key={index}><legend>Seção {index+1}</legend><label htmlFor={'section-title-'+index}>Título da seção</label><input id={'section-title-'+index} value={section.title} onChange={event=>setSections(sections.map((row,i)=>i===index?{...row,title:event.target.value}:row))}/><label htmlFor={'section-text-'+index}>Texto</label><textarea id={'section-text-'+index} rows={4} value={section.text??''} onChange={event=>setSections(sections.map((row,i)=>i===index?{...row,text:event.target.value}:row))}/><label htmlFor={'section-items-'+index}>Itens (um por linha)</label><textarea id={'section-items-'+index} rows={3} value={section.items?.join('\n')??''} onChange={event=>setSections(sections.map((row,i)=>i===index?{...row,items:event.target.value.split('\n')}:row))}/><button type="button" onClick={()=>setSections(sections.filter((_,i)=>i!==index))}>Remover seção</button></fieldset>)}
+ <button type="button" className="record-edit" onClick={()=>setSections([...sections,{title:'',text:''}])}>Adicionar seção</button>
+ <label htmlFor="support-checklist">Checklist (um item por linha, opcional)</label><textarea id="support-checklist" rows={3} value={checklist} onChange={event=>setChecklist(event.target.value)}/>
+ <label htmlFor="support-files">Anexos</label><input id="support-files" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt" onChange={event=>setFiles(Array.from(event.target.files??[]))}/><p>PDF, Word, Excel, imagens e texto. Até 20 MB por arquivo.</p>
+ {attachments.map(file=><div key={file.path}>{file.name} <button type="button" onClick={()=>setAttachments(attachments.filter(row=>row.path!==file.path))}>Retirar do conteúdo</button></div>)}{files.map((file,i)=><p key={i}>Novo anexo: {file.name}</p>)}
+ <label className="record-check"><input type="checkbox" checked={demo} onChange={event=>setDemo(event.target.checked)}/> Conteúdo demonstrativo, sem validade institucional</label>
+ {error&&<p role="alert">{error}</p>}<div className="record-actions"><button type="button" disabled={busy} onClick={onClose}>Cancelar</button><button className="portal-primary" disabled={busy}>{busy?'Salvando…':'Salvar conteúdo'}</button></div></form></DialogContent></Dialog>;
+}

@@ -9,7 +9,7 @@ export const useAuth = () => {
   if (!context) throw new Error('AuthProvider ausente.');
   return context;
 };
-const profiles: UserProfile[] = ['Diretoria', 'Subdiretoria', 'ADM', 'Vistoria', 'Análise', 'Multas'];
+const profiles: UserProfile[] = ['Diretoria', 'Subdiretoria', 'Secretaria', 'Vistoriador', 'Análise', 'Multas'];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

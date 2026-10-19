@@ -50,3 +50,5 @@ O projeto DGSCI no Supabase armazena o efetivo e o controle de diárias, com aut
 - Removidos os itens laterais Mapa territorial e Vistoria (atendimento online). O mapa continua disponível dentro de Estabelecimentos.
 
 Fontes: https://docs.google.com/spreadsheets/d/1PvFYLL1eXRdwkBLezQY4jkmc_qFlNSSM8R48lVN9oJ8/edit e https://docs.google.com/spreadsheets/d/1m3dF21UVDryF3U-d0p1FyDuCzs2SOWkNxsK9EPrd8Mo/edit
+
+Atualização de perfis: ADM → Secretaria; Vistoria → Vistoriador. Modelos de Auto de Infração ficam dentro de Modelos Padronizados; catálogo de ocupações removido da consulta de Estabelecimentos. A biblioteca e as SATs regionais agora persistem no Supabase, com exemplos anteriores identificados. Consulte PERFIS_E_PERMISSOES.md.

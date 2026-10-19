@@ -1,8 +1,8 @@
 export type UserProfile = 
-  | 'Vistoria'
+  | 'Vistoriador'
   | 'Análise'
   | 'Multas'
-  | 'ADM'
+  | 'Secretaria'
   | 'Subdiretoria'
   | 'Diretoria';
 

@@ -2,6 +2,7 @@ export type ContentType = 'model' | 'guide' | 'notice';
 export interface SupportContent {
   id: string; type: ContentType; area: string; date: string; format: string;
   title: string; description: string; tags: string[]; version?: string;
+  attachments?: {path:string;name:string}[]; isDemo?: boolean; revision?: number;
   file?: string; featured?: boolean; checklist?: string[]; related: string[];
   sections: { title: string; text?: string; items?: string[] }[];
 }

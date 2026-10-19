@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.documentElement.setAttribute('data-theme', 'light');
   const app = window.app;
   if (!app) return;
-  const views = new Set(['companies', 'map', 'overview', 'analytics', 'catalog']);
+  const views = new Set(['companies', 'map', 'overview', 'analytics']);
   const sendStatus = () => {
     const count = app.store.companies.length;
     const date = app.store.lastSync ? new Date(app.store.lastSync).toLocaleString('pt-BR') : null;

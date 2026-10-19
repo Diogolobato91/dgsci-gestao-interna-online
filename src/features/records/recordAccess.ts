@@ -7,3 +7,6 @@ export function safeFileUrl(value: string) {
   try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : null; }
   catch { return null; }
 }
+
+export const canManageSat = (user: User | null) => !!user?.allowedProfiles?.some(sector => ['Diretoria', 'Subdiretoria'].includes(sector));
+export const canManageSupport = (user: User | null) => !!user?.allowedProfiles?.some(sector => ['Secretaria', 'Diretoria', 'Subdiretoria'].includes(sector));
