@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets and private institutional imports
+.env
+.env.*
+!.env.example
+/public/private-data/
+/private-imports/
+/upload/

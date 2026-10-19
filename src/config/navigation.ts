@@ -170,9 +170,9 @@ export const navigationConfig: MenuConfig = {
     },
     {
       id: 'autorizacoes',
-      title: 'Autorizações',
+      title: 'Controle de Autorizações | Diárias',
       icon: CheckCircle,
-      path: '/autorizacoes'
+      path: '/controle-autorizacoes-diarias'
     },
     {
       id: 'relacao-efetivo',
@@ -232,19 +232,12 @@ export const navigationConfig: MenuConfig = {
     },
     {
       id: 'dir-autorizacoes',
-      title: 'Autorizações',
+      title: 'Controle de Autorizações | Diárias',
       icon: CheckCircle,
-      path: '/autorizacoes',
+      path: '/controle-autorizacoes-diarias',
       section: 'Subdiretoria'
     },
     // Seção Diretoria
-    {
-      id: 'dashboard-geral',
-      title: 'Dashboard Geral',
-      icon: TrendingUp,
-      path: '/dashboard-geral',
-      section: 'Diretoria'
-    },
     {
       id: 'relacao-efetivo',
       title: 'Relação de Efetivo',

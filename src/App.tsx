@@ -87,6 +87,7 @@ const AppRoutes = () => (
         <Route path="comissao-tecnica" element={<ComissaoTecnica />} />
         <Route path="autorizacoes" element={<Autorizacoes />} />
         <Route path="dashboard-geral" element={<DashboardGeral />} />
+        <Route path="controle-autorizacoes-diarias" element={<Autorizacoes />} />
         <Route path="relacao-efetivo" element={<RelacaoEfetivo />} />
       </Route>
 

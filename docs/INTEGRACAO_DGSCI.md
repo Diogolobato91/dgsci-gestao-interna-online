@@ -33,3 +33,9 @@ Nenhuma credencial ou consulta ao SISGAT foi adicionada. Não há gravação nas
 O código de revisão fica em uma branch própria. A publicação privada em Sites usa uma cópia da mesma implementação e não configura automaticamente o deploy do GitHub para Netlify. A branch principal e o site público existente permanecem na versão anterior até revisão e integração das alterações.
 
 `netlify.toml` interrompe os builds de branch/deploy-preview para que a revisão desta integração aconteça apenas no endereço privado. A configuração de produção só terá efeito se a alteração for revisada e incorporada à branch principal.
+
+## Atualização de 19/10/2026
+
+A logo foi substituída pela fornecida pelo usuário. A relação do efetivo agora consulta uma cópia privada do pecúlio de outubro, com 71 pessoas. O Controle de Autorizações | Diárias usa uma cópia única de 80 registros SAT, 7 DGSCI e 2 linhas distintas de saldo. Esses dados não estão incluídos na branch pública. As telas novas mostram erros de disponibilidade em vez de dados simulados.
+
+A migração para o Supabase ainda depende de definir o projeto de destino. Nenhum projeto existente da EFM ou WR foi utilizado. `.env.local` e os dados reais não são versionados no GitHub. O ambiente privado mantém as cópias importadas para revisão, sem sincronização automática das diárias.

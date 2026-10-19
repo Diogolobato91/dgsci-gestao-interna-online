@@ -13,7 +13,7 @@ export default function MainLayout() {
   const items = navigationConfig[user.profile];
   const groups = [...new Set(items.map(item => item.section || 'Consulta compartilhada'))];
   const title = pathname === '/favoritos' ? 'Meus favoritos' : items.find(item => item.path === pathname)?.title || 'Portal DGSCI';
-  const integrated = ['/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa'].includes(pathname);
+  const integrated = ['/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
   useEffect(() => { setOpen(false); document.title = `${title} · DGSCI`; window.scrollTo(0, 0); }, [pathname, title]);
   useEffect(() => {
     if (!open) return;
@@ -26,7 +26,7 @@ export default function MainLayout() {
     <a className="portal-skip" href="#workspace-main">Pular para o conteúdo</a>
     {open && <button className="shell-backdrop" aria-label="Fechar navegação" onClick={() => { setOpen(false); menuButton.current?.focus(); }} />}
     <aside id="portal-sidebar" className={`shell-sidebar ${open ? 'is-open' : ''}`} aria-label="Navegação principal">
-      <div className="shell-brand"><img src="/portal/assets/mark.svg" alt="" width="42" height="42" /><div><strong>DGSCI<span>.</span></strong><small>GESTÃO E APOIO OPERACIONAL</small></div><button ref={closeButton} className="shell-close" onClick={() => { setOpen(false); menuButton.current?.focus(); }} aria-label="Fechar menu"><X size={19} /></button></div>
+      <div className="shell-brand"><img src="/portal/assets/dgsci-logo.png" alt="" width="42" height="42" /><div><strong>DGSCI<span>.</span></strong><small>GESTÃO E APOIO OPERACIONAL</small></div><button ref={closeButton} className="shell-close" onClick={() => { setOpen(false); menuButton.current?.focus(); }} aria-label="Fechar menu"><X size={19} /></button></div>
       <div className="shell-profile"><span>PRÉVIA POR SETOR</span><strong>{user.profile}</strong></div>
       <nav>{groups.map(group => <div className="shell-nav-group" key={group}><p>{group}</p>{items.filter(item => (item.section || 'Consulta compartilhada') === group).map(({ id, path, title, icon: Icon }) => <NavLink key={id} to={path} className={({ isActive }) => `shell-nav-item ${isActive ? 'active' : ''}`}><Icon size={18} /><span>{title}</span><ChevronRight size={13} /></NavLink>)}</div>)}
         <div className="shell-nav-group"><p>MINHA CONSULTA</p><NavLink to="/favoritos" className={({ isActive }) => `shell-nav-item ${isActive ? 'active' : ''}`}><span>Meus favoritos</span><ChevronRight size={13} /></NavLink></div>
