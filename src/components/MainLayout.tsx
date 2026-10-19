@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, LogOut, LockKeyhole, ChevronRight } from 'lucide-react';
+import { Menu, X, LogOut, LockKeyhole, ChevronRight, UserRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { navigationConfig } from '@/config/navigation';
 import { isFullAdministrator } from '@/features/records/recordAccess';
@@ -20,7 +20,15 @@ export default function MainLayout() {
   useEffect(() => {
     if (!open) return;
     closeButton.current?.focus();
-    const listener = (event: KeyboardEvent) => { if (event.key === 'Escape') { setOpen(false); menuButton.current?.focus(); } };
+    const listener = (event: KeyboardEvent) => {
+      if(event.key==='Escape'){setOpen(false);menuButton.current?.focus();}
+      if(event.key==='Tab'){
+        const elements=Array.from(document.querySelectorAll<HTMLElement>('#portal-sidebar a, #portal-sidebar button:not([disabled])'));
+        const first=elements[0],last=elements[elements.length-1];
+        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+        else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+      }
+    };
     document.addEventListener('keydown', listener);
     return () => document.removeEventListener('keydown', listener);
   }, [open]);
@@ -36,7 +44,7 @@ export default function MainLayout() {
       <div className="shell-bottom"><LockKeyhole size={15} /><p>DGSCI / CBMPA<br /><span>Portal de apoio à rotina operacional</span></p></div>
     </aside>
     <div className="shell-content">
-      <header className="shell-topbar"><div><button ref={menuButton} className="shell-menu" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open} aria-controls="portal-sidebar"><Menu size={21} /></button><span>Portal DGSCI</span><i>/</i><strong>{title}</strong></div><div><span className="shell-stage"><span />Em desenvolvimento</span><button onClick={logout} className="shell-exit"><LogOut size={15} /><span>Sair</span></button></div></header>
+      <header className="shell-topbar"><div><button ref={menuButton} className="shell-menu" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open} aria-controls="portal-sidebar"><Menu size={21} /></button><span>Portal DGSCI</span><i>/</i><strong>{title}</strong></div><div><span className="shell-account"><UserRound size={16}/><span>{user.matricula}</span></span><span className="shell-stage"><span />Em desenvolvimento</span><button onClick={logout} className="shell-exit"><LogOut size={15} /><span>Sair</span></button></div></header>
       <main id="workspace-main" className="shell-main" tabIndex={-1}>{!integrated && <div className="portal-note"><p><strong>Rotina demonstrativa do projeto anterior.</strong> Dados e alterações desta tela são exemplos locais. A persistência compartilhada será implementada na próxima etapa.</p></div>}<Suspense fallback={<p className="workspace-status" role="status">Carregando módulo…</p>}><Outlet /></Suspense></main>
     </div>
   </div>;

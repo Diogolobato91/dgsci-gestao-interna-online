@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Building2, MapPinned, BarChart3, RefreshCw, Info } from 'lucide-react';
+import { PageHeader, ActionButton } from '@/components/workspace/Workspace';
 import { useLocation } from 'react-router-dom';
 
 const views = [{ id: 'companies', title: 'Estabelecimentos', Icon: Building2 }, { id: 'map', title: 'Mapa territorial', Icon: MapPinned }, { id: 'overview', title: 'Indicadores', Icon: BarChart3 }];
@@ -22,11 +23,10 @@ export default function EstablishmentsWorkspace() {
   useEffect(() => {
     if (ready) iframe.current?.contentWindow?.postMessage({ type: 'dgsci:view', view }, window.location.origin);
   }, [view, ready]);
-  return <section className="establishments-workspace">
-    <div className="portal-section-heading"><div><p className="portal-eyebrow">ARQUIVO DGSCI · BASE COMPARTILHADA</p><h1>Estabelecimentos<span>.</span></h1><p>Informações das planilhas e consulta territorial reunidas.</p></div></div>
-    <div className="source-note"><Info size={17} /><p><strong>Consulta às planilhas.</strong> Atualize os cadastros na origem. Esta versão não grava alterações nos estabelecimentos e não consulta o SISGAT.</p></div>
-    <div className="workspace-toolbar"><div role="group" aria-label="Visualização dos estabelecimentos">{views.map(({ id, title, Icon }) => <button key={id} aria-pressed={view === id} className={view === id ? 'active' : ''} onClick={() => setView(id)}><Icon size={16} />{title}</button>)}</div><button disabled={!ready} onClick={() => iframe.current?.contentWindow?.postMessage({ type: 'dgsci:sync' }, window.location.origin)}><RefreshCw size={15} />Atualizar</button></div>
-    <p className="workspace-status" role="status" aria-live="polite">{status}</p>
+  return <section className="establishments-workspace workspace-page">
+    <PageHeader eyebrow="Arquivo DGSCI" title="Estabelecimentos" description="Consulta de cadastros, localização e indicadores dos estabelecimentos." icon={Building2} actions={<ActionButton disabled={!ready} onClick={()=>iframe.current?.contentWindow?.postMessage({type:'dgsci:sync'},window.location.origin)}><RefreshCw size={16}/>Atualizar cadastros</ActionButton>}/>
+    <div className="establishments-tabs"><div className="workspace-segments" role="group" aria-label="Visualização dos estabelecimentos">{views.map(({id,title,Icon})=><button key={id} aria-pressed={view===id} onClick={()=>setView(id)}><Icon size={16}/>{title}</button>)}</div><p role="status" aria-live="polite">{status}</p></div>
     <iframe ref={iframe} title="Consulta de estabelecimentos e mapa territorial DGSCI" src="/arquivo/index.html?embedded=1" className="archive-frame" allow="geolocation 'self'" referrerPolicy="strict-origin-when-cross-origin" />
+    <p className="workspace-footnote">Consulta às planilhas. Alterações cadastrais são realizadas na origem; não há consulta direta ao SISGAT.</p>
   </section>;
 }

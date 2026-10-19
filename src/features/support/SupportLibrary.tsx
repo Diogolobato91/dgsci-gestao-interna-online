@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, Bookmark, Building2, Check, Compass, FileText, Info, Megaphone, Search, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Bookmark, Building2, Check, Compass, FileText, Info, Megaphone, Search, X, Plus, Pencil, BookOpen, RefreshCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { TYPE_LABELS } from './content';
@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { canManageSupport } from '@/features/records/recordAccess';
 import { useDatabaseRows } from '@/features/records/useDatabaseRows';
 import SupportEditor from './SupportEditor';
+import { PageHeader, ActionButton, SearchField } from '@/components/workspace/Workspace';
 import { matchesContent, readLocal, saveLocal, SupportContent } from './catalog';
 
 const icons = { model: FileText, guide: Compass, notice: Megaphone };
@@ -57,49 +58,32 @@ export default function SupportLibrary() {
     setChecklists(next);
     if (!saveLocal('checklists', next)) toast({ title: 'Progresso mantido nesta sessão', description: 'O navegador não permitiu salvar o checklist.' });
   }
-  const clear = () => { setQuery(''); setType('all'); setArea('all'); };
+  const clear = () => { setQuery(''); setType(initialType); setArea('all'); };
   const checked = selected && Array.isArray(checklists[selected.id]) ? checklists[selected.id].filter(i => Number.isInteger(i) && i >= 0 && i < (selected.checklist?.length || 0)) : [];
   const heading = favoritesOnly ? 'Meus favoritos' : type === 'model' ? 'Modelos padronizados' : type === 'guide' ? 'Ajuda ao vistoriador' : type === 'notice' ? 'Comunicados' : 'Biblioteca de apoio';
 
-  return <div className="portal-page">
-    {pathname === '/dashboard' && <>
-      <section className="portal-hero">
-        <div className="hero-grid" aria-hidden="true" />
-        <p className="portal-eyebrow"><span /> BASE DE APOIO OPERACIONAL <small>DGSCI / 01</small></p>
-        <h1>Gestão e apoio<br /><em>operacional.</em></h1>
-        <p>Consulta de documentos, orientações e registros administrativos da DGSCI / CBMPA.</p>
-        <form className="portal-search" role="search" onSubmit={e => { e.preventDefault(); document.getElementById('biblioteca')?.scrollIntoView({ behavior: 'smooth' }); }}>
-          <Search size={21} /><label className="sr-only" htmlFor="portal-query">Buscar na biblioteca</label>
-          <input id="portal-query" type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Busque um modelo, orientação ou assunto..." />
-          <button type="submit">Buscar <ArrowRight size={16} /></button>
-        </form>
-        <div className="portal-quick"><span>Busca rápida</span>{['Relatório', 'Checklist', 'Comunicado'].map(term => <button key={term} onClick={() => setQuery(term)}>{term} <ArrowUpRight size={12} /></button>)}</div>
-      </section>
-      <div className="portal-shortcuts">
-        <Link to="/estabelecimentos"><Building2 /><div><strong>Estabelecimentos</strong><span>Consulta às planilhas do DGSCI</span></div><ArrowUpRight size={17} /></Link>
-        <Link to="/cmt-sub-sats"><Building2 /><div><strong>CMT e SUB SAT'S</strong><span>Relação do comando das unidades</span></div><ArrowUpRight size={17} /></Link>
-      </div>
-    </>}
-    <div className="portal-note"><Info size={16} /><p><strong>Consulta institucional.</strong> Exemplos estão identificados como demonstração e não têm validade institucional. Favoritos e checklists ficam neste navegador.</p></div>
-    {error && <div role="alert"><p>{error}</p><button onClick={reload}>Tentar novamente</button></div>}
-    {loading && <p role="status">Carregando conteúdos…</p>}
-    {canEdit && <div className="workspace-toolbar"><button onClick={()=>setEditor({item:null})}>Adicionar {type==='notice'?'comunicado':type==='guide'?'orientação':type==='model'?'modelo':'conteúdo'}</button></div>}
-    {type==='model' && <div className="workspace-toolbar"><button onClick={()=>setQuery('')}>Todos os modelos</button><button onClick={()=>setQuery('infração')}>Autos de infração</button></div>}
+  return <div className="portal-page workspace-page">
+    <PageHeader eyebrow="Gestão e apoio operacional" title={pathname==='/dashboard'?'Painel principal':heading} description={initialType==='notice'?'Informações e atualizações para os setores da DGSCI.':initialType==='guide'?'Orientações e documentos para apoiar a rotina de vistoria.':initialType==='model'?'Documentos padronizados e modelos de auto de infração.':'Documentos, orientações e consultas internas da DGSCI / CBMPA.'} icon={initialType==='notice'?Megaphone:initialType==='guide'?Compass:BookOpen} actions={<><ActionButton disabled={loading} onClick={reload}><RefreshCw size={16}/>Atualizar</ActionButton>{canEdit&&<ActionButton variant="primary" onClick={()=>setEditor({item:null})}><Plus size={17}/>{initialType==='notice'?'Novo comunicado':initialType==='guide'?'Nova orientação':initialType==='model'?'Novo modelo':'Adicionar conteúdo'}</ActionButton>}</>}/>
+    {pathname==='/dashboard'&&<div className="overview-access"><Link to="/estabelecimentos"><span className="overview-access-icon"><Building2 size={23}/></span><div><strong>Estabelecimentos</strong><p>Cadastros, mapa e indicadores</p></div><ArrowUpRight size={18}/></Link><Link to="/cmt-sub-sats"><span className="overview-access-icon"><Compass size={23}/></span><div><strong>Comando das SATs</strong><p>Comandantes e subcomandantes</p></div><ArrowUpRight size={18}/></Link></div>}
+    {error&&<div className="workspace-feedback is-error" role="alert">{error}</div>}
+    <div className="library-workspace">
     <section id="biblioteca" className="portal-library">
-      <div className="portal-section-heading"><div><p className="portal-eyebrow">TUDO EM UM SÓ LUGAR</p><h2>{heading}<span>.</span></h2><p>Encontre o conteúdo e siga com o seu trabalho.</p></div><div className="portal-total"><strong>{results.length}</strong><span>conteúdos<br />para consulta</span></div></div>
-      {pathname !== '/dashboard' && <div className="portal-search light"><Search size={19} /><label className="sr-only" htmlFor="library-query">Buscar conteúdo</label><input id="library-query" type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Pesquisar na biblioteca..." /></div>}
-      <div className="portal-filters"><div role="group" aria-label="Tipo de conteúdo">{[['all', 'Todos'], ['model', 'Modelos'], ['guide', 'Ajuda rápida'], ['notice', 'Comunicados']].map(([value, label]) => <button key={value} aria-pressed={type === value} className={type === value ? 'active' : ''} onClick={() => setType(value)}>{label}<span>{content.filter(item => matchesContent(item, query, value, area) && (!favoritesOnly || favorites.includes(item.id))).length}</span></button>)}</div>
+      <div className="data-panel-heading"><h2>{pathname==='/dashboard'?'Biblioteca de apoio':favoritesOnly?'Conteúdos salvos':'Acervo para consulta'}</h2><span className="workspace-count">{results.length}</span></div>
+      <div className="library-search-row"><SearchField id="library-query" value={query} onChange={setQuery} placeholder="Pesquisar por título, conteúdo ou assunto…"/>{type==='model'&&<div className="workspace-segments" role="group" aria-label="Categoria dos modelos"><button aria-pressed={!query} onClick={()=>setQuery('')}>Todos os modelos</button><button aria-pressed={query==='infração'} onClick={()=>setQuery('infração')}>Autos de infração</button></div>}</div>
+      <div className="portal-filters"><div role="group" aria-label="Tipo de conteúdo">{(initialType==='all'?[['all', 'Todos'], ['model', 'Modelos'], ['guide', 'Ajuda rápida'], ['notice', 'Comunicados']]:[[initialType,initialType==='model'?'Modelos':initialType==='guide'?'Ajuda rápida':'Comunicados']]).map(([value, label]) => <button key={value} aria-pressed={type === value} className={type === value ? 'active' : ''} onClick={() => setType(value)}>{label}<span>{content.filter(item => matchesContent(item, query, value, area) && (!favoritesOnly || favorites.includes(item.id))).length}</span></button>)}</div>
         <label><span className="sr-only">Filtrar por área</span><select value={area} onChange={e => setArea(e.target.value)}><option value="all">Todas as áreas</option>{[...new Set(content.map(item => item.area))].map(value => <option key={value}>{value}</option>)}</select></label>
       </div>
       <div className="portal-results"><span role="status" aria-live="polite">{results.length} conteúdo(s) disponível(is){query && ` para “${query}”`}</span><label>Ordenar por <select value={sort} onChange={e => setSort(e.target.value)}><option value="recent">Mais recentes</option><option value="alpha">Título A–Z</option></select></label></div>
+      {loading&&<p className="workspace-load" role="status">Carregando conteúdos…</p>}
       <div className="portal-cards">{results.map(item => { const Icon = icons[item.type]; return <article className="portal-card" key={item.id}>
         <div className="portal-card-top"><span><Icon size={14} />{TYPE_LABELS[item.type]}</span><button aria-label={`${favorites.includes(item.id) ? 'Remover dos' : 'Salvar nos'} favoritos: ${item.title}`} aria-pressed={favorites.includes(item.id)} onClick={() => toggleFavorite(item.id)}><Bookmark size={18} fill={favorites.includes(item.id) ? 'currentColor' : 'none'} /></button></div>
         <button className="portal-card-title" onClick={() => setSelected(item)}><h3>{item.title}</h3></button><p>{item.description}</p><div className="portal-card-tags"><span>{item.area}</span><span>{item.isDemo ? 'Demonstração' : 'Cadastrado pelo setor'}</span></div>
-        <footer>{canEdit&&<button onClick={()=>setEditor({item})}>Editar</button>}<span>{new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(item.date + 'T12:00:00Z'))} · {item.format}</span><button onClick={() => setSelected(item)}>Consultar <ArrowRight size={14} /></button></footer>
+        <footer><span>{new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(new Date(item.date+'T12:00:00Z'))} · {item.format}</span><div>{canEdit&&<ActionButton variant="ghost" onClick={()=>setEditor({item})} aria-label={'Editar '+item.title} title="Editar conteúdo"><Pencil size={16}/></ActionButton>}<ActionButton onClick={()=>setSelected(item)}>Consultar<ArrowRight size={14}/></ActionButton></div></footer>
       </article>; })}</div>
-      {results.length === 0 && <div className="portal-empty"><Search size={30} /><h3>{favoritesOnly && !favorites.length ? 'Sua consulta, do seu jeito' : 'Nenhum conteúdo encontrado'}</h3><p>{favoritesOnly && !favorites.length ? 'Marque os conteúdos que deseja encontrar aqui.' : 'Tente outro termo ou remova os filtros.'}</p><button onClick={clear}>Limpar busca e filtros</button>{favoritesOnly && <Link to="/dashboard">Explorar biblioteca <ArrowRight size={14} /></Link>}</div>}
+      {!loading && !error && results.length === 0 && <div className="portal-empty"><Search size={30} /><h3>{favoritesOnly && !favorites.length ? 'Sua consulta, do seu jeito' : 'Nenhum conteúdo encontrado'}</h3><p>{favoritesOnly && !favorites.length ? 'Marque os conteúdos que deseja encontrar aqui.' : 'Tente outro termo ou remova os filtros.'}</p><button onClick={clear}>Limpar busca e filtros</button>{favoritesOnly && <Link to="/dashboard">Explorar biblioteca <ArrowRight size={14} /></Link>}</div>}
     </section>
-    <footer className="portal-footer"><strong>DGSCI<span>.</span></strong><span>Portal de apoio à rotina operacional</span><small>DGSCI / CBMPA</small></footer>
+    </div>
+    <footer className="portal-footer"><strong>DGSCI<span>.</span></strong><span>Portal de apoio à rotina operacional</span><small>Conteúdos marcados como demonstração aguardam validação institucional.</small></footer>
     <Dialog open={!!selected} onOpenChange={open => { if (!open) setSelected(null); }}><DialogContent className="portal-dialog max-w-2xl max-h-[88dvh] overflow-y-auto">
       {selected && <><DialogHeader><p className="portal-eyebrow">{TYPE_LABELS[selected.type]} · {selected.area}</p><DialogTitle className="text-2xl">{selected.title}</DialogTitle><DialogDescription>{selected.description}</DialogDescription></DialogHeader>
         {selected.isDemo&&<div className="portal-note"><Info size={16} /><p><strong>Conteúdo demonstrativo — sem validade institucional.</strong> Consulte os documentos oficiais antes de usar.</p></div>}

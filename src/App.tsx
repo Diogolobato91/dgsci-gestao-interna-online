@@ -24,6 +24,7 @@ import SupportLibrary from '@/features/support/SupportLibrary';
 import EstablishmentsWorkspace from '@/features/establishments/EstablishmentsWorkspace';
 import PendingModule from '@/features/support/PendingModule';
 import '@/features/support/portal.css';
+import '@/features/support/workspace.css';
 
 const queryClient = new QueryClient();
 
