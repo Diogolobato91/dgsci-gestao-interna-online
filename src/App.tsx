@@ -29,17 +29,19 @@ const queryClient = new QueryClient();
 
 // Componente para proteger rotas autenticadas
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+  if (loading) return <p className="session-loading" role="status">Conferindo sessão…</p>;
   return user ? <>{children}</> : <Navigate to="/login" state={{ from: location.pathname }} replace />;
 };
 
 // Componente para redirecionar usuários logados
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
   const from = location.state?.from;
   const destination = typeof from === "string" && from.startsWith("/") && !from.startsWith("//") && from !== "/login" ? from : "/dashboard";
+  if (loading) return <p className="session-loading" role="status">Conferindo sessão…</p>;
   return !user ? <>{children}</> : <Navigate to={destination} replace />;
 };
 

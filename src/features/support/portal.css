@@ -1,5 +1,5 @@
 .dgsci-shell {
-  --orange:#ec762f;
+  --orange:#c8102e;
   --ink:#25272c;
   --line:#e5e5df;
   background:#fafaf8;
@@ -11,7 +11,7 @@
   position:fixed;
   top:-100px;
   left:20px;
-  background:#ec762f;
+  background:#c8102e;
   padding:12px;
   z-index:100
 }
@@ -42,7 +42,7 @@
   color:#fff
 }
 .shell-brand strong span,.portal-section-heading h2>span,.portal-section-heading h1>span,.portal-footer strong span {
-  color:var(--orange,#ec762f)
+  color:var(--orange,#c8102e)
 }
 .shell-brand small {
   display:block;
@@ -105,8 +105,8 @@
   color:#fff
 }
 .shell-nav-item.active {
-  color:#f58c4b;
-  background:#332920
+  color:#f54b62;
+  background:#332023
 }
 .shell-nav-item.active>svg:last-child {
   opacity:1
@@ -172,8 +172,8 @@
   display:flex;
   align-items:center;
   gap:7px;
-  color:#9d6038;
-  border:1px solid #eedbcf;
+  color:#9d3845;
+  border:1px solid #eecfd3;
   padding:7px 10px;
   border-radius:5px;
   white-space:nowrap;
@@ -183,7 +183,7 @@
   width:5px;
   height:5px;
   border-radius:50%;
-  background:#ec762f
+  background:#c8102e
 }
 .shell-exit {
   display:flex;
@@ -233,12 +233,12 @@
   margin:0 0 13px
 }
 .portal-hero .portal-eyebrow {
-  color:#f3c19c
+  color:#f39ca8
 }
 .portal-eyebrow>span {
   width:19px;
   height:2px;
-  background:#ec762f
+  background:#c8102e
 }
 .portal-eyebrow>small {
   margin-left:auto;
@@ -254,7 +254,7 @@
 }
 .portal-hero h1 em {
   font-style:normal;
-  color:#f58c4b
+  color:#f54b62
 }
 .portal-hero>p:not(.portal-eyebrow) {
   color:#b5b9be;
@@ -285,15 +285,15 @@
   padding:11px 0
 }
 .portal-search:focus-within {
-  outline:2px solid #ec762f;
+  outline:2px solid #c8102e;
   outline-offset:2px
 }
 .portal-search button {
   display:flex;
   align-items:center;
   gap:15px;
-  background:#ec762f;
-  color:#221a14;
+  background:#c8102e;
+  color:#221416;
   border-radius:5px;
   padding:13px 19px;
   font-size:12px;
@@ -330,14 +330,14 @@
   background:white
 }
 .portal-shortcuts a:hover {
-  border-color:#e6ab85
+  border-color:#e68592
 }
 .portal-shortcuts a>svg:first-child {
-  color:#b9662d;
+  color:#b92d40;
   padding:9px;
   width:39px;
   height:39px;
-  background:#fff3e9;
+  background:#ffe9ec;
   border-radius:8px
 }
 .portal-shortcuts a>div {
@@ -361,9 +361,9 @@
   display:flex;
   align-items:flex-start;
   gap:9px;
-  color:#8a674b;
-  background:#fff6ee;
-  border:1px solid #f2e4d9;
+  color:#8a4b53;
+  background:#ffeef0;
+  border:1px solid #f2d9dc;
   padding:13px 15px;
   border-radius:7px;
   font-size:11px;
@@ -379,7 +379,7 @@
 }
 .portal-note strong,.source-note strong {
   font-weight:600;
-  color:#8b5128
+  color:#8b2835
 }
 .portal-section-heading {
   display:flex;
@@ -451,12 +451,12 @@
   background:#eeeee8
 }
 .portal-filters button.active {
-  background:#fff0e5;
-  color:#a65223
+  background:#ffe5e8;
+  color:#a62334
 }
 .portal-filters button.active span {
-  background:#f7d9c4;
-  color:#a65223
+  background:#f7c4cb;
+  color:#a62334
 }
 .portal-filters select {
   font-size:11px;
@@ -498,7 +498,7 @@
   transition:border-color .15s,box-shadow .15s
 }
 .portal-card:hover {
-  border-color:#d6bda9;
+  border-color:#d6a9af;
   box-shadow:0 4px 18px #201a1005
 }
 .portal-card-top {
@@ -513,14 +513,14 @@
   align-items:center;
   gap:6px;
   font-size:9px;
-  color:#a5683e
+  color:#a53e4c
 }
 .portal-card-top>button {
   padding:5px;
   color:#a5a9ae
 }
 .portal-card-top>button[aria-pressed=true] {
-  color:#bd612b
+  color:#bd2b3e
 }
 .portal-card-title {
   text-align:left;
@@ -528,7 +528,7 @@
   margin:0 0 10px
 }
 .portal-card-title:hover {
-  color:#b85d29
+  color:#b8293c
 }
 .portal-card-title h3 {
   font-size:16px;
@@ -558,7 +558,7 @@
   border-radius:3px
 }
 .portal-card-tags>span:last-child {
-  color:#b09a87;
+  color:#b0878c;
   font-size:8px
 }
 .portal-card footer {
@@ -576,7 +576,7 @@
   display:flex;
   align-items:center;
   gap:6px;
-  color:#a36234;
+  color:#a33443;
   font-size:10px
 }
 .portal-empty {
@@ -593,7 +593,7 @@
   margin-top:10px
 }
 .portal-empty>svg {
-  color:#ba7848
+  color:#ba4857
 }
 .portal-empty h3,.portal-empty h1 {
   font-size:21px;
@@ -609,7 +609,7 @@
 }
 .portal-empty button,.portal-empty a {
   font-size:12px;
-  color:#a85222;
+  color:#a82234;
   display:flex;
   align-items:center;
   gap:8px;
@@ -646,7 +646,7 @@
 }
 .portal-dialog section>h3 small {
   float:right;
-  color:#a36336;
+  color:#a33645;
   font-size:11px
 }
 .portal-dialog section>p,.portal-dialog section>ul {
@@ -674,7 +674,7 @@
 }
 .portal-check input {
   margin-top:3px;
-  accent-color:#b7612e;
+  accent-color:#b72e40;
   width:16px;
   height:16px;
   flex-shrink:0
@@ -682,7 +682,7 @@
 .portal-dialog progress {
   height:5px;
   width:100%;
-  accent-color:#ec762f
+  accent-color:#c8102e
 }
 .portal-related {
   display:flex;
@@ -690,7 +690,7 @@
   align-items:center;
   justify-content:space-between;
   gap:9px;
-  color:#a65d30;
+  color:#a63040;
   font-size:12px;
   text-align:left;
   padding:9px 0
@@ -715,8 +715,8 @@
   font-weight:600
 }
 .portal-primary {
-  background:#ec762f;
-  color:#251a14
+  background:#c8102e;
+  color:#251416
 }
 .portal-secondary {
   background:#fff;
@@ -747,9 +747,9 @@
   min-height:40px
 }
 .workspace-toolbar button.active {
-  background:#fff0e5;
-  color:#ac5b29;
-  border-color:#efc5a9
+  background:#ffe5e8;
+  color:#ac293a;
+  border-color:#efa9b2
 }
 .workspace-toolbar button:disabled {
   opacity:.45;
@@ -786,7 +786,7 @@
   width:min(490px,100%)
 }
 .preview-entry .portal-eyebrow {
-  color:#d09b74;
+  color:#d07480;
   margin-top:24px
 }
 .preview-entry h1 {
@@ -797,7 +797,7 @@
   margin:18px 0
 }
 .preview-entry h1 span {
-  color:#f28b4a
+  color:#f24a60
 }
 .preview-entry section>p:not(.portal-eyebrow) {
   color:#9fa7b1;
@@ -827,8 +827,8 @@
   display:flex;
   align-items:center;
   justify-content:space-between;
-  background:#ec762f;
-  color:#251c16;
+  background:#c8102e;
+  color:#251618;
   padding:15px 17px;
   border-radius:6px;
   font-size:13px;
@@ -852,7 +852,7 @@
   margin:0
 }
 .dgsci-shell button:focus-visible,.dgsci-shell a:focus-visible,.dgsci-shell select:focus-visible,.preview-entry button:focus-visible,.preview-entry select:focus-visible {
-  outline:2px solid #ec762f;
+  outline:2px solid #c8102e;
   outline-offset:3px
 }
 
@@ -1258,4 +1258,12 @@
 .records-summary { display: flex; gap: 15px; flex-wrap: wrap; margin: 20px 0; }
 .records-summary > div { background: white; border: 1px solid #e4e4dc; border-radius: 8px; padding: 20px; min-width: 200px; }
 .records-summary span { display: block; font-size: 11px; color: #8a9095; }
-.records-summary strong { display: block; font-size: 23px; color: #9d5327; margin-top: 9px; font-weight: 600; }
+.records-summary strong { display: block; font-size: 23px; color: #9d2737; margin-top: 9px; font-weight: 600; }
+
+.portal-primary,.portal-search button,.preview-entry form>button{color:#fff}
+.preview-entry input{background:#242a31;color:#fff;border:1px solid #4a4e55;border-radius:6px;padding:13px 14px;font-size:14px;min-width:0}
+.preview-entry input:focus-visible{outline:2px solid #c8102e;outline-offset:3px}
+.login-mode{padding:14px 0 0;color:#f18b9b;font-size:12px}
+.login-error{color:#ffb9c4;font-size:12px;line-height:1.7}
+.login-message{color:#c5e8d1;font-size:12px;line-height:1.7}
+.session-loading{min-height:100vh;display:grid;place-items:center;color:#6f747c;background:#fafaf8;font-size:13px}

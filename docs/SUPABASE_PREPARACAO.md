@@ -1,11 +1,13 @@
-# Migração Supabase pendente de destino
+# Banco DGSCI
 
-Não foi encontrado um projeto DGSCI entre os projetos conectados. Os projetos EFM e WR não são destinos desta importação. É necessário informar o projeto DGSCI existente ou escolher a organização em que será criado um novo projeto. Custos, se houver, serão apresentados antes da criação.
+Projeto autorizado: `prozusgomipgwzbyoagj`. Importados 71 registros do efetivo, 87 autorizações e 2 linhas de saldo. Dados reais não são versionados no GitHub nem servidos como arquivos estáticos.
 
-As cópias do pecúlio e do controle de diárias são servidas somente pela revisão privada. Os arquivos reais ficam fora do GitHub, em `public/private-data/` no checkout privado de Sites; a branch pública contém apenas código para consulta. O pecúlio original não deve ser incluído no repositório.
+O cadastro exige e-mail previamente autorizado e confirmação por e-mail. No primeiro acesso, use Criar conta e defina sua própria senha. Os setores e a função são obtidos da associação protegida no banco; selecionar um setor não concede permissões.
 
-`.env.local` está ignorado, assim como `.env` e outras variantes. `.env.example` contém apenas nomes e campos vazios. A chave publicável do Supabase é configuração pública do cliente e será visível no bundle quando configurada; ela não concede acesso sem políticas adequadas. Senha de banco e `service_role` deverão ficar exclusivamente no ambiente de servidor, sem prefixo `VITE_`.
+O arquivo `supabase/schema.sql` documenta tabelas, funções e políticas. A lista de e-mails autorizados é privada. RLS validada com administrador, setor sem permissão, usuário anônimo, tentativa de escalar privilégios e cadastro não autorizado; fixtures revertidas.
 
-Antes da importação no banco: autenticação real, vínculo do usuário aos setores, RLS habilitada, permissões restritas, controle especial dos dados cadastrais do efetivo e teste de negação para usuário anônimo. A seleção de setor da prévia não autoriza consultas ao banco. Nenhum mock será importado como registro oficial.
+Configure `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` no ambiente local ou de implantação. `.env.local` e variantes estão ignorados. A chave publicável aparece no cliente por definição; a proteção está na autenticação e RLS. Nunca colocar senha de banco ou service_role no cliente.
 
-O controle de diárias foi extraído uma única vez de uma cópia XLSX da planilha fornecida. As duas linhas de saldo foram mantidas separadas e sem agregação. Não existe conexão automática dessa tela à planilha.
+No painel Authentication / URL Configuration, configure a URL do site privado como Site URL e URL de redirecionamento para que o link de confirmação retorne ao portal. O envio e a confirmação do primeiro cadastro dependem do usuário e ainda precisam de validação completa.
+
+O controle de diárias foi copiado uma única vez da planilha. Os valores originais foram preservados em source_values, inclusive uma arrecadação com pontuação excedente normalizada para número. Estabelecimentos continuam com a consulta às planilhas. Outros módulos legados e a biblioteca de apoio mantêm exemplos demonstrativos.

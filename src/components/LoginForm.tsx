@@ -1,11 +1,32 @@
 import { useState } from 'react';
 import { ArrowRight, LockKeyhole } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserProfile } from '@/types/auth';
 
-const profiles: UserProfile[] = ['Vistoria', 'Análise', 'Multas', 'ADM', 'Subdiretoria', 'Diretoria'];
 export default function LoginForm() {
-  const { login } = useAuth();
-  const [profile, setProfile] = useState<UserProfile>('Diretoria');
-  return <main className="preview-entry"><section><img src="/portal/assets/dgsci-logo.png" alt="DGSCI" width="54" height="54" /><p className="portal-eyebrow">DGSCI / CBMPA</p><h1>Uma base comum.<br /><span>Várias áreas conectadas.</span></h1><p>Prévia da integração entre gestão interna, biblioteca de apoio e consulta territorial.</p><form onSubmit={async event => { event.preventDefault(); await login('Prévia DGSCI', 'demonstracao', profile); }}><label htmlFor="preview-profile">Escolha o setor para explorar a prévia</label><select id="preview-profile" value={profile} onChange={event => setProfile(event.target.value as UserProfile)}>{profiles.map(value => <option key={value}>{value}</option>)}</select><button type="submit">Explorar o portal <ArrowRight size={18} /></button></form><div className="entry-disclaimer"><LockKeyhole size={16} /><p>A seleção demonstra a navegação por setor. Contas individuais e permissões reais ainda serão implementadas. Não informe credenciais do SISGAT nesta prévia.</p></div></section></main>;
+  const { login, register, authError } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  return <main className="preview-entry"><section><img src="/portal/assets/dgsci-logo.png" alt="DGSCI" width="62" height="77" /><p className="portal-eyebrow">DGSCI / CBMPA</p><h1>Uma base comum.<br /><span>Várias áreas conectadas.</span></h1><p>Acesse a biblioteca de apoio, o efetivo e os controles do departamento com sua conta individual.</p>
+    <form onSubmit={async event => {
+      event.preventDefault(); setBusy(true); setError(''); setMessage('');
+      try {
+        if (creating) {
+          const result = await register(email, password);
+          if (result === 'pending') { setMessage('Confira o e-mail para confirmar o cadastro. Após confirmar, volte a esta página e entre.'); setCreating(false); setPassword(''); }
+        } else await login(email, password);
+      } catch (reason) { setError(reason instanceof Error ? reason.message : 'Não foi possível concluir.'); }
+      finally { setBusy(false); }
+    }}>
+      <label htmlFor="account-email">E-mail autorizado</label><input id="account-email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="Seu e-mail" />
+      <label htmlFor="account-password">Senha</label><input id="account-password" type="password" autoComplete={creating ? 'new-password' : 'current-password'} required minLength={creating ? 8 : 1} value={password} onChange={e => setPassword(e.target.value)} placeholder={creating ? 'Crie uma senha com pelo menos 8 caracteres' : 'Sua senha'} />
+      {(error || authError) && <p className="login-error" role="alert">{error || authError}</p>}{message && <p className="login-message" role="status">{message}</p>}
+      <button type="submit" disabled={busy}>{busy ? 'Aguarde…' : creating ? 'Criar minha conta' : 'Entrar no portal'}<ArrowRight size={18} /></button>
+    </form>
+    <button className="login-mode" onClick={() => { setCreating(!creating); setError(''); setMessage(''); }}>{creating ? 'Já tenho conta. Entrar' : 'Primeiro acesso? Criar minha conta'}</button>
+    <div className="entry-disclaimer"><LockKeyhole size={16} /><p>O cadastro é restrito aos e-mails autorizados. As permissões dos setores são definidas pelo administrador. Use uma senha própria para o portal.</p></div>
+  </section></main>;
 }

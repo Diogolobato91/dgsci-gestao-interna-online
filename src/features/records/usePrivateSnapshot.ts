@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 export function usePrivateSnapshot<T>(name: 'efetivo' | 'diarias') {
+  const { user } = useAuth();
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
-    const controller = new AbortController();
+    let current = true;
     setData(null); setError('');
-    fetch(`/private-data/${name}.json`, { signal: controller.signal, credentials: 'same-origin', cache: 'no-store' })
-      .then(async response => {
-        if (!response.ok || !response.headers.get('content-type')?.includes('json')) throw new Error('A base privada ainda não está disponível neste ambiente.');
-        return response.json();
-      }).then(setData).catch(reason => { if (reason.name !== 'AbortError') setError(reason.message); });
-    return () => controller.abort();
-  }, [name]);
+    if (!user) return;
+    if (!supabase) { setError('A conexão com o Supabase não está configurada.'); return; }
+    if (!user.allowedProfiles?.some(profile => ['Diretoria','Subdiretoria','ADM'].includes(profile))) { setError('Sua conta não tem acesso a este controle.'); return; }
+    supabase.rpc(name === 'efetivo' ? 'get_staff_snapshot' : 'get_diarias_snapshot')
+      .then(({ data: result, error: problem }) => {
+        if (!current) return;
+        if (problem || !result) setError('Não foi possível consultar os dados no Supabase. Confira sua sessão e tente novamente.');
+        else setData(result as T);
+      });
+    return () => { current = false; };
+  }, [name, user]);
   return { data, error };
 }

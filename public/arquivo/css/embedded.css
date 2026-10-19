@@ -4,9 +4,9 @@ html.embedded {
   --bg-sidebar:#fff;
   --bg-card-hover:#f5f5ef;
   --bg-input:#f7f7f2;
-  --primary:#c7682d;
-  --primary-hover:#aa511f;
-  --primary-glow:rgba(199,104,45,.15);
+  --primary:#c72d42;
+  --primary-hover:#aa1f32;
+  --primary-glow:rgba(200,16,46,.15);
   --bg-glass:#fafaf8;
   --border-color:#e4e4db;
   --text-main:#30353b;
@@ -61,9 +61,9 @@ html.embedded {
   font-size:13px;
   color:#7a6a59;
   max-width:620px;
-  background:#fff6ed;
+  background:#ffedef;
   margin:25px;
-  border:1px solid #ecd8c9;
+  border:1px solid #ecc9ce;
   border-radius:8px
 }
 
