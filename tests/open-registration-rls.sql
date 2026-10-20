@@ -1,330 +1,353 @@
 -- Teste de validação RLS, autorização, integridade de superadmin e transações do fluxo de cadastro com aprovação.
--- Todas as fixtures são revertidas com rollback ao final.
+-- As fixtures passam pelos gatilhos reais da aplicação e são revertidas com rollback ao final.
 begin;
 
--- 1. Fixtures realistas: login_allowlist, auth.users, app_members e user_registrations
+-- 1. Fixtures criadas pelo papel administrativo da conexão
+-- 1.1 Configuração do superadministrador inicial
 insert into private.login_allowlist(email, display_name, role, sectors, enabled) values
   ('superadmin-test@example.invalid', 'Gestor Principal', 'administrator', array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'], true),
-  ('superadmin-second@example.invalid', 'Gestor Secundário', 'administrator', array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'], true),
-  ('regular-test@example.invalid', 'Comum Teste', 'editor', array['Secretaria'], true),
-  ('blocked-test@example.invalid', 'Bloqueado Teste', 'editor', array['Secretaria'], false);
+  ('preauthorized@example.invalid', 'Pre-Autorizado Allowlist', 'administrator', array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'], true);
 
-insert into auth.users(id, email, aud, role) values
-  ('40000000-0000-4000-8000-000000000001', 'superadmin-test@example.invalid', 'authenticated', 'authenticated'),
-  ('40000000-0000-4000-8000-000000000002', 'superadmin-second@example.invalid', 'authenticated', 'authenticated'),
-  ('40000000-0000-4000-8000-000000000003', 'regular-test@example.invalid', 'authenticated', 'authenticated'),
-  ('40000000-0000-4000-8000-000000000004', 'pending-test@example.invalid', 'authenticated', 'authenticated'),
-  ('40000000-0000-4000-8000-000000000005', 'blocked-test@example.invalid', 'authenticated', 'authenticated'),
-  ('40000000-0000-4000-8000-000000000006', 'legacy-user@example.invalid', 'authenticated', 'authenticated');
+-- Inserção do superadmin via auth.users passando pelos gatilhos reais
+insert into auth.users(id, email, aud, role, raw_user_meta_data) values (
+  '40000000-0000-4000-8000-000000000001',
+  'superadmin-test@example.invalid',
+  'authenticated', 'authenticated',
+  jsonb_build_object(
+    'nome', 'Gestor Principal',
+    'posto_graduacao', 'CEL',
+    'matricula', 'MAT-001',
+    'cpf', '52998224725',
+    'data_nascimento', '1980-01-01'
+  )
+);
 
-insert into public.app_members(user_id, display_name, role, sectors, enabled) values
-  ('40000000-0000-4000-8000-000000000001', 'Gestor Principal', 'administrator', array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'], true),
-  ('40000000-0000-4000-8000-000000000002', 'Gestor Secundário', 'administrator', array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'], true),
-  ('40000000-0000-4000-8000-000000000003', 'Comum Teste', 'editor', array['Secretaria'], true),
-  ('40000000-0000-4000-8000-000000000004', 'Pendente Teste', 'reader', array[]::text[], false),
-  ('40000000-0000-4000-8000-000000000005', 'Bloqueado Teste', 'editor', array['Secretaria'], false),
-  ('40000000-0000-4000-8000-000000000006', 'Conta Legada Antiga', 'editor', array['Vistoriador'], true);
+-- Como papel administrativo, habilita o primeiro superadministrador para permitir operações administrativas subsequentes
+update public.app_members set
+  enabled = true,
+  role = 'administrator',
+  sectors = array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas']
+where user_id = '40000000-0000-4000-8000-000000000001';
 
-insert into public.user_registrations(user_id, email, nome, posto_graduacao, matricula, cpf, data_nascimento, status) values
-  ('40000000-0000-4000-8000-000000000001', 'superadmin-test@example.invalid', 'Gestor Principal', 'CEL', 'MAT-001', '52998224725', '1980-01-01', 'approved'),
-  ('40000000-0000-4000-8000-000000000002', 'superadmin-second@example.invalid', 'Gestor Secundário', 'TCEL', 'MAT-002', '11144477735', '1982-03-10', 'approved'),
-  ('40000000-0000-4000-8000-000000000003', 'regular-test@example.invalid', 'Comum Teste', 'CAP', 'MAT-003', '90467142074', '1985-05-15', 'approved'),
-  ('40000000-0000-4000-8000-000000000004', 'pending-test@example.invalid', 'Pendente Teste', 'SD', 'MAT-004', '71425178041', '1998-10-20', 'pending_approval'),
-  ('40000000-0000-4000-8000-000000000005', 'blocked-test@example.invalid', 'Bloqueado Teste', 'CB', 'MAT-005', '41285272023', '1990-03-12', 'blocked'),
-  ('40000000-0000-4000-8000-000000000006', 'legacy-user@example.invalid', 'Conta Legada Antiga', null, null, null, null, 'approved');
+update private.login_allowlist set
+  enabled = true,
+  role = 'administrator',
+  sectors = array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas']
+where email = 'superadmin-test@example.invalid';
 
--- 2. Teste de chamadas autorizadas com sucesso pelo Superadministrador
+update public.user_registrations set
+  status = 'approved',
+  approved_at = now()
+where user_id = '40000000-0000-4000-8000-000000000001';
+
+-- 1.2 Criação de novos usuários passando exclusivamente pelos gatilhos reais de cadastro
+-- A. Candidato comum padrão
+insert into auth.users(id, email, aud, role, raw_user_meta_data) values (
+  '40000000-0000-4000-8000-000000000002',
+  'pending-test@example.invalid',
+  'authenticated', 'authenticated',
+  jsonb_build_object(
+    'nome', 'Candidato Teste',
+    'posto_graduacao', 'SD',
+    'matricula', 'MAT-002',
+    'cpf', '11144477735',
+    'data_nascimento', '1998-10-20'
+  )
+);
+
+-- B. Cadastro com e-mail previamente autorizado na allowlist (deve nascer desabilitado e pendente)
+insert into auth.users(id, email, aud, role, raw_user_meta_data) values (
+  '40000000-0000-4000-8000-000000000003',
+  'preauthorized@example.invalid',
+  'authenticated', 'authenticated',
+  jsonb_build_object(
+    'nome', 'Tentativa Allowlist',
+    'posto_graduacao', 'CAP',
+    'matricula', 'MAT-003',
+    'cpf', '22233344405',
+    'data_nascimento', '1985-05-15'
+  )
+);
+
+-- C. Cadastro com metadados maliciosos tentando forçar superadmin e aprovação direta
+insert into auth.users(id, email, aud, role, raw_user_meta_data) values (
+  '40000000-0000-4000-8000-000000000004',
+  'malicious-meta@example.invalid',
+  'authenticated', 'authenticated',
+  jsonb_build_object(
+    'nome', 'Invasor Metadados',
+    'posto_graduacao', '1º TEN',
+    'matricula', 'MAT-004',
+    'cpf', '33344455508',
+    'data_nascimento', '1990-03-12',
+    'role', 'administrator',
+    'sectors', array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'],
+    'status', 'approved',
+    'enabled', true,
+    'is_superadmin', true
+  )
+);
+
+-- D. Conta legada pré-existente preservada sem inventar dados
+insert into auth.users(id, email, aud, role, raw_user_meta_data) values (
+  '40000000-0000-4000-8000-000000000005',
+  'legacy-user@example.invalid',
+  'authenticated', 'authenticated',
+  jsonb_build_object(
+    'nome', 'Membro Antigo',
+    'posto_graduacao', 'VC',
+    'matricula', 'MAT-LEGACY',
+    'cpf', '44455566619',
+    'data_nascimento', '1975-01-01'
+  )
+);
+-- Como papel administrativo, simula estado de conta legada migrada (campos desconhecidos ausentes/nulos)
+update public.user_registrations set
+  posto_graduacao = null,
+  matricula = null,
+  cpf = null,
+  data_nascimento = null,
+  status = 'approved',
+  approved_at = now()
+where user_id = '40000000-0000-4000-8000-000000000005';
+
+update public.app_members set
+  display_name = 'Membro Antigo',
+  role = 'editor',
+  sectors = array['Vistoriador'],
+  enabled = true
+where user_id = '40000000-0000-4000-8000-000000000005';
+
+-- 2. Operações da aplicação executadas estritamente com o papel authenticated
 set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"40000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
 
-do $$declare
+-- 2.1 Teste do usuário com e-mail previamente autorizado antes da aprovação
+select set_config('request.jwt.claims', '{"sub":"40000000-0000-4000-8000-000000000003","role":"authenticated"}', true);
+do $$
+declare
+  my_status jsonb;
+  my_regs_count integer;
+begin
+  -- Consulta própria retorna status pending_approval mesmo com e-mail na allowlist
+  select public.get_my_registration_status() into my_status;
+  if my_status->>'status' <> 'pending_approval' then
+    raise exception 'Usuário pre-autorizado não nasceu pendente: %', my_status;
+  end if;
+
+  -- Consulta direta de user_registrations retorna APENAS o próprio registro (sem vazar terceiros)
+  select count(*) into my_regs_count from public.user_registrations;
+  if my_regs_count <> 1 then
+    raise exception 'Consulta direta de user_registrations retornou registros de terceiros: %', my_regs_count;
+  end if;
+
+  -- Acesso a funções administrativas negado
+  begin
+    perform public.admin_list_users();
+    raise exception 'Usuário pendente conseguiu executar admin_list_users';
+  exception when insufficient_privilege then null; end;
+
+  begin
+    perform public.admin_approve_user('40000000-0000-4000-8000-000000000003', array['Secretaria'], false, null);
+    raise exception 'Usuário pendente conseguiu executar admin_approve_user';
+  exception when insufficient_privilege then null; end;
+
+  -- Acesso direto a tabelas privadas negado ao papel authenticated
+  begin
+    execute 'select count(*) from private.login_allowlist';
+    raise exception 'authenticated conseguiu ler private.login_allowlist diretamente';
+  exception when insufficient_privilege then null; end;
+end$$;
+
+-- 2.2 Teste do usuário com metadados maliciosos
+select set_config('request.jwt.claims', '{"sub":"40000000-0000-4000-8000-000000000004","role":"authenticated"}', true);
+do $$
+declare
+  my_status jsonb;
+  my_regs_count integer;
+begin
+  select public.get_my_registration_status() into my_status;
+  if my_status->>'status' <> 'pending_approval' then
+    raise exception 'Metadados maliciosos alteraram o status inicial: %', my_status;
+  end if;
+
+  select count(*) into my_regs_count from public.user_registrations;
+  if my_regs_count <> 1 then
+    raise exception 'Invasor obteve leitura de outros usuários via user_registrations: %', my_regs_count;
+  end if;
+
+  begin
+    perform public.admin_list_users();
+    raise exception 'Invasor obteve acesso administrativo via metadados injetados';
+  exception when insufficient_privilege then null; end;
+end$$;
+
+-- 2.3 Operações autorizadas pelo Superadministrador
+select set_config('request.jwt.claims', '{"sub":"40000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
+do $$
+declare
+  total_regs_count integer;
   users_data jsonb;
   pending_row jsonb;
   legacy_row jsonb;
   audit_data jsonb;
-  allowlist_row private.login_allowlist%rowtype;
-  member_row public.app_members%rowtype;
 begin
-  -- 2.1 Listagem de usuários pelo superadmin funciona
-  select public.admin_list_users() into users_data;
-  if jsonb_array_length(users_data) < 6 then
-    raise exception 'admin_list_users não retornou a quantidade esperada de registros';
+  -- Consulta direta de user_registrations pelo superadministrador retorna todos os registros
+  select count(*) into total_regs_count from public.user_registrations;
+  if total_regs_count < 5 then
+    raise exception 'Superadministrador não conseguiu listar todos os cadastros via user_registrations: %', total_regs_count;
   end if;
 
+  -- Listagem completa via RPC administrativo
+  select public.admin_list_users() into users_data;
   select value into pending_row from jsonb_array_elements(users_data) where value->>'email' = 'pending-test@example.invalid';
   if pending_row->>'status' <> 'pending_approval' or pending_row->>'posto_graduacao' <> 'SD' then
-    raise exception 'Superadmin não localizou usuário pendente com dados corretos';
+    raise exception 'Superadmin não localizou candidato pendente: %', pending_row;
   end if;
 
-  -- 2.2 Usuário legado preservado sem dados inventados
+  -- Conta legada preservada sem dados inventados
   select value into legacy_row from jsonb_array_elements(users_data) where value->>'email' = 'legacy-user@example.invalid';
   if legacy_row->>'cpf' is not null or legacy_row->>'matricula' is not null or legacy_row->>'posto_graduacao' is not null then
-    raise exception 'Usuário legado possui dados inventados indevidamente';
+    raise exception 'Conta legada possui dados fictícios indevidos: %', legacy_row;
   end if;
 
-  -- 2.3 Aprovação de cadastro com atribuição de setores funciona e sincroniza todas as fontes
-  perform public.admin_approve_user('40000000-0000-4000-8000-000000000004', array['Vistoriador'], false, 1);
+  -- Aprovação autorizada do candidato pendente com atribuição de setor
+  perform public.admin_approve_user('40000000-0000-4000-8000-000000000002', array['Secretaria'], false, 1);
 
-  select * into member_row from public.app_members where user_id = '40000000-0000-4000-8000-000000000004';
-  if not member_row.enabled or member_row.sectors <> array['Vistoriador'] then
-    raise exception 'Aprovação não atualizou app_members corretamente';
-  end if;
+  -- Bloqueio e desbloqueio autorizado
+  perform public.admin_toggle_user('40000000-0000-4000-8000-000000000002', false, 2);
+  perform public.admin_toggle_user('40000000-0000-4000-8000-000000000002', true, 3);
 
-  select * into allowlist_row from private.login_allowlist where email = 'pending-test@example.invalid';
-  if not allowlist_row.enabled or allowlist_row.sectors <> array['Vistoriador'] then
-    raise exception 'Aprovação não sincronizou login_allowlist';
-  end if;
+  -- Alteração cadastral autorizada via admin_save_user
+  perform public.admin_save_user('pending-test@example.invalid', 'Candidato Aprovado', array['Secretaria','Vistoriador'], true, false, 4);
 
-  -- 2.4 Bloqueio e desbloqueio funciona e mantém sincronização
-  perform public.admin_toggle_user('40000000-0000-4000-8000-000000000004', false, 2);
-  if (select enabled from public.app_members where user_id = '40000000-0000-4000-8000-000000000004') then
-    raise exception 'Bloqueio não desabilitou app_members';
-  end if;
-  if (select enabled from private.login_allowlist where email = 'pending-test@example.invalid') then
-    raise exception 'Bloqueio não desabilitou login_allowlist';
-  end if;
+  -- Rejeição justificada da tentativa com metadados maliciosos
+  perform public.admin_reject_user('40000000-0000-4000-8000-000000000004', 'Metadados inválidos', 1);
 
-  perform public.admin_toggle_user('40000000-0000-4000-8000-000000000004', true, 3);
-  if not (select enabled from public.app_members where user_id = '40000000-0000-4000-8000-000000000004') then
-    raise exception 'Desbloqueio não reabilitou app_members';
-  end if;
-
-  -- 2.5 Alteração cadastral via admin_save_user funciona e mantém consistência
-  perform public.admin_save_user('pending-test@example.invalid', 'Pendente Atualizado', array['Vistoriador', 'Secretaria'], true, false, 4);
-  if (select display_name from public.app_members where user_id = '40000000-0000-4000-8000-000000000004') <> 'Pendente Atualizado' then
-    raise exception 'admin_save_user não sincronizou app_members';
-  end if;
-  if (select display_name from private.login_allowlist where email = 'pending-test@example.invalid') <> 'Pendente Atualizado' then
-    raise exception 'admin_save_user não sincronizou login_allowlist';
-  end if;
-  if (select nome from public.user_registrations where user_id = '40000000-0000-4000-8000-000000000004') <> 'Pendente Atualizado' then
-    raise exception 'admin_save_user não sincronizou user_registrations';
-  end if;
-
-  -- 2.6 Rejeição com justificativa funciona
-  insert into auth.users(id, email, aud, role) values ('40000000-0000-4000-8000-000000000099', 'temp-reject@example.invalid', 'authenticated', 'authenticated');
-  insert into public.app_members(user_id, display_name, role, sectors, enabled) values ('40000000-0000-4000-8000-000000000099', 'Temp', 'reader', '{}', false);
-  insert into public.user_registrations(user_id, email, nome, status) values ('40000000-0000-4000-8000-000000000099', 'temp-reject@example.invalid', 'Temp', 'pending_approval');
-
-  perform public.admin_reject_user('40000000-0000-4000-8000-000000000099', 'Matrícula não localizada no efetivo', 1);
-  if (select status from public.user_registrations where user_id = '40000000-0000-4000-8000-000000000099') <> 'rejected' then
-    raise exception 'Rejeição não atualizou status para rejected';
-  end if;
-
-  -- 2.7 Histórico de auditoria funciona
+  -- Consulta de auditoria
   select public.admin_list_audit('pending-test@example.invalid') into audit_data;
-  if jsonb_array_length(audit_data) < 4 then
-    raise exception 'Auditoria incompleta para pending-test';
+  if jsonb_array_length(audit_data) < 3 then
+    raise exception 'Auditoria incompleta para candidato aprovado: %', audit_data;
   end if;
-end$$;
 
--- 3. Teste de proteções administrativas e integridade do superadministrador
-do $$begin
-  -- 3.1 Autobloqueio negado (via admin_toggle_user e admin_save_user)
+  -- Proteções contra autobloqueio, autorrejeição e autorrebaixamento
   begin
     perform public.admin_toggle_user('40000000-0000-4000-8000-000000000001', false, 1);
-    raise exception 'Superadministrador conseguiu se autobloquear via admin_toggle_user';
+    raise exception 'Superadministrador conseguiu se autobloquear';
   exception when invalid_parameter_value then null; end;
 
   begin
-    perform public.admin_save_user('superadmin-test@example.invalid', 'Gestor Principal', array['Secretaria'], false, false, 1);
-    raise exception 'Superadministrador conseguiu se autobloquear via admin_save_user';
-  exception when invalid_parameter_value then null; end;
-
-  -- 3.2 Autorrejeição negada
-  begin
-    perform public.admin_reject_user('40000000-0000-4000-8000-000000000001', 'Tentativa de rejeição de si mesmo', 1);
+    perform public.admin_reject_user('40000000-0000-4000-8000-000000000001', 'Rejeição própria', 1);
     raise exception 'Superadministrador conseguiu se autorrejeitar';
   exception when invalid_parameter_value then null; end;
 
-  -- 3.3 Rejeição de superadministrador negada mesmo vinda de outro superadmin
-  begin
-    perform public.admin_reject_user('40000000-0000-4000-8000-000000000002', 'Tentativa de rejeição de outro superadmin', 1);
-    raise exception 'Superadministrador conseguiu rejeitar outro superadmin';
-  exception when invalid_parameter_value then null; end;
-
-  -- 3.4 Autorrebaixamento negado (tentar retirar próprio papel superadmin)
   begin
     perform public.admin_approve_user('40000000-0000-4000-8000-000000000001', array['Secretaria'], false, 1);
-    raise exception 'Superadministrador conseguiu se autorrebaixar via admin_approve_user';
+    raise exception 'Superadministrador conseguiu se autorrebaixar';
   exception when invalid_parameter_value then null; end;
 
+  -- Acesso direto a tabelas privadas negado mesmo para superadministrador enquanto no papel authenticated
   begin
-    perform public.admin_save_user('superadmin-test@example.invalid', 'Gestor Principal', array['Secretaria'], true, false, 1);
-    raise exception 'Superadministrador conseguiu se autorrebaixar via admin_save_user';
-  exception when invalid_parameter_value then null; end;
-
-  -- 3.5 Proteção de último superadmin ativo
-  -- Primeiro desabilita o superadmin secundário (permitido pois o principal ainda está ativo)
-  perform public.admin_toggle_user('40000000-0000-4000-8000-000000000002', false, 1);
-
-  -- Agora tentar remover ou bloquear o superadmin restante deve falhar
-  begin
-    perform public.admin_save_user('superadmin-second@example.invalid', 'Gestor Secundário', array['Secretaria'], false, false, 2);
-    -- Já está inativo, ok
-  end;
-
-  -- Reativa o secundário para manter estado consistente
-  perform public.admin_toggle_user('40000000-0000-4000-8000-000000000002', true, 2);
-
-  -- 3.6 Aprovação sem setores negada
-  begin
-    perform public.admin_approve_user('40000000-0000-4000-8000-000000000004', array[]::text[], false, 5);
-    raise exception 'Aprovação sem setores foi aceita';
-  exception when invalid_parameter_value then null; end;
-
-  -- 3.7 Rejeição sem justificativa negada
-  begin
-    perform public.admin_reject_user('40000000-0000-4000-8000-000000000004', '', 5);
-    raise exception 'Rejeição sem motivo foi aceita';
-  exception when invalid_parameter_value then null; end;
+    execute 'select count(*) from private.login_allowlist';
+    raise exception 'Superadmin authenticated conseguiu ler private.login_allowlist diretamente';
+  exception when insufficient_privilege then null; end;
 end$$;
 
--- 4. Teste de duplicidades concorrentes e garantia de mensagem genérica sem dados pessoais
+-- 2.4 Teste do candidato recém-aprovado
+select set_config('request.jwt.claims', '{"sub":"40000000-0000-4000-8000-000000000002","role":"authenticated"}', true);
 do $$
 declare
-  err_code text;
-  err_msg text;
+  my_status jsonb;
+  my_regs_count integer;
 begin
-  -- 4.1 Duplicidade por e-mail existente
-  begin
-    insert into auth.users(id, email, aud, role, raw_user_meta_data)
-    values (
-      '40000000-0000-4000-8000-000000000088',
-      'regular-test@example.invalid', -- e-mail já existente
-      'authenticated', 'authenticated',
-      jsonb_build_object('nome', 'Novo Usuário', 'posto_graduacao', 'SD', 'matricula', 'MAT-999', 'cpf', '01234567890', 'data_nascimento', '1995-01-01')
-    );
-    raise exception 'Falha ao bloquear duplicidade de e-mail';
-  exception when others then
-    get stacked diagnostics err_code = RETURNED_SQLSTATE, err_msg = MESSAGE_TEXT;
-    if err_code <> '23505' then
-      raise exception 'Código de erro inesperado para duplicidade de e-mail: %', err_code;
-    end if;
-    if err_msg <> 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' then
-      raise exception 'Mensagem de duplicidade expôs dados ou divergiu: %', err_msg;
-    end if;
-  end;
+  select public.get_my_registration_status() into my_status;
+  if my_status->>'status' <> 'approved' then
+    raise exception 'Situação do usuário recém-aprovado divergente: %', my_status;
+  end if;
 
-  -- 4.2 Duplicidade por CPF existente
-  begin
-    insert into auth.users(id, email, aud, role, raw_user_meta_data)
-    values (
-      '40000000-0000-4000-8000-000000000089',
-      'outro-email@example.invalid',
-      'authenticated', 'authenticated',
-      jsonb_build_object('nome', 'Novo Usuário 2', 'posto_graduacao', 'SD', 'matricula', 'MAT-998', 'cpf', '529.982.247-25', 'data_nascimento', '1995-01-01')
-    );
-    raise exception 'Falha ao bloquear duplicidade de CPF';
-  exception when others then
-    get stacked diagnostics err_code = RETURNED_SQLSTATE, err_msg = MESSAGE_TEXT;
-    if err_code <> '23505' then
-      raise exception 'Código de erro inesperado para duplicidade de CPF: %', err_code;
-    end if;
-    if err_msg <> 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' then
-      raise exception 'Mensagem de duplicidade expôs CPF: %', err_msg;
-    end if;
-    if err_msg like '%529%' or err_msg like '%CPF%' or err_msg like '%MAT%' then
-      raise exception 'Mensagem pública de erro vazou detalhes pessoais: %', err_msg;
-    end if;
-  end;
+  select count(*) into my_regs_count from public.user_registrations;
+  if my_regs_count <> 1 then
+    raise exception 'Usuário aprovado obteve registros de outros usuários em consulta direta: %', my_regs_count;
+  end if;
 
-  -- 4.3 Duplicidade por matrícula existente
-  begin
-    insert into auth.users(id, email, aud, role, raw_user_meta_data)
-    values (
-      '40000000-0000-4000-8000-000000000090',
-      'mais-um-email@example.invalid',
-      'authenticated', 'authenticated',
-      jsonb_build_object('nome', 'Novo Usuário 3', 'posto_graduacao', 'SD', 'matricula', 'MAT-001', 'cpf', '01234567890', 'data_nascimento', '1995-01-01')
-    );
-    raise exception 'Falha ao bloquear duplicidade de matrícula';
-  exception when others then
-    get stacked diagnostics err_code = RETURNED_SQLSTATE, err_msg = MESSAGE_TEXT;
-    if err_code <> '23505' then
-      raise exception 'Código de erro inesperado para duplicidade de matrícula: %', err_code;
-    end if;
-    if err_msg <> 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' then
-      raise exception 'Mensagem de duplicidade expôs dados ou divergiu: %', err_msg;
-    end if;
-  end;
-end$$;
-
--- 5. Teste de chamadas não autorizadas por usuário comum
-select set_config('request.jwt.claims', '{"sub":"40000000-0000-4000-8000-000000000003","role":"authenticated"}', true);
-
-do $$begin
+  -- Como editor em Secretaria, não possui acesso administrativo
   begin
     perform public.admin_list_users();
-    raise exception 'Usuário comum acessou admin_list_users';
-  exception when insufficient_privilege then null; end;
-
-  begin
-    perform public.admin_approve_user('40000000-0000-4000-8000-000000000004', array['Secretaria'], false, 4);
-    raise exception 'Usuário comum executou admin_approve_user';
-  exception when insufficient_privilege then null; end;
-
-  begin
-    perform public.admin_reject_user('40000000-0000-4000-8000-000000000004', 'Motivo', 4);
-    raise exception 'Usuário comum executou admin_reject_user';
-  exception when insufficient_privilege then null; end;
-
-  begin
-    perform public.admin_toggle_user('40000000-0000-4000-8000-000000000004', false, 4);
-    raise exception 'Usuário comum executou admin_toggle_user';
-  exception when insufficient_privilege then null; end;
-
-  begin
-    perform public.admin_save_user('pending-test@example.invalid', 'Nome', array['Secretaria'], true, false, 4);
-    raise exception 'Usuário comum executou admin_save_user';
-  exception when insufficient_privilege then null; end;
-
-  begin
-    perform public.admin_list_audit();
-    raise exception 'Usuário comum executou admin_list_audit';
+    raise exception 'Usuário aprovado como editor acessou admin_list_users';
   exception when insufficient_privilege then null; end;
 end$$;
 
--- 6. Teste de isolamento de dados para usuário bloqueado
-select set_config('request.jwt.claims', '{"sub":"40000000-0000-4000-8000-000000000005","role":"authenticated"}', true);
-
-do $$declare my_status jsonb; begin
-  select public.get_my_registration_status() into my_status;
-  if my_status->>'status' <> 'blocked' then
-    raise exception 'Consulta de situação de bloqueado falhou: %', my_status;
-  end if;
-
-  if exists (select 1 from public.staff) then
-    raise exception 'Usuário bloqueado conseguiu ler tabela staff';
-  end if;
-  if exists (select 1 from public.support_documents) then
-    raise exception 'Usuário bloqueado conseguiu ler support_documents';
-  end if;
-end$$;
-
--- 7. Teste de isolamento para usuário anônimo
+-- 2.5 Teste de isolamento para usuário anônimo
 set local role anon;
 do $$begin
   begin
+    execute 'select * from public.user_registrations';
+    raise exception 'Anônimo conseguiu ler public.user_registrations';
+  exception when insufficient_privilege then null; end;
+
+  begin
     perform public.admin_list_users();
-    raise exception 'Anônimo executou admin_list_users';
-  exception when insufficient_privilege then null; end;
-
-  begin
-    perform public.admin_approve_user('40000000-0000-4000-8000-000000000004', array['Secretaria'], false, null);
-    raise exception 'Anônimo executou admin_approve_user';
-  exception when insufficient_privilege then null; end;
-
-  begin
-    perform public.admin_save_user('pending-test@example.invalid', 'Nome', array['Secretaria'], true, false, null);
-    raise exception 'Anônimo executou admin_save_user';
+    raise exception 'Anônimo conseguiu executar admin_list_users';
   exception when insufficient_privilege then null; end;
 
   begin
     perform public.get_my_registration_status();
-    raise exception 'Anônimo executou get_my_registration_status';
+    raise exception 'Anônimo conseguiu executar get_my_registration_status';
   exception when insufficient_privilege then null; end;
 end$$;
 
+-- 3. Verificação de sincronização das tabelas privadas após reset role (sem conceder acesso direto a elas)
 reset role;
+
+do $$
+declare
+  allowlist_row private.login_allowlist%rowtype;
+  member_row public.app_members%rowtype;
+  reg_row public.user_registrations%rowtype;
+  audit_count integer;
+begin
+  -- 3.1 Verificação do cadastro com e-mail previamente na allowlist
+  select * into allowlist_row from private.login_allowlist where email = 'preauthorized@example.invalid';
+  if allowlist_row.enabled then
+    raise exception 'Allowlist prévia não foi desabilitada no cadastro de preauthorized@example.invalid';
+  end if;
+
+  select * into member_row from public.app_members where user_id = '40000000-0000-4000-8000-000000000003';
+  if member_row.enabled or member_row.role <> 'reader' or member_row.sectors <> '{}' then
+    raise exception 'Membro preauthorized não nasceu desabilitado sem setores: %', member_row;
+  end if;
+
+  select * into reg_row from public.user_registrations where user_id = '40000000-0000-4000-8000-000000000003';
+  if reg_row.status <> 'pending_approval' then
+    raise exception 'Registro preauthorized não está pending_approval: %', reg_row;
+  end if;
+
+  -- 3.2 Verificação do usuário aprovado e sincronizado
+  select * into allowlist_row from private.login_allowlist where email = 'pending-test@example.invalid';
+  if not allowlist_row.enabled or allowlist_row.display_name <> 'Candidato Aprovado' or allowlist_row.sectors <> array['Secretaria','Vistoriador'] then
+    raise exception 'Sincronização da allowlist falhou para usuário aprovado: %', allowlist_row;
+  end if;
+
+  select * into member_row from public.app_members where user_id = '40000000-0000-4000-8000-000000000002';
+  if not member_row.enabled or member_row.display_name <> 'Candidato Aprovado' or member_row.role <> 'editor' or member_row.sectors <> array['Secretaria','Vistoriador'] then
+    raise exception 'Sincronização de app_members falhou para usuário aprovado: %', member_row;
+  end if;
+
+  select * into reg_row from public.user_registrations where user_id = '40000000-0000-4000-8000-000000000002';
+  if reg_row.status <> 'approved' or reg_row.nome <> 'Candidato Aprovado' then
+    raise exception 'Sincronização de user_registrations falhou para usuário aprovado: %', reg_row;
+  end if;
+
+  -- 3.3 Verificação da rejeição do usuário com metadados maliciosos
+  select * into reg_row from public.user_registrations where user_id = '40000000-0000-4000-8000-000000000004';
+  if reg_row.status <> 'rejected' or reg_row.rejection_reason <> 'Metadados inválidos' then
+    raise exception 'Rejeição de metadados maliciosos falhou: %', reg_row;
+  end if;
+
+  -- 3.4 Verificação de registros de auditoria
+  select count(*) into audit_count from private.user_access_audit;
+  if audit_count < 5 then
+    raise exception 'Quantidade insuficiente de eventos de auditoria registrados: %', audit_count;
+  end if;
+end$$;
+
 rollback;

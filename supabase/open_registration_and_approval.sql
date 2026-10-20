@@ -75,15 +75,17 @@ language sql stable security definer set search_path = '' as $$
     select 1 from public.app_members m
     join auth.users u on u.id = m.user_id
     join private.login_allowlist a on a.email = lower(u.email)
-    where m.user_id = p_user_id and m.enabled and a.enabled
+    where m.user_id = p_user_id and p_user_id is not null
+      and m.enabled and a.enabled
       and m.role = 'administrator' and a.role = 'administrator'
       and m.sectors @> array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas']
       and a.sectors @> array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas']
   );
 $$;
-revoke all on function private.is_superadmin(uuid) from public, anon, authenticated;
+revoke all on function private.is_superadmin(uuid) from public, anon;
+grant execute on function private.is_superadmin(uuid) to authenticated;
 
--- 5. Tratamento de cadastro no auth.users (sem manipulação direta de email_confirmed_at)
+-- 5. Tratamento de cadastro no auth.users (sem manipulação direta de email_confirmed_at e sem auto-habilitação por allowlist)
 create or replace function private.handle_new_user_registration() returns trigger
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -98,49 +100,45 @@ begin
   -- Serialização de cadastros concorrentes para proteção contra race conditions
   perform pg_advisory_xact_lock(73425, 19102026);
 
-  -- Se foram fornecidos metadados de solicitação aberta de cadastro
-  if clean_nome <> '' or clean_cpf <> '' or clean_matricula <> '' then
-    if length(clean_nome) < 2 or length(clean_nome) > 160 then
-      raise exception 'Informe um nome entre 2 e 160 caracteres' using errcode = '22023';
-    end if;
-
-    if not clean_posto = any(allowed_ranks) then
-      raise exception 'Selecione um posto ou graduação válido' using errcode = '22023';
-    end if;
-
-    if length(clean_matricula) < 2 or length(clean_matricula) > 50 then
-      raise exception 'Informe uma matrícula funcional válida' using errcode = '22023';
-    end if;
-
-    if not private.is_valid_cpf(clean_cpf) then
-      raise exception 'Informe um CPF válido' using errcode = '22023';
-    end if;
-
-    begin
-      clean_nasc := (raw_meta->>'data_nascimento')::date;
-      if clean_nasc is null or clean_nasc > current_date or clean_nasc < '1900-01-01'::date then
-        raise exception 'Data de nascimento inválida';
-      end if;
-    exception when others then
-      raise exception 'Data de nascimento inválida' using errcode = '22023';
-    end;
-
-    -- Validação de duplicidade sem expor dados de outros usuários
-    if exists (select 1 from public.user_registrations r where lower(r.email) = lower(new.email)) or
-       exists (select 1 from auth.users u where lower(u.email) = lower(new.email) and u.id <> new.id) or
-       exists (select 1 from public.user_registrations r where r.cpf is not null and regexp_replace(r.cpf, '\D', '', 'g') = clean_cpf) or
-       exists (select 1 from public.user_registrations r where r.matricula is not null and btrim(r.matricula) = clean_matricula) then
-      raise exception 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' using errcode = '23505';
-    end if;
-
-    -- Não altera new.email_confirmed_at: a confirmação depende da configuração do Supabase Auth.
-  else
-    -- Fallback compatível: cadastro via allowlist prévia
-    if not exists (select 1 from private.login_allowlist a where a.email = lower(new.email) and a.enabled) then
-      raise exception 'Cadastro não autorizado para este portal' using errcode = '42501';
-    end if;
+  -- Validação obrigatória de todos os campos da solicitação pública
+  if clean_nome = '' or clean_posto = '' or clean_matricula = '' or clean_cpf = '' or raw_meta->>'data_nascimento' is null then
+    raise exception 'Informe todos os dados obrigatórios para solicitação de cadastro' using errcode = '22023';
   end if;
 
+  if length(clean_nome) < 2 or length(clean_nome) > 160 then
+    raise exception 'Informe um nome entre 2 e 160 caracteres' using errcode = '22023';
+  end if;
+
+  if not clean_posto = any(allowed_ranks) then
+    raise exception 'Selecione um posto ou graduação válido' using errcode = '22023';
+  end if;
+
+  if length(clean_matricula) < 2 or length(clean_matricula) > 50 then
+    raise exception 'Informe uma matrícula funcional válida' using errcode = '22023';
+  end if;
+
+  if not private.is_valid_cpf(clean_cpf) then
+    raise exception 'Informe um CPF válido' using errcode = '22023';
+  end if;
+
+  begin
+    clean_nasc := (raw_meta->>'data_nascimento')::date;
+    if clean_nasc is null or clean_nasc > current_date or clean_nasc < '1900-01-01'::date then
+      raise exception 'Data de nascimento inválida';
+    end if;
+  exception when others then
+    raise exception 'Data de nascimento inválida' using errcode = '22023';
+  end;
+
+  -- Validação de duplicidade sem expor dados de outros usuários
+  if exists (select 1 from public.user_registrations r where lower(r.email) = lower(new.email)) or
+     exists (select 1 from auth.users u where lower(u.email) = lower(new.email) and u.id <> new.id) or
+     exists (select 1 from public.user_registrations r where r.cpf is not null and regexp_replace(r.cpf, '\D', '', 'g') = clean_cpf) or
+     exists (select 1 from public.user_registrations r where r.matricula is not null and btrim(r.matricula) = clean_matricula) then
+    raise exception 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' using errcode = '23505';
+  end if;
+
+  -- Metadados maliciosos (role, sectors, status, is_superadmin) são ignorados por design
   return new;
 end;
 $$;
@@ -169,58 +167,55 @@ declare
   clean_posto text := btrim(coalesce(raw_meta->>'posto_graduacao', ''));
   clean_matricula text := btrim(coalesce(raw_meta->>'matricula', ''));
   clean_cpf text := regexp_replace(coalesce(raw_meta->>'cpf', ''), '\D', '', 'g');
-  clean_nasc date;
-  allowed private.login_allowlist%rowtype;
+  clean_nasc date := (raw_meta->>'data_nascimento')::date;
 begin
   perform pg_advisory_xact_lock(73425, 19102026);
 
-  if clean_nome <> '' and clean_cpf <> '' then
-    clean_nasc := (raw_meta->>'data_nascimento')::date;
-
-    begin
-      insert into public.user_registrations(
-        user_id, email, nome, posto_graduacao, matricula, cpf, data_nascimento, status
-      ) values (
-        new.id, lower(new.email), clean_nome, clean_posto, clean_matricula, clean_cpf, clean_nasc, 'pending_approval'
-      ) on conflict (lower(email)) do update set
-        user_id = new.id,
-        nome = excluded.nome,
-        posto_graduacao = excluded.posto_graduacao,
-        matricula = excluded.matricula,
-        cpf = excluded.cpf,
-        data_nascimento = excluded.data_nascimento,
-        status = 'pending_approval',
-        updated_at = now();
-    exception when unique_violation then
-      raise exception 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' using errcode = '23505';
-    end;
-
-    -- Inicia no app_members desabilitado, papel leitor e sem setores
-    insert into public.app_members(user_id, display_name, role, sectors, enabled)
-    values (new.id, clean_nome, 'reader', '{}', false)
-    on conflict (user_id) do update set
-      display_name = excluded.display_name,
-      enabled = false;
-
-    insert into private.user_access_audit(actor_id, target_email, action, after_values, notes)
-    values (new.id, lower(new.email), 'register', jsonb_build_object('nome', clean_nome, 'status', 'pending_approval'), 'Solicitação de cadastro recebida');
-
-  elsif exists (select 1 from private.login_allowlist where email = lower(new.email) and enabled) then
-    select * into allowed from private.login_allowlist where email = lower(new.email) and enabled;
-    insert into public.app_members(user_id, display_name, role, sectors, enabled)
-    values (new.id, allowed.display_name, allowed.role, allowed.sectors, true)
-    on conflict (user_id) do update set
-      display_name = excluded.display_name,
-      role = excluded.role,
-      sectors = excluded.sectors,
-      enabled = true;
-
+  begin
     insert into public.user_registrations(
-      user_id, email, nome, posto_graduacao, matricula, cpf, data_nascimento, status, approved_at
+      user_id, email, nome, posto_graduacao, matricula, cpf, data_nascimento, status
     ) values (
-      new.id, lower(new.email), allowed.display_name, null, null, null, null, 'approved', now()
-    ) on conflict (lower(email)) do nothing;
-  end if;
+      new.id, lower(new.email), clean_nome, clean_posto, clean_matricula, clean_cpf, clean_nasc, 'pending_approval'
+    ) on conflict (lower(email)) do update set
+      user_id = new.id,
+      nome = excluded.nome,
+      posto_graduacao = excluded.posto_graduacao,
+      matricula = excluded.matricula,
+      cpf = excluded.cpf,
+      data_nascimento = excluded.data_nascimento,
+      status = 'pending_approval',
+      rejection_reason = null,
+      approved_at = null,
+      approved_by = null,
+      rejected_at = null,
+      rejected_by = null,
+      updated_at = now();
+  exception when unique_violation then
+    raise exception 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' using errcode = '23505';
+  end;
+
+  -- Toda nova conta pública nasce DESABILITADA, papel leitor e sem setores
+  insert into public.app_members(user_id, display_name, role, sectors, enabled)
+  values (new.id, clean_nome, 'reader', '{}', false)
+  on conflict (user_id) do update set
+    display_name = excluded.display_name,
+    role = 'reader',
+    sectors = '{}',
+    enabled = false;
+
+  -- Se o e-mail constava previamente na login_allowlist, desabilita a allowlist
+  -- para impedir que a nova conta assuma permissões antigas antes da aprovação formal
+  update private.login_allowlist set
+    enabled = false,
+    updated_at = now()
+  where email = lower(new.email);
+
+  insert into private.user_access_audit(actor_id, target_email, action, after_values, notes)
+  values (
+    new.id, lower(new.email), 'register',
+    jsonb_build_object('nome', clean_nome, 'status', 'pending_approval'),
+    'Solicitação de cadastro recebida (aguardando aprovação do superadmin)'
+  );
 
   return new;
 end;
@@ -251,12 +246,15 @@ on conflict (lower(email)) do nothing;
 
 -- 8. RLS em public.user_registrations: Restrita ao próprio usuário e ao superadministrador
 alter table public.user_registrations enable row level security;
-revoke all on public.user_registrations from public, anon, authenticated;
+revoke all on public.user_registrations from public, anon;
 grant select on public.user_registrations to authenticated;
 
 drop policy if exists reg_read_self on public.user_registrations;
 create policy reg_read_self on public.user_registrations for select to authenticated
-  using (user_id = (select auth.uid()) or private.is_superadmin(auth.uid()));
+  using (
+    user_id = (select auth.uid())
+    or private.is_superadmin((select auth.uid()))
+  );
 
 -- 9. Consulta da situação do próprio usuário logado (sem expor CPF/nascimento)
 create or replace function private.get_my_registration_status() returns jsonb
@@ -316,10 +314,19 @@ begin
           when u.id is null then 'pending_registration'
           else 'approved'
         end as status
-      from private.login_allowlist a
-      full outer join auth.users u on lower(u.email) = a.email and u.deleted_at is null
-      full outer join public.user_registrations r on (r.user_id = u.id or lower(r.email) = coalesce(a.email, lower(u.email)))
+      from (
+        select distinct lower(email) as email from (
+          select email from public.user_registrations
+          union all
+          select email from auth.users where deleted_at is null
+          union all
+          select email from private.login_allowlist
+        ) all_emails
+      ) e
+      left join public.user_registrations r on lower(r.email) = e.email
+      left join auth.users u on lower(u.email) = e.email and u.deleted_at is null
       left join public.app_members m on m.user_id = coalesce(u.id, r.user_id)
+      left join private.login_allowlist a on a.email = e.email
     ) t
   ), '[]'::jsonb);
 end;
@@ -737,8 +744,9 @@ end;
 $$;
 revoke all on function private.list_user_audit(text) from public, anon, authenticated;
 
--- 16. Concessão explícita de execução das funções privadas para authenticated (necessária para wrappers invoker)
+-- 16. Concessão explícita de execução das funções privadas para authenticated (necessária para wrappers invoker e RLS)
 grant usage on schema private to authenticated;
+grant execute on function private.is_superadmin(uuid) to authenticated;
 grant execute on function private.get_my_registration_status() to authenticated;
 grant execute on function private.list_managed_users() to authenticated;
 grant execute on function private.approve_user_registration(uuid, text[], boolean, integer) to authenticated;

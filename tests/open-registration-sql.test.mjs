@@ -1,0 +1,72 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { PGlite } from '@electric-sql/pglite';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(__dirname, '..');
+
+test('execução e validação da migration e suíte de testes SQL em PostgreSQL com rollback', async () => {
+  const db = new PGlite();
+
+  // 1. Mock do ambiente Supabase Auth e Roles
+  await db.exec(`
+    create schema if not exists auth;
+    create table if not exists auth.users (
+      id uuid primary key default gen_random_uuid(),
+      email text,
+      aud text default 'authenticated',
+      role text default 'authenticated',
+      raw_user_meta_data jsonb default '{}'::jsonb,
+      email_confirmed_at timestamptz,
+      last_sign_in_at timestamptz,
+      deleted_at timestamptz,
+      created_at timestamptz default now()
+    );
+
+    do $$begin
+      if not exists (select 1 from pg_roles where rolname = 'anon') then
+        create role anon;
+      end if;
+      if not exists (select 1 from pg_roles where rolname = 'authenticated') then
+        create role authenticated;
+      end if;
+    end$$;
+
+    create or replace function auth.uid() returns uuid language sql stable as $$
+      select coalesce(
+        nullif(current_setting('request.jwt.claim.sub', true), ''),
+        nullif((coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb)->>'sub', '')
+      )::uuid;
+    $$;
+
+    create or replace function auth.role() returns text language sql stable as $$
+      select coalesce(
+        nullif(current_setting('request.jwt.claim.role', true), ''),
+        (coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb)->>'role',
+        current_user
+      );
+    $$;
+
+    create or replace function public.rls_auto_enable() returns event_trigger language plpgsql as $$ begin end; $$;
+  `);
+
+  // 2. Baselines anteriores
+  const schemaSql = fs.readFileSync(path.join(root, 'supabase', 'schema.sql'), 'utf-8');
+  await db.exec(schemaSql);
+
+  const userMgmtSql = fs.readFileSync(path.join(root, 'supabase', 'user_management.sql'), 'utf-8');
+  await db.exec(userMgmtSql);
+
+  // 3. Aplicação da migration corrigida
+  const migrationSql = fs.readFileSync(path.join(root, 'supabase', 'open_registration_and_approval.sql'), 'utf-8');
+  await db.exec(migrationSql);
+
+  // 4. Execução da suíte completa de testes SQL
+  const testSql = fs.readFileSync(path.join(root, 'tests', 'open-registration-rls.sql'), 'utf-8');
+  await db.exec(testSql);
+
+  assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
+});
