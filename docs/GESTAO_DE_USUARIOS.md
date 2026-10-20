@@ -1,29 +1,58 @@
-# Gestão de Usuários
-Módulo exclusivo do superadministrador (função administrator e todos os seis setores). Usa a associação protegida no banco e uma verificação independente em cada operação administrativa.
+# Gestão de Usuários e Cadastro Aberto com Aprovação
 
-## Fluxo
-1. O gestor cadastra nome, e-mail e setores. A criação adiciona uma autorização, não uma conta Auth com senha compartilhada.
-2. A pessoa abre /login, escolhe Primeiro acesso, define sua senha e confirma o e-mail.
-3. A tela informa ativo, bloqueado, aguardando primeiro acesso ou aguardando confirmação.
-4. Nome, setores, permissão de superadministrador e liberação podem ser alterados. E-mail é a chave imutável deste fluxo.
-5. Bloquear desabilita a associação imediatamente no banco. Tokens antigos continuam sem acesso aos dados protegidos; o cliente revalida as permissões ao voltar à janela e a cada 60 segundos.
-6. Cadastro e alterações de acesso são registrados em auditoria privada, sem senhas.
+Módulo exclusivo do superadministrador (função `administrator` e todos os seis setores institucionais: Diretoria, Subdiretoria, Secretaria, Vistoriador, Análise e Multas).
 
-## Proteções
-- Chamadas administrativas negadas a usuário comum, conta bloqueada e anônimo.
-- E-mail normalizado; nome e setores validados no servidor.
-- Versão evita sobrescrita concorrente.
-- Superadministrador não pode bloquear ou rebaixar a própria conta.
-- Verificação de superadministrador ativo e serialização de alterações para evitar perda do último gestor.
-- Confirmação de e-mail preservada. Nenhum endpoint confirma contas ou altera senhas.
-- Enrollment e gestão usam a mesma trava para impedir reativação por confirmação concorrente.
-- Funções privilegiadas no schema private, search_path vazio e verificação de auth.uid(); endpoints públicos são wrappers invoker.
-- Nenhuma chave privilegiada no cliente, GitHub ou arquivo de ambiente público.
+## Novo Fluxo de Cadastro e Aprovação
 
-## Arquivos e validação
-- supabase/user_management.sql: expansão do esquema e funções.
-- tests/user-management-rls.sql: fixtures sintéticas e verificações, revertidas ao final.
-- tests/user-management.test.mjs: teste de renderização negada e classificação de perfis.
-- CI sem segredos: instalação, TypeScript, testes e build. Não publica o site.
+1. **Solicitação Aberta de Cadastro**:
+   - O interessado acessa a tela de acesso e seleciona **Solicitar cadastro**.
+   - Informa:
+     - Nome completo (entre 2 e 160 caracteres);
+     - Posto/graduação em seleção (`CEL`, `TCEL`, `MAJ`, `CAP`, `1º TEN`, `2º TEN`, `SUB TEN RR`, `SUB TEN`, `1º SGT`, `2º SGT`, `3º SGT`, `CB`, `SD`, `VC`);
+     - Matrícula funcional;
+     - CPF (com máscara e validação algorítmica módulo 11);
+     - Data de nascimento (validada, no passado, idade mínima de 16 anos);
+     - E-mail institucional ou pessoal;
+     - Senha e confirmação de senha (mínimo de 8 caracteres).
+   - Validações de duplicidade no backend para e-mail, CPF e matrícula, com mensagens seguras que não expõem dados de terceiros.
+   - Senhas são gerenciadas exclusivamente pelo Supabase Auth.
+   - Mensagem após o envio:
+     > “Cadastro recebido. Aguarde a aprovação do administrador para acessar o sistema.”
 
-A implementação foi preparada com o ambiente de execução local indisponível. A sincronização da fonte privada de Sites e a publicação dependem da recuperação desse ambiente. Não afirmar que a nova tela está publicada antes dessa etapa. A confirmação/redirecionamento do primeiro acesso continua seguindo a configuração Auth existente.
+2. **Situação do Usuário Pendente / Rejeitado / Bloqueado**:
+   - Usuário com cadastro pendente não possui nenhum setor nem permissão ativa (`app_members.enabled = false`).
+   - Sessão autenticada do Supabase Auth **NÃO** libera dados por si só: RLS em todas as tabelas (`staff`, `authorizations`, `sat_commands`, `sat_regions`, `support_documents`) e no Storage (`dgsci-support`) exige `m.enabled = true`.
+   - Na interface, o usuário pendente visualiza unicamente o cartão de situação cadastral e o botão de **Sair**.
+   - Em caso de rejeição, visualiza a justificativa informada pelo administrador.
+
+3. **Gestão pelo Superadministrador (`/gestao-usuarios`)**:
+   - **Contadores e Filtros**: contadores em tempo real para *Aguardando aprovação*, *Usuários ativos*, *Acessos bloqueados* e *Cadastros rejeitados*.
+   - **Consulta de Dados**: modal de detalhes cadastrais exibindo nome, posto/graduação, matrícula, CPF formatado, nascimento, data da solicitação e e-mail.
+   - **Aprovação**: atribuição obrigatória de um ou mais setores (`Diretoria`, `Subdiretoria`, `Secretaria`, `Vistoriador`, `Análise`, `Multas`), com opção de superadministrador.
+   - **Rejeição**: justificativa textual obrigatória gravada na auditoria e visível ao usuário.
+   - **Bloqueio e Desbloqueio**: controle imediato de acesso preservando proteção contra autobloqueio e perda do último superadministrador ativo.
+   - **Histórico de Auditoria**: rastreamento completo de eventos (`register`, `approve`, `reject`, `block`, `unblock`, `update`) com autor, data/hora e observações.
+
+## Proteção de Dados Pessoais
+
+- CPF, matrícula e data de nascimento são restritos ao próprio usuário autenticado e aos superadministradores.
+- Não são expostos em endpoints públicos, funções de listagem geral ou relatórios abertos.
+- Nenhuma chave privilegiada (`service_role` ou senhas de banco) é exposta no frontend, variáveis `VITE_*` ou repositório.
+
+## Configuração do Supabase Auth
+
+O novo fluxo dispensa a exigência de confirmação manual de e-mail pelo usuário.
+A migration SQL aplica a confirmação automática no momento do cadastro via trigger seguro. No painel administrativo do Supabase (Dashboard):
+1. Acesse **Authentication** → **Providers** → **Email**.
+2. Desmarque a opção **Confirm email** caso ainda esteja ativa.
+3. As contas existentes preservam seus acessos e senhas sem alterações em massa.
+
+## Arquivos e Migrations
+
+- `supabase/open_registration_and_approval.sql`: migration versionada com tabela `public.user_registrations`, triggers de cadastro e funções de aprovação/rejeição/auditoria.
+- `tests/open-registration-rls.sql`: suíte SQL com transações isoladas e rollback automático testando RLS, aprovação, rejeição, bloqueio e negação de acesso a pendentes.
+- `src/lib/rankHierarchy.ts`: centralização da hierarquia e normalização de postos e graduações.
+- `src/lib/userValidation.ts`: validações de CPF, máscaras, datas e regras de cadastro.
+- `tests/rank-hierarchy.test.mjs`: testes unitários da ordenação do efetivo e tolerância a grafias.
+- `tests/user-validation.test.mjs`: testes unitários de máscaras, CPF e formulário.
+- `tests/user-management.test.mjs`: testes de renderização de segurança e bloqueio de senhas.
