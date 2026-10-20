@@ -7,6 +7,8 @@ export type UserProfile =
   | 'Diretoria';
 
 export interface User {
+  id?: string;
+  email?: string;
   matricula: string;
   profile: UserProfile;
   isAuthenticated: boolean;
