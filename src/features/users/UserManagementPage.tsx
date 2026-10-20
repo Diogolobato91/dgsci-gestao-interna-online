@@ -440,6 +440,11 @@ export default function UserManagementPage() {
                         </strong>
                         <span className="table-secondary">
                           {account.email} {account.matricula ? `· Matrícula: ${account.matricula}` : ''}
+                          {!isPending && (!account.cpf || !account.matricula) && (
+                            <span className="user-incomplete-tag" title="Dados cadastrais pendentes de complementação">
+                              {' '}· Dados a complementar
+                            </span>
+                          )}
                         </span>
                       </td>
 
@@ -655,19 +660,19 @@ export default function UserManagementPage() {
                 </div>
                 <div>
                   <span className="table-overline">POSTO / GRADUAÇÃO</span>
-                  <strong>{viewingUser.posto_graduacao || 'Não informado'}</strong>
+                  <strong>{viewingUser.posto_graduacao || 'Não informado (a complementar)'}</strong>
                 </div>
                 <div>
                   <span className="table-overline">MATRÍCULA FUNCIONAL</span>
-                  <strong className="table-mono">{viewingUser.matricula || '—'}</strong>
+                  <strong className="table-mono">{viewingUser.matricula || 'Pendente de complementação'}</strong>
                 </div>
                 <div>
                   <span className="table-overline">CPF</span>
-                  <strong className="table-mono">{maskCpf(viewingUser.cpf) || '—'}</strong>
+                  <strong className="table-mono">{viewingUser.cpf ? maskCpf(viewingUser.cpf) : 'Pendente de complementação'}</strong>
                 </div>
                 <div>
                   <span className="table-overline">DATA DE NASCIMENTO</span>
-                  <span>{formatDate(viewingUser.data_nascimento)}</span>
+                  <span>{viewingUser.data_nascimento ? formatDate(viewingUser.data_nascimento) : 'Pendente de complementação'}</span>
                 </div>
                 <div>
                   <span className="table-overline">SITUAÇÃO ATUAL</span>

@@ -1,17 +1,17 @@
--- DGSCI: Cadastro com aprovação do superadministrador e proteção de dados pessoais.
--- Compatível com dados existentes e sem exclusões ou resets.
+-- DGSCI: Cadastro com aprovação do superadministrador, proteção de dados e sincronização consistente.
+-- Compatível com dados existentes, sem exclusões, resets ou dados fictícios.
 begin;
 
--- 1. Tabela de solicitações de cadastro e dados cadastrais
+-- 1. Tabela de solicitações e dados cadastrais de usuários
 create table if not exists public.user_registrations (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade,
   email text not null,
   nome text not null,
-  posto_graduacao text not null,
-  matricula text not null,
-  cpf text not null,
-  data_nascimento date not null,
+  posto_graduacao text,
+  matricula text,
+  cpf text,
+  data_nascimento date,
   status text not null check (status in ('pending_approval', 'approved', 'rejected', 'blocked')) default 'pending_approval',
   rejection_reason text,
   approved_at timestamptz,
@@ -24,12 +24,12 @@ create table if not exists public.user_registrations (
 );
 
 create unique index if not exists user_registrations_email_uidx on public.user_registrations (lower(email));
-create unique index if not exists user_registrations_cpf_uidx on public.user_registrations (regexp_replace(cpf, '\D', '', 'g'));
-create unique index if not exists user_registrations_matricula_uidx on public.user_registrations (btrim(matricula));
+create unique index if not exists user_registrations_cpf_uidx on public.user_registrations (regexp_replace(cpf, '\D', '', 'g')) where cpf is not null;
+create unique index if not exists user_registrations_matricula_uidx on public.user_registrations (btrim(matricula)) where matricula is not null;
 create index if not exists user_registrations_status_idx on public.user_registrations (status);
 create index if not exists user_registrations_user_id_idx on public.user_registrations (user_id);
 
--- 2. Expandir auditoria para registrar aprovação e rejeição
+-- 2. Tabela de auditoria: expandir ações para aprovação e rejeição
 alter table private.user_access_audit drop constraint if exists user_access_audit_action_check;
 alter table private.user_access_audit add constraint user_access_audit_action_check
   check (action in ('create','update','block','unblock','register','approve','reject'));
@@ -37,7 +37,7 @@ alter table private.user_access_audit add constraint user_access_audit_action_ch
 alter table private.user_access_audit add column if not exists actor_email text,
   add column if not exists notes text;
 
--- 3. Função auxiliar para validar algoritmo de CPF no PostgreSQL
+-- 3. Função auxiliar imutável para validar algoritmo de CPF (módulo 11)
 create or replace function private.is_valid_cpf(raw text) returns boolean
 language plpgsql immutable set search_path = '' as $$
 declare
@@ -68,18 +68,22 @@ end;
 $$;
 revoke all on function private.is_valid_cpf(text) from public, anon, authenticated;
 
--- 4. Função de verificação de superadministrador reutilizável
+-- 4. Função de verificação unificada de superadministrador (compatível com require_user_manager)
 create or replace function private.is_superadmin(p_user_id uuid) returns boolean
 language sql stable security definer set search_path = '' as $$
   select exists(
     select 1 from public.app_members m
-    where m.user_id = p_user_id and m.enabled and m.role = 'administrator'
+    join auth.users u on u.id = m.user_id
+    join private.login_allowlist a on a.email = lower(u.email)
+    where m.user_id = p_user_id and m.enabled and a.enabled
+      and m.role = 'administrator' and a.role = 'administrator'
       and m.sectors @> array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas']
+      and a.sectors @> array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas']
   );
 $$;
 revoke all on function private.is_superadmin(uuid) from public, anon, authenticated;
 
--- 5. Tratamento de cadastro no auth.users
+-- 5. Tratamento de cadastro no auth.users (sem manipulação direta de email_confirmed_at)
 create or replace function private.handle_new_user_registration() returns trigger
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -91,7 +95,10 @@ declare
   clean_nasc date;
   allowed_ranks text[] := array['CEL','TCEL','MAJ','CAP','1º TEN','2º TEN','SUB TEN RR','SUB TEN','1º SGT','2º SGT','3º SGT','CB','SD','VC'];
 begin
-  -- Se foram fornecidos metadados de solicitação de cadastro
+  -- Serialização de cadastros concorrentes para proteção contra race conditions
+  perform pg_advisory_xact_lock(73425, 19102026);
+
+  -- Se foram fornecidos metadados de solicitação aberta de cadastro
   if clean_nome <> '' or clean_cpf <> '' or clean_matricula <> '' then
     if length(clean_nome) < 2 or length(clean_nome) > 160 then
       raise exception 'Informe um nome entre 2 e 160 caracteres' using errcode = '22023';
@@ -118,22 +125,20 @@ begin
       raise exception 'Data de nascimento inválida' using errcode = '22023';
     end;
 
-    -- Validação de duplicidade sem expor dados de terceiros
+    -- Validação de duplicidade sem expor dados de outros usuários
     if exists (select 1 from public.user_registrations r where lower(r.email) = lower(new.email)) or
        exists (select 1 from auth.users u where lower(u.email) = lower(new.email) and u.id <> new.id) or
-       exists (select 1 from public.user_registrations r where regexp_replace(r.cpf, '\D', '', 'g') = clean_cpf) or
-       exists (select 1 from public.user_registrations r where btrim(r.matricula) = clean_matricula) then
+       exists (select 1 from public.user_registrations r where r.cpf is not null and regexp_replace(r.cpf, '\D', '', 'g') = clean_cpf) or
+       exists (select 1 from public.user_registrations r where r.matricula is not null and btrim(r.matricula) = clean_matricula) then
       raise exception 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' using errcode = '23505';
     end if;
 
-    -- Auto-confirmação da conta no Supabase Auth para eliminar dependência de e-mail de confirmação
-    new.email_confirmed_at := coalesce(new.email_confirmed_at, now());
+    -- Não altera new.email_confirmed_at: a confirmação depende da configuração do Supabase Auth.
   else
     -- Fallback compatível: cadastro via allowlist prévia
     if not exists (select 1 from private.login_allowlist a where a.email = lower(new.email) and a.enabled) then
       raise exception 'Cadastro não autorizado para este portal' using errcode = '42501';
     end if;
-    new.email_confirmed_at := coalesce(new.email_confirmed_at, now());
   end if;
 
   return new;
@@ -172,21 +177,25 @@ begin
   if clean_nome <> '' and clean_cpf <> '' then
     clean_nasc := (raw_meta->>'data_nascimento')::date;
 
-    insert into public.user_registrations(
-      user_id, email, nome, posto_graduacao, matricula, cpf, data_nascimento, status
-    ) values (
-      new.id, lower(new.email), clean_nome, clean_posto, clean_matricula, clean_cpf, clean_nasc, 'pending_approval'
-    ) on conflict (lower(email)) do update set
-      user_id = new.id,
-      nome = excluded.nome,
-      posto_graduacao = excluded.posto_graduacao,
-      matricula = excluded.matricula,
-      cpf = excluded.cpf,
-      data_nascimento = excluded.data_nascimento,
-      status = 'pending_approval',
-      updated_at = now();
+    begin
+      insert into public.user_registrations(
+        user_id, email, nome, posto_graduacao, matricula, cpf, data_nascimento, status
+      ) values (
+        new.id, lower(new.email), clean_nome, clean_posto, clean_matricula, clean_cpf, clean_nasc, 'pending_approval'
+      ) on conflict (lower(email)) do update set
+        user_id = new.id,
+        nome = excluded.nome,
+        posto_graduacao = excluded.posto_graduacao,
+        matricula = excluded.matricula,
+        cpf = excluded.cpf,
+        data_nascimento = excluded.data_nascimento,
+        status = 'pending_approval',
+        updated_at = now();
+    exception when unique_violation then
+      raise exception 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.' using errcode = '23505';
+    end;
 
-    -- Inicia no app_members desabilitado e sem setores
+    -- Inicia no app_members desabilitado, papel leitor e sem setores
     insert into public.app_members(user_id, display_name, role, sectors, enabled)
     values (new.id, clean_nome, 'reader', '{}', false)
     on conflict (user_id) do update set
@@ -209,7 +218,7 @@ begin
     insert into public.user_registrations(
       user_id, email, nome, posto_graduacao, matricula, cpf, data_nascimento, status, approved_at
     ) values (
-      new.id, lower(new.email), allowed.display_name, 'VC', 'S/M', '00000000000', '1980-01-01'::date, 'approved', now()
+      new.id, lower(new.email), allowed.display_name, null, null, null, null, 'approved', now()
     ) on conflict (lower(email)) do nothing;
   end if;
 
@@ -222,22 +231,21 @@ drop trigger if exists dgsci_enroll_verified on auth.users;
 create trigger dgsci_enroll_verified after insert on auth.users
   for each row execute function private.enroll_new_user_after();
 
--- 7. Migração segura de contas existentes já habilitadas para user_registrations
+-- 7. Migração segura de contas existentes já habilitadas (sem inventar CPF, matrícula, nascimento ou graduação)
 insert into public.user_registrations(user_id, email, nome, posto_graduacao, matricula, cpf, data_nascimento, status, approved_at, version)
 select
   u.id,
   lower(u.email),
   m.display_name,
-  coalesce(s.posto_graduacao, 'VC'),
-  coalesce(s.mf, 'S/M'),
-  coalesce(s.cpf, '00000000000'),
-  coalesce(s.data_nascimento, '1980-01-01'::date),
+  null, -- Dados não inventados; permanecem nulos para complementação
+  null,
+  null,
+  null,
   case when m.enabled then 'approved' else 'blocked' end,
   now(),
   1
 from public.app_members m
 join auth.users u on u.id = m.user_id
-left join public.staff s on lower(btrim(s.nome)) = lower(btrim(m.display_name))
 where not exists (select 1 from public.user_registrations r where lower(r.email) = lower(u.email))
 on conflict (lower(email)) do nothing;
 
@@ -250,8 +258,8 @@ drop policy if exists reg_read_self on public.user_registrations;
 create policy reg_read_self on public.user_registrations for select to authenticated
   using (user_id = (select auth.uid()) or private.is_superadmin(auth.uid()));
 
--- 9. Consulta de situação do próprio usuário logado (sem expor CPF/nascimento)
-create or replace function public.get_my_registration_status() returns jsonb
+-- 9. Consulta da situação do próprio usuário logado (sem expor CPF/nascimento)
+create or replace function private.get_my_registration_status() returns jsonb
 language plpgsql stable security definer set search_path = '' as $$
 declare
   actor uuid := auth.uid();
@@ -271,8 +279,7 @@ begin
   );
 end;
 $$;
-revoke all on function public.get_my_registration_status() from public, anon;
-grant execute on function public.get_my_registration_status() to authenticated;
+revoke all on function private.get_my_registration_status() from public, anon, authenticated;
 
 -- 10. Listagem completa para o Superadministrador
 create or replace function private.list_managed_users() returns jsonb
@@ -290,11 +297,11 @@ begin
         coalesce(r.nome, m.display_name, a.display_name) as display_name,
         coalesce(m.role, a.role, 'reader') as role,
         coalesce(m.sectors, a.sectors, '{}'::text[]) as sectors,
-        coalesce(m.enabled, false) as enabled,
+        coalesce(m.enabled, a.enabled, false) as enabled,
         coalesce(r.version, a.version, 1) as version,
         coalesce(r.updated_at, a.updated_at, now()) as updated_at,
         coalesce(r.created_at, u.created_at, now()) as created_at,
-        u.id as user_id,
+        coalesce(u.id, r.user_id) as user_id,
         u.last_sign_in_at,
         r.posto_graduacao,
         r.matricula,
@@ -309,16 +316,17 @@ begin
           when u.id is null then 'pending_registration'
           else 'approved'
         end as status
-      from public.user_registrations r
-      full outer join auth.users u on u.id = r.user_id and u.deleted_at is null
-      left join public.app_members m on m.user_id = u.id
-      left join private.login_allowlist a on a.email = coalesce(r.email, lower(u.email))
+      from private.login_allowlist a
+      full outer join auth.users u on lower(u.email) = a.email and u.deleted_at is null
+      full outer join public.user_registrations r on (r.user_id = u.id or lower(r.email) = coalesce(a.email, lower(u.email)))
+      left join public.app_members m on m.user_id = coalesce(u.id, r.user_id)
     ) t
   ), '[]'::jsonb);
 end;
 $$;
+revoke all on function private.list_managed_users() from public, anon, authenticated;
 
--- 11. Aprovação de cadastro pelo superadministrador (com setores obrigatórios)
+-- 11. Aprovação de cadastro pelo superadministrador (mantendo app_members e login_allowlist sincronizados)
 create or replace function private.approve_user_registration(
   p_user_id uuid,
   p_sectors text[],
@@ -342,6 +350,23 @@ begin
     raise exception 'Usuário não especificado' using errcode = '22023';
   end if;
 
+  -- Proteção contra autorrebaixamento
+  if actor = p_user_id and not p_superadmin then
+    raise exception 'Você não pode remover o próprio acesso de superadministrador' using errcode = '22023';
+  end if;
+
+  -- Proteção contra remoção do último superadministrador ativo
+  if not p_superadmin and private.is_superadmin(p_user_id) and not exists(
+    select 1 from public.app_members m
+    join auth.users u on u.id = m.user_id
+    join private.login_allowlist a on a.email = lower(u.email)
+    where m.user_id <> p_user_id and m.enabled and a.enabled
+      and m.role = 'administrator' and a.role = 'administrator'
+      and m.sectors @> all_sectors and a.sectors @> all_sectors
+  ) then
+    raise exception 'Mantenha ao menos um superadministrador com acesso' using errcode = '22023';
+  end if;
+
   select * into target_reg from public.user_registrations where user_id = p_user_id for update;
   if not found then
     raise exception 'Solicitação de cadastro não encontrada' using errcode = '22023';
@@ -359,6 +384,7 @@ begin
     array(select distinct sector from unnest(p_sectors) sector order by sector) end;
   selected_role := case when p_superadmin then 'administrator' else 'editor' end;
 
+  -- 1. Atualiza user_registrations
   update public.user_registrations set
     status = 'approved',
     approved_at = now(),
@@ -368,6 +394,7 @@ begin
     updated_at = now()
   where id = target_reg.id;
 
+  -- 2. Atualiza app_members
   insert into public.app_members(user_id, display_name, role, sectors, enabled)
   values (p_user_id, target_reg.nome, selected_role, selected_sectors, true)
   on conflict (user_id) do update set
@@ -375,6 +402,17 @@ begin
     role = excluded.role,
     sectors = excluded.sectors,
     enabled = true;
+
+  -- 3. Sincroniza login_allowlist para consistência com require_user_manager
+  insert into private.login_allowlist(email, display_name, role, sectors, enabled)
+  values (target_reg.email, target_reg.nome, selected_role, selected_sectors, true)
+  on conflict (email) do update set
+    display_name = excluded.display_name,
+    role = excluded.role,
+    sectors = excluded.sectors,
+    enabled = true,
+    version = private.login_allowlist.version + 1,
+    updated_at = now();
 
   insert into private.user_access_audit(actor_id, actor_email, target_email, action, before_values, after_values, notes)
   values (
@@ -387,7 +425,7 @@ end;
 $$;
 revoke all on function private.approve_user_registration(uuid, text[], boolean, integer) from public, anon, authenticated;
 
--- 12. Rejeição de cadastro pelo superadministrador (com justificativa obrigatória)
+-- 12. Rejeição de cadastro pelo superadministrador (com justificativa obrigatória e proteção contra autorrejeição)
 create or replace function private.reject_user_registration(
   p_user_id uuid,
   p_reason text,
@@ -408,6 +446,15 @@ begin
     raise exception 'Usuário não especificado' using errcode = '22023';
   end if;
 
+  -- Proteção contra autorrejeição e rejeição de superadministrador
+  if actor = p_user_id then
+    raise exception 'Você não pode rejeitar o próprio cadastro de superadministrador' using errcode = '22023';
+  end if;
+
+  if private.is_superadmin(p_user_id) then
+    raise exception 'Não é permitido rejeitar uma conta de superadministrador' using errcode = '22023';
+  end if;
+
   if length(clean_reason) < 3 then
     raise exception 'Informe a justificativa da rejeição' using errcode = '22023';
   end if;
@@ -421,6 +468,7 @@ begin
     raise exception 'Cadastro alterado por outra pessoa. Atualize a lista' using errcode = '40001';
   end if;
 
+  -- 1. Atualiza user_registrations
   update public.user_registrations set
     status = 'rejected',
     rejection_reason = clean_reason,
@@ -430,7 +478,11 @@ begin
     updated_at = now()
   where id = target_reg.id;
 
+  -- 2. Atualiza app_members
   update public.app_members set enabled = false where user_id = p_user_id;
+
+  -- 3. Atualiza login_allowlist se existente
+  update private.login_allowlist set enabled = false where email = target_reg.email;
 
   insert into private.user_access_audit(actor_id, actor_email, target_email, action, before_values, after_values, notes)
   values (
@@ -443,7 +495,7 @@ end;
 $$;
 revoke all on function private.reject_user_registration(uuid, text, integer) from public, anon, authenticated;
 
--- 13. Bloqueio / Desbloqueio preservando regras de superadministrador
+-- 13. Bloqueio / Desbloqueio (sincronizando app_members e login_allowlist com proteções)
 create or replace function private.toggle_user_block(
   p_user_id uuid,
   p_enabled boolean,
@@ -453,6 +505,7 @@ declare
   actor uuid;
   actor_email text;
   target_reg public.user_registrations%rowtype;
+  target_email text;
   all_sectors constant text[] := array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'];
   is_target_superadmin boolean;
 begin
@@ -472,29 +525,39 @@ begin
     raise exception 'Cadastro alterado por outra pessoa. Atualize a lista' using errcode = '40001';
   end if;
 
-  select exists(
-    select 1 from public.app_members m
-    where m.user_id = p_user_id and m.enabled and m.role = 'administrator' and m.sectors @> all_sectors
-  ) into is_target_superadmin;
+  is_target_superadmin := private.is_superadmin(p_user_id);
 
   if not p_enabled and is_target_superadmin and not exists(
     select 1 from public.app_members m
-    where m.user_id <> p_user_id and m.enabled and m.role = 'administrator' and m.sectors @> all_sectors
+    join auth.users u on u.id = m.user_id
+    join private.login_allowlist a on a.email = lower(u.email)
+    where m.user_id <> p_user_id and m.enabled and a.enabled
+      and m.role = 'administrator' and a.role = 'administrator'
+      and m.sectors @> all_sectors and a.sectors @> all_sectors
   ) then
     raise exception 'Mantenha ao menos um superadministrador com acesso' using errcode = '22023';
   end if;
 
+  select coalesce(target_reg.email, (select lower(email) from auth.users where id = p_user_id)) into target_email;
+
+  -- 1. Atualiza user_registrations
   update public.user_registrations set
     status = case when p_enabled then 'approved' else 'blocked' end,
     version = version + 1,
     updated_at = now()
   where user_id = p_user_id;
 
+  -- 2. Atualiza app_members
   update public.app_members set enabled = p_enabled where user_id = p_user_id;
+
+  -- 3. Atualiza login_allowlist se existente
+  if target_email is not null then
+    update private.login_allowlist set enabled = p_enabled where email = target_email;
+  end if;
 
   insert into private.user_access_audit(actor_id, actor_email, target_email, action, before_values, after_values, notes)
   values (
-    actor, actor_email, coalesce(target_reg.email, (select email from auth.users where id = p_user_id)),
+    actor, actor_email, coalesce(target_email, 'desconhecido'),
     case when p_enabled then 'unblock' else 'block' end,
     jsonb_build_object('enabled', not p_enabled),
     jsonb_build_object('enabled', p_enabled),
@@ -504,7 +567,149 @@ end;
 $$;
 revoke all on function private.toggle_user_block(uuid, boolean, integer) from public, anon, authenticated;
 
--- 14. Histórico de auditoria para o Superadministrador
+-- 14. Edição de dados e setores do usuário gerenciado (mantendo app_members, login_allowlist e user_registrations consistentes)
+create or replace function private.save_managed_user(
+  p_email text,
+  p_display_name text,
+  p_sectors text[],
+  p_enabled boolean,
+  p_superadmin boolean,
+  p_expected_version integer default null
+) returns void language plpgsql security definer set search_path = '' as $$
+declare
+  actor uuid;
+  actor_email text;
+  target text := lower(btrim(p_email));
+  clean_name text := btrim(p_display_name);
+  all_sectors constant text[] := array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'];
+  selected_sectors text[];
+  selected_role text;
+  previous private.login_allowlist%rowtype;
+  present boolean;
+  target_id uuid;
+  action_name text;
+  target_reg public.user_registrations%rowtype;
+  target_is_superadmin boolean;
+begin
+  actor := private.require_user_manager();
+  select email into actor_email from auth.users where id = actor;
+  perform pg_advisory_xact_lock(73425, 19102026);
+  actor := private.require_user_manager();
+
+  if target is null or length(target) > 254 or target !~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$' then
+    raise exception 'Informe um e-mail válido' using errcode = '22023';
+  end if;
+
+  if clean_name is null or length(clean_name) < 2 or length(clean_name) > 160 then
+    raise exception 'Informe um nome entre 2 e 160 caracteres' using errcode = '22023';
+  end if;
+
+  if p_enabled is null or p_superadmin is null or p_sectors is null
+    or cardinality(p_sectors) = 0 or array_position(p_sectors, null) is not null or not p_sectors <@ all_sectors then
+    raise exception 'Selecione setores válidos' using errcode = '22023';
+  end if;
+
+  selected_sectors := case when p_superadmin then all_sectors else
+    array(select distinct sector from unnest(p_sectors) sector order by sector) end;
+  selected_role := case when p_superadmin then 'administrator' else 'editor' end;
+
+  select * into previous from private.login_allowlist where email = target for update;
+  present := found;
+
+  select * into target_reg from public.user_registrations where lower(email) = target for update;
+
+  select id into target_id from auth.users where lower(email) = target and deleted_at is null;
+
+  if present and p_expected_version is null and target_reg.id is null then
+    raise exception 'Este e-mail já está cadastrado' using errcode = '23505';
+  end if;
+
+  -- Validação de versão concorrente
+  if p_expected_version is not null then
+    if target_reg.version is not null and target_reg.version <> p_expected_version then
+      raise exception 'Cadastro alterado por outra pessoa. Atualize a lista' using errcode = '40001';
+    elsif target_reg.version is null and present and previous.version <> p_expected_version then
+      raise exception 'Cadastro alterado por outra pessoa. Atualize a lista' using errcode = '40001';
+    end if;
+  end if;
+
+  -- Proteção contra autobloqueio e autorrebaixamento
+  if (lower(actor_email) = target or actor = target_id) and (not p_enabled or not p_superadmin) then
+    raise exception 'Você não pode bloquear ou remover o próprio acesso de superadministrador' using errcode = '22023';
+  end if;
+
+  -- Verifica se o alvo é superadmin atualmente
+  target_is_superadmin := (target_id is not null and private.is_superadmin(target_id)) or
+    (present and previous.enabled and previous.role = 'administrator' and previous.sectors @> all_sectors);
+
+  -- Proteção de último superadmin
+  if target_is_superadmin and (not p_enabled or not p_superadmin) and not exists(
+    select 1 from public.app_members m
+    join auth.users u on u.id = m.user_id
+    join private.login_allowlist a on a.email = lower(u.email)
+    where (target_id is null or m.user_id <> target_id)
+      and a.email <> target
+      and m.enabled and a.enabled
+      and m.role = 'administrator' and a.role = 'administrator'
+      and m.sectors @> all_sectors and a.sectors @> all_sectors
+  ) then
+    raise exception 'Mantenha ao menos um superadministrador com acesso' using errcode = '22023';
+  end if;
+
+  -- 1. Sincroniza login_allowlist
+  if not present then
+    insert into private.login_allowlist(email, display_name, role, sectors, enabled)
+    values (target, clean_name, selected_role, selected_sectors, p_enabled);
+    action_name := 'create';
+  else
+    update private.login_allowlist set
+      display_name = clean_name,
+      role = selected_role,
+      sectors = selected_sectors,
+      enabled = p_enabled,
+      version = version + 1,
+      updated_at = now()
+    where email = target;
+    action_name := case
+      when previous.enabled and not p_enabled then 'block'
+      when not previous.enabled and p_enabled then 'unblock'
+      else 'update'
+    end;
+  end if;
+
+  -- 2. Sincroniza app_members se o usuário auth existir
+  if target_id is not null then
+    insert into public.app_members(user_id, display_name, role, sectors, enabled)
+    values (target_id, clean_name, selected_role, selected_sectors, p_enabled)
+    on conflict (user_id) do update set
+      display_name = excluded.display_name,
+      role = excluded.role,
+      sectors = excluded.sectors,
+      enabled = excluded.enabled;
+  end if;
+
+  -- 3. Sincroniza user_registrations se existir
+  if target_reg.id is not null then
+    update public.user_registrations set
+      nome = clean_name,
+      status = case when p_enabled then 'approved' else 'blocked' end,
+      version = version + 1,
+      updated_at = now()
+    where id = target_reg.id;
+  end if;
+
+  insert into private.user_access_audit(actor_id, actor_email, target_email, action, before_values, after_values, notes)
+  values (
+    actor, actor_email, target, action_name,
+    case when present then jsonb_build_object('name', previous.display_name, 'role', previous.role, 'sectors', previous.sectors, 'enabled', previous.enabled) end,
+    jsonb_build_object('name', clean_name, 'role', selected_role, 'sectors', selected_sectors, 'enabled', p_enabled),
+    'Alteração cadastral pelo superadministrador'
+  );
+end;
+$$;
+revoke all on function private.save_managed_user(text, text, text[], boolean, boolean, integer) from public, anon, authenticated;
+
+-- 15. Histórico de auditoria para o Superadministrador
 create or replace function private.list_user_audit(p_target_email text default null) returns jsonb
 language plpgsql stable security definer set search_path = '' as $$
 begin
@@ -532,7 +737,27 @@ end;
 $$;
 revoke all on function private.list_user_audit(text) from public, anon, authenticated;
 
--- 15. Wrappers públicos invoker
+-- 16. Concessão explícita de execução das funções privadas para authenticated (necessária para wrappers invoker)
+grant usage on schema private to authenticated;
+grant execute on function private.get_my_registration_status() to authenticated;
+grant execute on function private.list_managed_users() to authenticated;
+grant execute on function private.approve_user_registration(uuid, text[], boolean, integer) to authenticated;
+grant execute on function private.reject_user_registration(uuid, text, integer) to authenticated;
+grant execute on function private.toggle_user_block(uuid, boolean, integer) to authenticated;
+grant execute on function private.save_managed_user(text, text, text[], boolean, boolean, integer) to authenticated;
+grant execute on function private.list_user_audit(text) to authenticated;
+
+-- 17. Wrappers públicos SECURITY INVOKER (com revogação estrita de public/anon)
+create or replace function public.get_my_registration_status() returns jsonb
+language sql stable security invoker set search_path = '' as $$
+  select private.get_my_registration_status();
+$$;
+
+create or replace function public.admin_list_users() returns jsonb
+language sql stable security invoker set search_path = '' as $$
+  select private.list_managed_users();
+$$;
+
 create or replace function public.admin_approve_user(
   p_user_id uuid,
   p_sectors text[],
@@ -558,14 +783,38 @@ create or replace function public.admin_toggle_user(
   select private.toggle_user_block(p_user_id, p_enabled, p_expected_version);
 $$;
 
+create or replace function public.admin_save_user(
+  p_email text,
+  p_display_name text,
+  p_sectors text[],
+  p_enabled boolean,
+  p_superadmin boolean,
+  p_expected_version integer default null
+) returns void language sql security invoker set search_path = '' as $$
+  select private.save_managed_user(p_email, p_display_name, p_sectors, p_enabled, p_superadmin, p_expected_version);
+$$;
+
 create or replace function public.admin_list_audit(p_target_email text default null) returns jsonb
 language sql security invoker set search_path = '' as $$
   select private.list_user_audit(p_target_email);
 $$;
 
+-- Revogação estrita de acesso anônimo e público
+revoke all on function public.get_my_registration_status() from public, anon;
+revoke all on function public.admin_list_users() from public, anon;
+revoke all on function public.admin_approve_user(uuid, text[], boolean, integer) from public, anon;
+revoke all on function public.admin_reject_user(uuid, text, integer) from public, anon;
+revoke all on function public.admin_toggle_user(uuid, boolean, integer) from public, anon;
+revoke all on function public.admin_save_user(text, text, text[], boolean, boolean, integer) from public, anon;
+revoke all on function public.admin_list_audit(text) from public, anon;
+
+-- Concessão apenas ao perfil authenticated
+grant execute on function public.get_my_registration_status() to authenticated;
+grant execute on function public.admin_list_users() to authenticated;
 grant execute on function public.admin_approve_user(uuid, text[], boolean, integer) to authenticated;
 grant execute on function public.admin_reject_user(uuid, text, integer) to authenticated;
 grant execute on function public.admin_toggle_user(uuid, boolean, integer) to authenticated;
+grant execute on function public.admin_save_user(text, text, text[], boolean, boolean, integer) to authenticated;
 grant execute on function public.admin_list_audit(text) to authenticated;
 
 commit;

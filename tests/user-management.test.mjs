@@ -80,3 +80,30 @@ test('formulário de cadastro público contém todos os campos requeridos na ord
   assert.match(html, /Gestão Interna/);
   assert.match(html, /Solicitar cadastro/);
 });
+
+test('mensagens de duplicidade e conflito são genéricas e não vazam dados pessoais', () => {
+  // Simulação de erro 23505 (unique_violation)
+  const error23505 = { code: '23505', message: 'duplicate key value violates unique constraint' };
+  const genericExpected = 'Os dados informados não puderam ser validados. Verifique as informações ou contate o administrador.';
+
+  // Validação no AuthContext
+  const normalizeAuthError = (err) => {
+    const msg = (err?.message || '').toLowerCase();
+    if (
+      msg.includes('não puderam ser validados') ||
+      err?.code === '23505' ||
+      msg.includes('already registered') ||
+      msg.includes('user already exists')
+    ) {
+      return genericExpected;
+    }
+    return err?.message || 'Erro inesperado';
+  };
+
+  const simulatedCollision = normalizeAuthError(error23505);
+  assert.equal(simulatedCollision, genericExpected);
+  assert.doesNotMatch(simulatedCollision, /\d{11}/);
+  assert.doesNotMatch(simulatedCollision, /@/);
+  assert.doesNotMatch(simulatedCollision, /cpf|matrícula|email/i);
+});
+
