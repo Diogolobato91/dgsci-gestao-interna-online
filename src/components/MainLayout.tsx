@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, LogOut, LockKeyhole, ChevronRight, UserRound } from 'lucide-react';
+import { Menu, X, LogOut, LockKeyhole, ChevronRight, UserRound, UsersRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { navigationConfig } from '@/config/navigation';
 import { isFullAdministrator } from '@/features/records/recordAccess';
@@ -12,10 +12,11 @@ export default function MainLayout() {
   const menuButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const fullAccess = isFullAdministrator(user);
-  const items = fullAccess ? [...new Map(Object.values(navigationConfig).flat().map(item => [item.path, item])).values()] : navigationConfig[user.profile];
+  const baseItems = fullAccess ? [...new Map(Object.values(navigationConfig).flat().map(item => [item.path, item])).values()] : navigationConfig[user.profile];
+  const items = fullAccess ? [...baseItems, {id:'user-management',title:'Gestão de Usuários',path:'/gestao-usuarios',icon:UsersRound,section:'Administração do sistema'}] : baseItems;
   const groups = [...new Set(items.map(item => item.section || 'Consulta compartilhada'))];
   const title = pathname === '/favoritos' ? 'Meus favoritos' : items.find(item => item.path === pathname)?.title || 'Portal DGSCI';
-  const integrated = ['/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/controle-portarias', '/sat-regionais', '/cmt-sub-sats', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
+  const integrated = ['/gestao-usuarios','/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/controle-portarias', '/sat-regionais', '/cmt-sub-sats', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
   useEffect(() => { setOpen(false); document.title = `${title} · DGSCI`; window.scrollTo(0, 0); }, [pathname, title]);
   useEffect(() => {
     if (!open) return;

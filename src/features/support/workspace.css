@@ -216,3 +216,17 @@
 .shell-account { display:flex;align-items:center;gap:8px;color:#778293;font-size:11px; }.shell-account>span { max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }.shell-account>svg { background:#f2f4f8;padding:7px;width:16px;height:16px;border-radius:50%;box-sizing:content-box; }
 @media(max-width:1000px) { .shell-account>span { display:none; } }.shell-topbar>div>.shell-account { color:#778293; }
 @media(max-width:760px) { .shell-topbar>div>.shell-account { display:flex; }.shell-topbar .shell-account>span { display:none; } }
+
+/* Superadministrator user management. */
+.user-sector-tags { display:flex;gap:5px;flex-wrap:wrap;max-width:280px; }
+.user-sector-tags .workspace-badge { display:inline-flex;gap:5px;align-items:center; }
+.table-primary>.workspace-badge { margin-left:7px;font-size:8px;vertical-align:middle; }
+.user-status-active { background:#edf6f0;color:#4a7860; }
+.user-status-blocked { background:#fff0f2;color:#a44c5d; }
+.user-status-pending_registration,.user-status-pending_confirmation { background:#fff6e8;color:#8d7247;white-space:normal; }
+.user-sector-options { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
+.record-dialog .user-sector-options .record-check { margin:0;align-items:center; }
+.user-first-access { margin-top:20px;padding:18px 20px;background:#fff;border:1px solid #e3e8ef;border-radius:12px;display:flex;align-items:center;gap:22px; }
+.user-first-access>div { flex:1; }.user-first-access strong { font-size:12px;color:#556173; }
+.user-first-access p { margin-top:7px;font-size:11px;line-height:1.8;color:#8792a2; }
+@media(max-width:760px) { .user-sector-options { grid-template-columns:1fr; }.user-first-access { align-items:flex-start;flex-direction:column;gap:14px; } }

@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 import LoginForm from "@/components/LoginForm";
 import MainLayout from "@/components/MainLayout";
+const UserManagement = lazy(() => import('@/features/users/UserManagementPage'));
 const SatCommands = lazy(() => import('@/features/records/SatCommandsPage'));
 
 const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
@@ -69,6 +70,7 @@ const AppRoutes = () => (
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="gestao-usuarios" element={<UserManagement />} />
         <Route path="dashboard" element={<SupportLibrary />} />
         <Route path="biblioteca" element={<SupportLibrary />} />
         <Route path="comunicados" element={<SupportLibrary />} />

@@ -19,27 +19,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let alive = true;
     if (!supabase) { setAuthError('A conexão com o Supabase ainda não está configurada neste ambiente.'); setLoading(false); return; }
-    const resolveSession = async (session: Session | null) => {
+    const resolveSession = async (session: Session | null, quiet = false) => {
       const current = ++generation.current;
       if (!alive) return;
-      setLoading(true);
+      if (!quiet) setLoading(true);
       if (!session) { setUser(null); setLoading(false); return; }
       try {
         const { data, error } = await supabase.from('app_members').select('display_name,role,sectors,enabled').eq('user_id', session.user.id).maybeSingle();
         if (!alive || current !== generation.current) return;
-        if (error || !data?.enabled) { setUser(null); setAuthError('Sua conta não possui acesso liberado ao DGSCI.'); return; }
+        if (error) throw error;
+        if (!data?.enabled) { setUser(null); setAuthError('Sua conta não possui acesso liberado ao DGSCI.'); void supabase.auth.signOut({scope:'local'}); return; }
         const allowed = profiles.filter(profile => Array.isArray(data.sectors) && data.sectors.includes(profile));
         if (!allowed.length) { setUser(null); setAuthError('Nenhum setor foi vinculado à sua conta.'); return; }
         setAuthError('');
-        setUser({ matricula: data.display_name, profile: allowed[0], isAuthenticated: true, allowedProfiles: allowed, role: data.role });
-      } catch { if (alive && current === generation.current) { setUser(null); setAuthError('Não foi possível conferir suas permissões. Tente novamente.'); } }
+        const next: User = { id:session.user.id, email:session.user.email, matricula:data.display_name, profile:allowed[0], isAuthenticated:true, allowedProfiles:allowed, role:data.role };
+        setUser(previous => JSON.stringify(previous) === JSON.stringify(next) ? previous : next);
+      } catch { if (alive && current === generation.current) { if (!quiet) setUser(null); setAuthError('Não foi possível conferir suas permissões. Tente novamente.'); } }
       finally { if (alive && current === generation.current) setLoading(false); }
     };
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       // Keep database calls outside the Auth callback's internal lock.
       setTimeout(() => { if (alive) void resolveSession(session); }, 0);
     });
-    return () => { alive = false; generation.current++; subscription.subscription.unsubscribe(); };
+    const refreshPermissions = async () => {
+      if (!alive || document.visibilityState === 'hidden') return;
+      try { const { data: { session } } = await supabase.auth.getSession(); if (alive) await resolveSession(session, true); }
+      catch { /* A temporary network failure must not discard an in-progress form. */ }
+    };
+    const refreshOnFocus = () => { void refreshPermissions(); };
+    const timer = window.setInterval(refreshOnFocus, 60000);
+    window.addEventListener('focus', refreshOnFocus);
+    document.addEventListener('visibilitychange', refreshOnFocus);
+    return () => {
+      alive=false; generation.current++; subscription.subscription.unsubscribe();
+      window.clearInterval(timer); window.removeEventListener('focus', refreshOnFocus);
+      document.removeEventListener('visibilitychange', refreshOnFocus);
+    };
   }, []);
   const login = async (email: string, password: string) => {
     if (!supabase) throw new Error('Conexão com o banco não configurada.');
