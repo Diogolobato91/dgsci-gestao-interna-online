@@ -348,14 +348,19 @@ declare
   selected_sectors text[];
   selected_role text;
 begin
+  -- Validação estrita de parâmetros obrigatórios antes de verificações administrativas
+  if p_user_id is null then
+    raise exception 'Usuário não especificado' using errcode = '22023';
+  end if;
+
+  if p_superadmin is null then
+    raise exception 'Parâmetro de superadministrador não pode ser nulo' using errcode = '22023';
+  end if;
+
   actor := private.require_user_manager();
   select email into actor_email from auth.users where id = actor;
   perform pg_advisory_xact_lock(73425, 19102026);
   actor := private.require_user_manager();
-
-  if p_user_id is null then
-    raise exception 'Usuário não especificado' using errcode = '22023';
-  end if;
 
   -- Proteção contra autorrebaixamento
   if actor = p_user_id and not p_superadmin then
@@ -516,12 +521,19 @@ declare
   all_sectors constant text[] := array['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'];
   is_target_superadmin boolean;
 begin
+  -- Validação estrita de parâmetros obrigatórios antes de verificações administrativas
+  if p_user_id is null then
+    raise exception 'Usuário não especificado' using errcode = '22023';
+  end if;
+
+  if p_enabled is null then
+    raise exception 'Situação do usuário não pode ser nula' using errcode = '22023';
+  end if;
+
   actor := private.require_user_manager();
   select email into actor_email from auth.users where id = actor;
   perform pg_advisory_xact_lock(73425, 19102026);
   actor := private.require_user_manager();
-
-  if p_user_id is null then raise exception 'Usuário não especificado' using errcode = '22023'; end if;
   if actor = p_user_id and not p_enabled then
     raise exception 'Você não pode bloquear o próprio acesso de superadministrador' using errcode = '22023';
   end if;

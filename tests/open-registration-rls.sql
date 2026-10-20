@@ -151,6 +151,17 @@ begin
     raise exception 'Usuário pendente conseguiu executar admin_approve_user';
   exception when insufficient_privilege then null; end;
 
+  -- Rejeição de p_superadmin IS NULL e p_enabled IS NULL com 22023 antes das verificações administrativas
+  begin
+    perform public.admin_approve_user('40000000-0000-4000-8000-000000000002', array['Secretaria'], null, 1);
+    raise exception 'admin_approve_user aceitou p_superadmin nulo';
+  exception when invalid_parameter_value then null; end;
+
+  begin
+    perform public.admin_toggle_user('40000000-0000-4000-8000-000000000002', null, 1);
+    raise exception 'admin_toggle_user aceitou p_enabled nulo';
+  exception when invalid_parameter_value then null; end;
+
   -- Acesso direto a tabelas privadas negado ao papel authenticated
   begin
     execute 'select count(*) from private.login_allowlist';
@@ -208,6 +219,51 @@ begin
   select value into legacy_row from jsonb_array_elements(users_data) where value->>'email' = 'legacy-user@example.invalid';
   if legacy_row->>'cpf' is not null or legacy_row->>'matricula' is not null or legacy_row->>'posto_graduacao' is not null then
     raise exception 'Conta legada possui dados fictícios indevidos: %', legacy_row;
+  end if;
+
+  -- Teste de rejeição de p_superadmin IS NULL e p_enabled IS NULL com erro 22023 antes das checagens administrativas
+  begin
+    perform public.admin_approve_user('40000000-0000-4000-8000-000000000002', array['Secretaria'], null, 1);
+    raise exception 'admin_approve_user aceitou p_superadmin nulo sob superadmin';
+  exception when invalid_parameter_value then null; end;
+
+  begin
+    perform public.admin_toggle_user('40000000-0000-4000-8000-000000000002', null, 1);
+    raise exception 'admin_toggle_user aceitou p_enabled nulo sob superadmin';
+  exception when invalid_parameter_value then null; end;
+
+  -- Confirma que nenhum papel, setor, status ou permissão foi alterado no usuário pendente
+  select value into pending_row from jsonb_array_elements(public.admin_list_users()) where value->>'email' = 'pending-test@example.invalid';
+  if pending_row->>'status' <> 'pending_approval' or
+     pending_row->>'role' <> 'reader' or
+     pending_row->'sectors' <> '[]'::jsonb or
+     (pending_row->>'enabled')::boolean <> false or
+     (pending_row->>'version')::integer <> 1 then
+    raise exception 'Parâmetros nulos alteraram o estado do usuário pendente: %', pending_row;
+  end if;
+
+  if exists (
+    select 1 from public.user_registrations
+    where user_id = '40000000-0000-4000-8000-000000000002'
+      and (status <> 'pending_approval' or approved_at is not null or approved_by is not null or version <> 1)
+  ) then
+    raise exception 'user_registrations foi modificado indevidamente após chamadas com parâmetros nulos';
+  end if;
+
+  -- Teste de rejeição de p_enabled IS NULL em usuário já habilitado/aprovado
+  begin
+    perform public.admin_toggle_user('40000000-0000-4000-8000-000000000005', null, 1);
+    raise exception 'admin_toggle_user aceitou p_enabled nulo em conta legada';
+  exception when invalid_parameter_value then null; end;
+
+  -- Confirma que nenhum papel, setor, status ou permissão foi alterado no usuário legado
+  select value into legacy_row from jsonb_array_elements(public.admin_list_users()) where value->>'email' = 'legacy-user@example.invalid';
+  if legacy_row->>'status' <> 'approved' or
+     legacy_row->>'role' <> 'editor' or
+     legacy_row->'sectors' <> '["Vistoriador"]'::jsonb or
+     (legacy_row->>'enabled')::boolean <> true or
+     (legacy_row->>'version')::integer <> 1 then
+    raise exception 'Parâmetro p_enabled nulo alterou permissões da conta legada: %', legacy_row;
   end if;
 
   -- Aprovação autorizada do candidato pendente com atribuição de setor
