@@ -43,12 +43,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 // Componente para redirecionar usuários logados aprovados
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  const location = useLocation();
-  const from = location.state?.from;
-  const destination = typeof from === "string" && from.startsWith("/") && !from.startsWith("//") && from !== "/login" ? from : "/dashboard";
+
   if (loading) return <p className="session-loading" role="status">Conferindo sessão…</p>;
   if (user && user.registrationStatus === 'approved') {
-    return <Navigate to={destination} replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   return <>{children}</>;
 };

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   UsersRound,
+  Trash2,
   UserCheck,
   UserX,
   Pencil,
@@ -106,6 +107,8 @@ export default function UserManagementPage() {
     superadmin: boolean;
     enabled: boolean;
   } | null>(null);
+  const [deletingUser, setDeletingUser] = useState<ManagedUser | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [blockingUser, setBlockingUser] = useState<ManagedUser | null>(null);
   const [auditTarget, setAuditTarget] = useState<ManagedUser | null>(null);
   const [auditLogs, setAuditLogs] = useState<UserAuditEntry[]>([]);
@@ -186,6 +189,23 @@ export default function UserManagementPage() {
   const pagination = usePagination(rows, query + '|' + status + '|' + sector);
 
   // Ações do Superadministrador
+  const handleDelete = async () => {
+    if (!deletingUser || !supabase || busy || deleteConfirmation !== deletingUser.email) return;
+    setBusy(true); setFormError('');
+    try {
+      const { data, error: problem } = await supabase.functions.invoke('delete-account', {
+        body: { email: deletingUser.email, version: deletingUser.version, confirmation: deleteConfirmation },
+      });
+      if (problem) {
+        let detail = '';
+        try { detail = (await problem.context?.json())?.message || ''; } catch { /* Resposta indisponível */ }
+        throw new Error(detail || 'Não foi possível excluir. Atualize a lista e tente novamente.');
+      }
+      setMessage(data?.message || 'Conta excluída.'); setDeletingUser(null); reload();
+    } catch (reason) { setFormError(reason instanceof Error ? reason.message : 'Não foi possível excluir.'); }
+    finally { setBusy(false); }
+  };
+
   const handleApprove = async () => {
     if (!approvingUser || !supabase || busy) return;
     if (!approvingUser.sectors.length && !approvingUser.superadmin) {
@@ -490,6 +510,7 @@ export default function UserManagementPage() {
 
                       <td className="table-actions">
                         <div>
+                          <ActionButton variant="ghost" className="workspace-button-danger" disabled={busy || account.email.toLowerCase() === ownEmail} onClick={() => { setDeletingUser(account); setDeleteConfirmation(''); setFormError(''); }} aria-label={'Excluir conta de ' + account.display_name}><Trash2 size={15}/>Excluir</ActionButton>
                           {/* Ações específicas para cadastro pendente */}
                           {isPending ? (
                             <>
@@ -806,6 +827,13 @@ export default function UserManagementPage() {
               </div>
             </form>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deletingUser} onOpenChange={open => { if (!open && !busy) setDeletingUser(null); }}>
+        <DialogContent className="record-dialog compact-dialog"><DialogHeader><DialogTitle>Excluir conta</DialogTitle><DialogDescription>{deletingUser?.display_name} · {deletingUser?.email}</DialogDescription></DialogHeader>
+          <div className="detail-body"><p className="delete-warning">A conta perderá o acesso e será excluída da autenticação. O histórico de alterações será preservado. Esta ação não pode ser desfeita pelo portal.</p><div className="form-field"><label htmlFor="delete-account-confirmation">Digite o e-mail da conta para confirmar</label><input id="delete-account-confirmation" value={deleteConfirmation} autoComplete="off" onChange={e => setDeleteConfirmation(e.target.value)}/></div>
+          {formError && <p className="form-error" role="alert">{formError}</p>}<div className="record-actions"><ActionButton disabled={busy} onClick={() => setDeletingUser(null)}>Cancelar</ActionButton><ActionButton variant="primary" disabled={busy || deleteConfirmation !== deletingUser?.email} onClick={() => void handleDelete()}><Trash2 size={15}/>{busy ? 'Excluindo…' : 'Excluir conta'}</ActionButton></div></div>
         </DialogContent>
       </Dialog>
 

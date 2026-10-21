@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 export function usePrivateSnapshot<T>(name: 'efetivo' | 'diarias') {
   const { user } = useAuth();
   const [data, setData] = useState<T | null>(null);
+  const [revision, setRevision] = useState(0);
   const [error, setError] = useState('');
   useEffect(() => {
     let current = true;
@@ -19,6 +20,6 @@ export function usePrivateSnapshot<T>(name: 'efetivo' | 'diarias') {
         else setData(result as T);
       });
     return () => { current = false; };
-  }, [name, user]);
-  return { data, error };
+  }, [name, user, revision]);
+  return { data, error, reload: () => setRevision(value => value + 1) };
 }
