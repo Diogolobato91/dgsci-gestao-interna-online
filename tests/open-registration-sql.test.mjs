@@ -75,6 +75,10 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
   await db.exec(fs.readFileSync(path.join(root, 'supabase', 'roster_planning_contacts.sql'), 'utf-8'));
   await db.exec(testSql); // O novo gatilho de contato preserva todo o fluxo de aprovação existente.
   await db.exec(fs.readFileSync(path.join(root, 'tests', 'roster-planning-rls.sql'), 'utf-8'));
+  const staffMigration = fs.readdirSync(path.join(root,'supabase','migrations')).find(f=>f.endsWith('_staff_management.sql'));
+  await db.exec(fs.readFileSync(path.join(root,'supabase','migrations',staffMigration),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'tests','roster-planning-rls.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'tests','staff-management-rls.sql'),'utf-8'));
 
   assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
 });
