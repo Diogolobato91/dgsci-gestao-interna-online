@@ -15,3 +15,6 @@ test('totais financeiros preservam zero e não tratam saldo de referência como 
  assert.deepEqual(financialTotals([{valorDespesa:120.5,valorArrecadado:250},{valorDespesa:null,valorArrecadado:0},{valorDespesa:20,valorArrecadado:null}]),{expense:140.5,revenue:250});
  assert.deepEqual(financialTotals([]),{expense:0,revenue:0});
 });
+test('totais excluem cancelados e preservam centavos sem erro de ponto flutuante',()=>{
+ assert.deepEqual(financialTotals([{valorDespesa:0.1,valorArrecadado:0.2},{valorDespesa:0.2,valorArrecadado:0.1},{valorDespesa:100,valorArrecadado:100,status:'CANCELADO/ARQUIVADO'}]),{expense:0.3,revenue:0.3});
+});

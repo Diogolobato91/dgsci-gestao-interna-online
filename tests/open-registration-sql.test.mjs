@@ -79,6 +79,16 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
   await db.exec(fs.readFileSync(path.join(root,'supabase','migrations',staffMigration),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','roster-planning-rls.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','staff-management-rls.sql'),'utf-8'));
+  // Estruturas mínimas do Storage: as regras de leitura/escrita da migration são reais.
+  await db.exec(`create schema storage;
+    create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+    create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb);
+    alter table storage.objects enable row level security;
+    grant usage on schema storage to authenticated,anon;
+    grant select,insert,update,delete on storage.objects to authenticated,anon;`);
+  const financeMigration=fs.readdirSync(path.join(root,'supabase','migrations')).find(f=>f.endsWith('_authorization_workflow.sql'));
+  await db.exec(fs.readFileSync(path.join(root,'supabase','migrations',financeMigration),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'tests','authorization-workflow-rls.sql'),'utf-8'));
 
   assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
 });
