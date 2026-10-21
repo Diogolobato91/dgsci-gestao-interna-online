@@ -21,6 +21,7 @@ export interface User {
 }
 
 export interface RegisterData {
+  contato: string;
   nome: string;
   postoGraduacao: string;
   matricula: string;

@@ -21,6 +21,7 @@ export default function LoginForm() {
   const [matricula, setMatricula] = useState('');
   const [cpf, setCpf] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
+  const [contato, setContato] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -134,6 +135,7 @@ export default function LoginForm() {
                 matricula,
                 cpf,
                 dataNascimento,
+                contato,
                 email: regEmail,
                 password,
                 confirmPassword,
@@ -153,6 +155,7 @@ export default function LoginForm() {
                   matricula,
                   cpf: cleanDigits(cpf),
                   dataNascimento,
+                  contato,
                   email: regEmail,
                   password,
                 });
@@ -223,6 +226,14 @@ export default function LoginForm() {
                 />
                 {fieldErrors.matricula && <p className="field-error">{fieldErrors.matricula}</p>}
               </div>
+            </div>
+
+            <div className="field-block">
+              <label htmlFor="reg-contact">Contato (DDD + telefone) *</label>
+              <input id="reg-contact" type="tel" inputMode="tel" autoComplete="tel-national" required maxLength={20}
+                placeholder="(91) 99999-9999" value={contato} onChange={e => { setContato(e.target.value); setFieldErrors({...fieldErrors,contato:''}); }}/>
+              <small>Utilizado pela Administração para contato e na escala de serviço.</small>
+              {fieldErrors.contato && <p className="field-error">{fieldErrors.contato}</p>}
             </div>
 
             <div className="form-group-title">

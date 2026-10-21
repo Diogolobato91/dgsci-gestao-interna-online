@@ -692,6 +692,10 @@ export default function UserManagementPage() {
                   <strong className="table-mono">{viewingUser.cpf ? maskCpf(viewingUser.cpf) : 'Pendente de complementação'}</strong>
                 </div>
                 <div>
+                  <span className="table-overline">CONTATO</span>
+                  <span>{viewingUser.contato || 'Pendente de complementação'}</span>
+                </div>
+                <div>
                   <span className="table-overline">DATA DE NASCIMENTO</span>
                   <span>{viewingUser.data_nascimento ? formatDate(viewingUser.data_nascimento) : 'Pendente de complementação'}</span>
                 </div>

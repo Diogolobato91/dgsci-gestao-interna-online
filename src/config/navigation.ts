@@ -128,6 +128,7 @@ export const navigationConfig: MenuConfig = {
   
   'Subdiretoria': [
     ...commonItemsComplete,
+    { id: 'escala-mensal', title: 'Escala Mensal', icon: Calendar, path: '/escala-mensal', section: 'Administração' },
     {
       id: 'controle-portarias',
       title: 'Controle de Portarias',

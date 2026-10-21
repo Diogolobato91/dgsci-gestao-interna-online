@@ -32,6 +32,7 @@ export type ManagedUser = {
   posto_graduacao?: string | null;
   matricula?: string | null;
   cpf?: string | null;
+  contato?: string | null;
   data_nascimento?: string | null;
   status: UserStatus;
   rejection_reason?: string | null;

@@ -82,6 +82,7 @@ export function validateBirthDate(rawDate: string | null | undefined): { valid: 
  * Valida o formulário completo de solicitação de cadastro antes de enviar.
  */
 export interface UserRegistrationPayload {
+  contato: string;
   nome: string;
   postoGraduacao: string;
   matricula: string;
@@ -118,6 +119,10 @@ export function validateRegistrationForm(payload: UserRegistrationPayload): Reco
   const birthCheck = validateBirthDate(payload.dataNascimento);
   if (!birthCheck.valid) {
     errors.dataNascimento = birthCheck.error || 'Data inválida.';
+  }
+
+  if (!/^\d{10,11}$/.test(cleanDigits(payload.contato))) {
+    errors.contato = 'Informe o contato com DDD (10 ou 11 dígitos).';
   }
 
   const cleanEmail = (payload.email || '').trim().toLowerCase();

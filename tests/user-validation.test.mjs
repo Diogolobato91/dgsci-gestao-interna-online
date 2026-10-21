@@ -52,6 +52,7 @@ test('validação de data de nascimento barra datas futuras e inválidas e aceit
 
 test('validação do formulário de cadastro checa todos os campos obrigatórios', () => {
   const emptyResult = validateRegistrationForm({
+    contato: '',
     nome: '',
     postoGraduacao: '',
     matricula: '',
@@ -61,6 +62,7 @@ test('validação do formulário de cadastro checa todos os campos obrigatórios
     password: '',
     confirmPassword: '',
   });
+  assert(emptyResult.contato);
   assert(emptyResult.nome);
   assert(emptyResult.postoGraduacao);
   assert(emptyResult.matricula);
@@ -70,6 +72,7 @@ test('validação do formulário de cadastro checa todos os campos obrigatórios
   assert(emptyResult.password);
 
   const mismatchResult = validateRegistrationForm({
+    contato: '(91) 99999-1234',
     nome: 'Tenente Silva',
     postoGraduacao: '1º TEN',
     matricula: '123456',

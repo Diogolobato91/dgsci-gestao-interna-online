@@ -163,6 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           matricula: data.matricula.trim(),
           cpf: data.cpf.replace(/\D/g, ''),
           data_nascimento: data.dataNascimento.trim(),
+          contato: data.contato.replace(/\D/g, ''),
         },
       },
     });
