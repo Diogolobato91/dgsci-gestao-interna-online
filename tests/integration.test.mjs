@@ -22,14 +22,14 @@ test('tipo e área restringem a busca conjuntamente', () => {
   assert.ok(results.every(item => item.type === 'guide' && item.area === 'Análise'));
   assert.equal(CONTENT.filter(item => matchesContent(item, 'xyz-inexistente', 'all', 'all')).length, 0);
 });
-test('conteúdos relacionados e modelos importados existem', () => {
+test('conteúdos relacionados permanecem consistentes sem modelos demonstrativos públicos', () => {
   const ids = new Set(CONTENT.map(item => item.id));
   assert.equal(ids.size, CONTENT.length);
   for (const item of CONTENT) {
     for (const related of item.related) assert.ok(ids.has(related), `${item.id}: ${related}`);
-    if (item.file) assert.equal(fs.readFileSync(`public/portal/assets/models/${item.file}`).subarray(0, 2).toString(), 'PK');
+    assert.equal(item.file, undefined);
   }
-  assert.equal(CONTENT.filter(item => item.file).length, 4);
+  assert.equal(CONTENT.filter(item => item.file).length, 0);
 });
 test('favoritos e checklists não derrubam a tela se armazenamento falhar', () => {
   globalThis.localStorage = { getItem() { throw new Error('blocked'); }, setItem() { throw new Error('blocked'); } };

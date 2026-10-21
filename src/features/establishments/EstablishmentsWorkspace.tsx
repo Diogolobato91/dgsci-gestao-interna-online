@@ -10,10 +10,12 @@ export default function EstablishmentsWorkspace() {
   const [view, setView] = useState(location.pathname === '/mapa' ? 'map' : 'companies');
   const [status, setStatus] = useState('Conectando às planilhas…');
   const [ready, setReady] = useState(false);
+  const [frameHeight, setFrameHeight] = useState(800);
   useEffect(() => { setView(location.pathname === '/mapa' ? 'map' : 'companies'); }, [location.pathname]);
   useEffect(() => {
     const listener = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin || event.source !== iframe.current?.contentWindow || event.data?.type !== 'dgsci:status') return;
+      if (event.origin !== window.location.origin || event.source !== iframe.current?.contentWindow || !['dgsci:status','dgsci:height'].includes(event.data?.type)) return;
+      if (event.data.type === 'dgsci:height' && Number.isFinite(event.data.height)) { setFrameHeight(Math.max(500, Math.min(30000, event.data.height))); return; }
       if (typeof event.data.message === 'string') setStatus(event.data.message.slice(0, 160));
       if (event.data.ready === true) setReady(true);
     };
@@ -23,10 +25,15 @@ export default function EstablishmentsWorkspace() {
   useEffect(() => {
     if (ready) iframe.current?.contentWindow?.postMessage({ type: 'dgsci:view', view }, window.location.origin);
   }, [view, ready]);
+  useEffect(() => {
+    const send = () => { const rect=iframe.current?.getBoundingClientRect(); if(rect) iframe.current?.contentWindow?.postMessage({type:'dgsci:viewport',top:Math.max(0,-rect.top),height:window.innerHeight},window.location.origin); };
+    window.addEventListener('scroll',send,{passive:true});window.addEventListener('resize',send);send();
+    return () => {window.removeEventListener('scroll',send);window.removeEventListener('resize',send);};
+  },[ready,frameHeight]);
   return <section className="establishments-workspace workspace-page">
     <PageHeader eyebrow="Arquivo DGSCI" title="Estabelecimentos" description="Consulta de cadastros, localização e indicadores dos estabelecimentos." icon={Building2} actions={<ActionButton disabled={!ready} onClick={()=>iframe.current?.contentWindow?.postMessage({type:'dgsci:sync'},window.location.origin)}><RefreshCw size={16}/>Atualizar cadastros</ActionButton>}/>
     <div className="establishments-tabs"><div className="workspace-segments" role="group" aria-label="Visualização dos estabelecimentos">{views.map(({id,title,Icon})=><button key={id} aria-pressed={view===id} onClick={()=>setView(id)}><Icon size={16}/>{title}</button>)}</div><p role="status" aria-live="polite">{status}</p></div>
-    <iframe ref={iframe} title="Consulta de estabelecimentos e mapa territorial DGSCI" src="/arquivo/index.html?embedded=1" className="archive-frame" allow="geolocation 'self'" referrerPolicy="strict-origin-when-cross-origin" />
+    <iframe ref={iframe} title="Consulta de estabelecimentos e mapa territorial DGSCI" src="/arquivo/index.html?embedded=1" className="archive-frame" style={{height:frameHeight,minHeight:0,border:0,borderRadius:0,display:"block"}} scrolling="no" allow="geolocation 'self'" referrerPolicy="strict-origin-when-cross-origin" />
     <p className="workspace-footnote">Consulta às planilhas. Alterações cadastrais são realizadas na origem; não há consulta direta ao SISGAT.</p>
   </section>;
 }

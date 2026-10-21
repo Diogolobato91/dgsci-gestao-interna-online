@@ -1,279 +1,43 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Download, Users, Clock, Phone } from 'lucide-react';
-
-const EscalaMensal: React.FC = () => {
-  const [visualizacao, setVisualizacao] = useState<'semanal' | 'mensal'>('semanal');
-
-  const diasSemana = [
-    {
-      dia: 'Segunda-feira',
-      data: '14 de Janeiro',
-      isToday: false,
-      chefePlantao: { nome: 'Cap. Silva', whatsapp: '5591999999999' },
-      peritoDia: { nome: 'Ten. Santos', whatsapp: '5591888888888' },
-      auxiliar: { nome: 'Sd. Oliveira', whatsapp: '5591777777777' }
-    },
-    {
-      dia: 'Terça-feira',
-      data: '15 de Janeiro',
-      isToday: true,
-      chefePlantao: { nome: 'Maj. Costa', whatsapp: '5591666666666' },
-      peritoDia: { nome: 'Ten. Lima', whatsapp: '5591555555555' },
-      auxiliar: { nome: 'Cb. Ferreira', whatsapp: '5591444444444' }
-    },
-    {
-      dia: 'Quarta-feira',
-      data: '16 de Janeiro',
-      isToday: false,
-      chefePlantao: { nome: 'Cap. Rodrigues', whatsapp: '5591333333333' },
-      peritoDia: { nome: 'Ten. Almeida', whatsapp: '5591222222222' },
-      auxiliar: { nome: 'Sd. Pereira', whatsapp: '5591111111111' }
-    },
-    {
-      dia: 'Quinta-feira',
-      data: '17 de Janeiro',
-      isToday: false,
-      chefePlantao: { nome: 'Cap. Mendes', whatsapp: '5591987654321' },
-      peritoDia: { nome: 'Ten. Carvalho', whatsapp: '5591123456789' },
-      auxiliar: { nome: 'Cb. Moreira', whatsapp: '5591246813579' }
-    },
-    {
-      dia: 'Sexta-feira',
-      data: '18 de Janeiro',
-      isToday: false,
-      chefePlantao: { nome: 'Maj. Barbosa', whatsapp: '5591135792468' },
-      peritoDia: { nome: 'Ten. Martins', whatsapp: '5591864297531' },
-      auxiliar: { nome: 'Sd. Ribeiro', whatsapp: '5591975318642' }
-    }
-  ];
-
-  const sobreaviso = [
-    { nome: 'Cap. Araújo', funcao: 'Coordenador de Plantão' },
-    { nome: 'Ten. Gomes', funcao: 'Perito de Sobreaviso' },
-    { nome: 'Sgt. Teixeira', funcao: 'Apoio Operacional' }
-  ];
-
-  const calendarioMensal = Array.from({ length: 31 }, (_, i) => ({
-    dia: i + 1,
-    militares: ['Silva', 'Santos', 'Costa'].slice(0, Math.floor(Math.random() * 3) + 1),
-    isToday: i + 1 === 15
-  }));
-
-  return (
-    <div className="space-y-4 sm:space-y-6 max-w-7xl mx-auto">
-      {/* Controles de Visualização */}
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <Calendar className="h-5 w-5 text-primary" />
-              Escala de Serviço
-            </CardTitle>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <Button
-                variant={visualizacao === 'semanal' ? 'default' : 'outline'}
-                onClick={() => setVisualizacao('semanal')}
-                size="sm"
-                className="w-full sm:w-auto text-xs sm:text-sm"
-              >
-                Visualização Semanal
-              </Button>
-              <Button
-                variant={visualizacao === 'mensal' ? 'default' : 'outline'}
-                onClick={() => setVisualizacao('mensal')}
-                size="sm"
-                className="w-full sm:w-auto text-xs sm:text-sm"
-              >
-                Visualização Mensal
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
-
-      {visualizacao === 'semanal' ? (
-        <>
-          {/* Visualização Semanal */}
-          <div className="grid grid-cols-1 gap-3 sm:gap-4">
-            {diasSemana.map((dia, index) => (
-              <Card key={index} className={`${dia.isToday ? "border-primary bg-primary/5" : ""} overflow-hidden`}>
-                <CardHeader className="pb-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <h3 className="font-semibold text-base sm:text-lg">
-                        {dia.dia}
-                      </h3>
-                      <span className="text-sm text-muted-foreground">
-                        {dia.data}
-                      </span>
-                      {dia.isToday && (
-                        <Badge className="bg-primary text-xs">Hoje</Badge>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="text-xs">
-                        <Download className="h-3 w-3 mr-1" />
-                        <span className="hidden sm:inline">Baixar JPG</span>
-                        <span className="sm:hidden">JPG</span>
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span className="font-medium">Chefe de Plantão</span>
-                      </div>
-                      <div className="flex items-center justify-between pl-6">
-                        <p className="text-muted-foreground">{dia.chefePlantao.nome}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => window.open(`https://wa.me/${dia.chefePlantao.whatsapp}`, '_blank')}
-                          className="ml-2"
-                        >
-                          <Phone className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span className="font-medium">Perito do Dia</span>
-                      </div>
-                      <div className="flex items-center justify-between pl-6">
-                        <p className="text-muted-foreground">{dia.peritoDia.nome}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => window.open(`https://wa.me/${dia.peritoDia.whatsapp}`, '_blank')}
-                          className="ml-2"
-                        >
-                          <Phone className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span className="font-medium">Auxiliar/Condutor</span>
-                      </div>
-                      <div className="flex items-center justify-between pl-6">
-                        <p className="text-muted-foreground">{dia.auxiliar.nome}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => window.open(`https://wa.me/${dia.auxiliar.whatsapp}`, '_blank')}
-                          className="ml-2"
-                        >
-                          <Phone className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Seção de Sobreaviso */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                <Users className="h-5 w-5 text-primary" />
-                Sobreaviso da Semana
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {sobreaviso.map((militar, index) => (
-                  <div key={index} className="space-y-2 p-3 rounded-lg bg-muted/50">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">{militar.funcao}</Badge>
-                    </div>
-                    <p className="font-medium text-sm sm:text-base">{militar.nome}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ações da Semana */}
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button className="w-full sm:w-auto text-xs sm:text-sm">
-                  <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                  Baixar Escala da Semana (JPG)
-                </Button>
-                <Button variant="outline" className="w-full sm:w-auto text-xs sm:text-sm">
-                  <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                  Baixar Escala do Dia (JPG)
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </>
-      ) : (
-        <>
-          {/* Visualização Mensal */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Janeiro 2024</CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-6">
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-4">
-                {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((dia) => (
-                  <div key={dia} className="p-1 sm:p-2 text-center font-medium text-muted-foreground text-xs sm:text-sm">
-                    {dia}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1 sm:gap-2">
-                {calendarioMensal.map((dia) => (
-                  <Card
-                    key={dia.dia}
-                    className={`min-h-[60px] sm:min-h-[80px] ${dia.isToday ? 'border-primary bg-primary/5' : ''}`}
-                  >
-                    <CardContent className="p-1 sm:p-2">
-                      <div className="font-medium text-xs sm:text-sm mb-1">{dia.dia}</div>
-                      <div className="space-y-1">
-                        {dia.militares.slice(0, 2).map((militar, index) => (
-                          <div key={index} className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                            {militar}
-                          </div>
-                        ))}
-                        {dia.militares.length > 2 && (
-                          <div className="text-[10px] sm:text-xs text-muted-foreground">
-                            +{dia.militares.length - 2}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ações do Mês */}
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <Button className="w-full sm:w-auto text-xs sm:text-sm">
-                <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
-                Baixar Escala do Mês (JPG)
-              </Button>
-            </CardContent>
-          </Card>
-        </>
-      )}
-    </div>
-  );
-};
-
-export default EscalaMensal;
+import { useEffect, useMemo, useState } from 'react';
+import { CalendarDays, ChevronLeft, ChevronRight, Plus, Pencil, Trash2, Clock, Users } from 'lucide-react';
+import { PageHeader, ActionButton, LoadState } from '@/components/workspace/Workspace';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
+import { usePrivateSnapshot } from '@/features/records/usePrivateSnapshot';
+import { compareStaffMembers } from '@/lib/rankHierarchy';
+type Person={id:string;nome:string;postoGraduacao:string};
+type Duty={id:string;service_date:string;staff_id:string;duty_role:string;shift:string;notes:string;version:number};
+const iso=(date:Date)=>`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+const shifts=['Manhã','Tarde','Integral','Plantão','Sobreaviso'];
+export default function EscalaMensal(){
+  const {user}=useAuth();const canEdit=!!user?.allowedProfiles?.some(p=>['Secretaria','Diretoria','Subdiretoria'].includes(p));
+  const {data:staff,error:staffError}=usePrivateSnapshot<{registros:Person[]}>('efetivo');
+  const [month,setMonth]=useState(()=>new Date(new Date().getFullYear(),new Date().getMonth(),1));
+  const [day,setDay]=useState(()=>iso(new Date()));const [duties,setDuties]=useState<Duty[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [revision,setRevision]=useState(0);
+  const [draft,setDraft]=useState<Partial<Duty>|null>(null);const [busy,setBusy]=useState(false);const [formError,setFormError]=useState('');const [removing,setRemoving]=useState<Duty|null>(null);
+  const people=useMemo(()=>[...(staff?.registros??[])].sort(compareStaffMembers),[staff]);
+  const names=useMemo(()=>new Map(people.map(p=>[p.id,`${p.postoGraduacao} ${p.nome}`])),[people]);
+  const start=iso(month);const end=iso(new Date(month.getFullYear(),month.getMonth()+1,0));
+  useEffect(()=>{let alive=true;setLoading(true);setError('');void(async()=>{
+    const result=await supabase?.from('duty_roster').select('id,service_date,staff_id,duty_role,shift,notes,version').gte('service_date',start).lte('service_date',end).order('service_date');
+    if(!alive)return;if(!result||result.error){setDuties([]);setError('Não foi possível consultar a escala. Tente novamente.');}else setDuties(result.data);setLoading(false);
+  })();return()=>{alive=false;};},[start,end,revision]);
+  const firstOffset=(month.getDay()+6)%7;const daysInMonth=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
+  const cells=Array.from({length:Math.ceil((firstOffset+daysInMonth)/7)*7},(_,i)=>{const n=i-firstOffset+1;return n>0&&n<=daysInMonth?iso(new Date(month.getFullYear(),month.getMonth(),n)):null;});
+  const selected=duties.filter(d=>d.service_date===day);const today=iso(new Date());
+  const move=(offset:number)=>{const next=new Date(month.getFullYear(),month.getMonth()+offset,1);setMonth(next);setDay(iso(next));};
+  const openNew=()=>{setFormError('');setDraft({service_date:day,staff_id:'',duty_role:'',shift:'Integral',notes:''});};
+  const label=month.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  return <section className="workspace-page roster-page"><PageHeader eyebrow="Administração" title="Escala mensal" description="Organize os serviços por dia, função e turno com o efetivo cadastrado." icon={CalendarDays} actions={canEdit&&<ActionButton variant="primary" disabled={!people.length} onClick={openNew}><Plus size={16}/>Adicionar serviço</ActionButton>}/>
+    <div className="roster-summary"><span><Users size={18}/><strong>{duties.length}</strong> serviços no mês</span><span><CalendarDays size={18}/><strong>{new Set(duties.map(d=>d.service_date)).size}</strong> dias com escala</span><span><Clock size={18}/><strong>{new Set(duties.map(d=>d.staff_id)).size}</strong> integrantes escalados</span></div>
+    <div className="roster-toolbar"><div className="roster-month"><ActionButton aria-label="Mês anterior" onClick={()=>move(-1)}><ChevronLeft size={18}/></ActionButton><h2>{label}</h2><ActionButton aria-label="Próximo mês" onClick={()=>move(1)}><ChevronRight size={18}/></ActionButton></div><div className="roster-month-controls"><label htmlFor="roster-month" className="sr-only">Selecionar mês</label><input id="roster-month" type="month" value={start.slice(0,7)} onChange={e=>{if(/^\d{4}-\d{2}$/.test(e.target.value)){const [y,m]=e.target.value.split('-').map(Number);const next=new Date(y,m-1,1);setMonth(next);setDay(iso(next));}}}/><ActionButton onClick={()=>{const now=new Date();setMonth(new Date(now.getFullYear(),now.getMonth(),1));setDay(iso(now));}}>Hoje</ActionButton></div></div>
+    {staffError&&<p role="alert" className="form-error">{staffError}</p>}
+    {loading||error?<LoadState error={error} onRetry={()=>setRevision(v=>v+1)}/>:<div className="roster-layout"><section className="roster-calendar" aria-label={'Calendário de '+label}><div className="roster-weekdays">{['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map(d=><span key={d}>{d}</span>)}</div><div className="roster-grid">{cells.map((date,i)=>date?<button key={date} aria-label={new Date(date+'T12:00:00').toLocaleDateString('pt-BR')+`: ${duties.filter(d=>d.service_date===date).length} serviços`} aria-pressed={date===day} className={`roster-day ${date===today?'is-today':''} ${date===day?'is-selected':''}`} onClick={()=>setDay(date)}><strong>{Number(date.slice(-2))}</strong><span className="roster-day-items">{duties.filter(d=>d.service_date===date).slice(0,2).map(d=><span key={d.id}>{d.duty_role}</span>)}</span>{duties.some(d=>d.service_date===date)&&<small>{duties.filter(d=>d.service_date===date).length} serviço(s)</small>}</button>:<div key={'empty'+i} className="roster-day is-outside"/>)}</div></section>
+      <aside className="roster-agenda"><div className="roster-agenda-heading"><span>ESCALA DO DIA</span><h3>{new Date(day+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})}</h3></div>{selected.length?selected.map(d=><article className="roster-service" key={d.id}><span className="workspace-badge">{d.shift}</span><h4>{d.duty_role}</h4><p>{names.get(d.staff_id)||'Integrante cadastrado'}</p>{d.notes&&<small>{d.notes}</small>}{canEdit&&<div><ActionButton variant="ghost" onClick={()=>{setFormError('');setDraft({...d});}} aria-label={'Editar serviço '+d.duty_role}><Pencil size={14}/>Editar</ActionButton><ActionButton variant="ghost" className="workspace-button-danger" onClick={()=>{setFormError('');setRemoving(d);}} aria-label={'Retirar serviço '+d.duty_role}><Trash2 size={14}/>Retirar</ActionButton></div>}</article>):<div className="roster-empty"><CalendarDays size={30}/><strong>Nenhum serviço cadastrado</strong><p>{canEdit?'Selecione “Adicionar serviço” para montar a escala deste dia.':'Aguarde o cadastro da escala pela Administração.'}</p></div>}{canEdit&&<ActionButton onClick={openNew} disabled={!people.length}><Plus size={15}/>Adicionar neste dia</ActionButton>}</aside>
+    </div>}
+    <Dialog open={!!draft} onOpenChange={open=>{if(!open&&!busy)setDraft(null);}}><DialogContent className="record-dialog editor-dialog"><DialogHeader><DialogTitle>{draft?.id?'Editar serviço':'Adicionar serviço'}</DialogTitle><DialogDescription>Selecione um integrante do efetivo e informe a função e o turno.</DialogDescription></DialogHeader>{draft&&<form className="record-form" onSubmit={async e=>{e.preventDefault();if(!supabase||busy)return;setBusy(true);setFormError('');try{const values={service_date:draft.service_date,staff_id:draft.staff_id,duty_role:draft.duty_role?.trim(),shift:draft.shift,notes:draft.notes?.trim()||''};if(!values.duty_role)throw new Error('Informe a função.');const result=draft.id?await supabase.from('duty_roster').update(values).eq('id',draft.id).eq('version',draft.version).select('id'):await supabase.from('duty_roster').insert(values).select('id');if(result.error)throw new Error(result.error.code==='23505'?'Este integrante já possui um serviço neste dia e turno.':'Não foi possível salvar. Confira os dados e a permissão.');if(!result.data?.length)throw new Error('O serviço mudou. Atualize a escala antes de editar.');setDay(values.service_date!);const [y,m]=values.service_date!.split('-').map(Number);setMonth(new Date(y,m-1,1));setDraft(null);setRevision(v=>v+1);}catch(reason){setFormError(reason instanceof Error?reason.message:'Não foi possível salvar.');}finally{setBusy(false);}}}>
+      <section className="editor-section"><div className="form-grid"><div className="form-field"><label htmlFor="duty-date">Data *</label><input id="duty-date" type="date" required value={draft.service_date||''} onChange={e=>setDraft({...draft,service_date:e.target.value})}/></div><div className="form-field"><label htmlFor="duty-shift">Turno *</label><select id="duty-shift" value={draft.shift} onChange={e=>setDraft({...draft,shift:e.target.value})}>{shifts.map(s=><option key={s}>{s}</option>)}</select></div><div className="form-field form-field-wide"><label htmlFor="duty-person">Integrante *</label><select id="duty-person" required value={draft.staff_id} onChange={e=>setDraft({...draft,staff_id:e.target.value})}><option value="">Selecione no efetivo</option>{people.map(p=><option key={p.id} value={p.id}>{p.postoGraduacao} {p.nome}</option>)}</select></div><div className="form-field form-field-wide"><label htmlFor="duty-role">Função *</label><input id="duty-role" required maxLength={100} placeholder="Ex.: chefe de plantão, perito, auxiliar…" value={draft.duty_role} onChange={e=>setDraft({...draft,duty_role:e.target.value})}/></div><div className="form-field form-field-wide"><label htmlFor="duty-notes">Observações</label><textarea id="duty-notes" rows={3} maxLength={2000} value={draft.notes} onChange={e=>setDraft({...draft,notes:e.target.value})}/></div></div></section>{formError&&<p className="form-error" role="alert">{formError}</p>}<div className="record-actions"><ActionButton disabled={busy} onClick={()=>setDraft(null)}>Cancelar</ActionButton><ActionButton type="submit" variant="primary" disabled={busy}>{busy?'Salvando…':'Salvar serviço'}</ActionButton></div></form>}</DialogContent></Dialog>
+    <Dialog open={!!removing} onOpenChange={open=>{if(!open&&!busy)setRemoving(null);}}><DialogContent className="record-dialog compact-dialog"><DialogHeader><DialogTitle>Retirar serviço da escala?</DialogTitle><DialogDescription>{removing?.duty_role} · {removing&&names.get(removing.staff_id)}</DialogDescription></DialogHeader><div className="detail-body"><p>Somente este serviço será retirado. Os demais dias permanecem na escala.</p>{formError&&<p className="form-error" role="alert">{formError}</p>}<div className="record-actions"><ActionButton disabled={busy} onClick={()=>setRemoving(null)}>Cancelar</ActionButton><ActionButton variant="primary" disabled={busy} onClick={async()=>{if(!removing||!supabase)return;setBusy(true);const {data,error}=await supabase.from('duty_roster').delete().eq('id',removing.id).eq('version',removing.version).select('id');setBusy(false);if(error||!data?.length)setFormError('Não foi possível retirar. O serviço pode ter sido alterado.');else{setRemoving(null);setRevision(v=>v+1);}}}>{busy?'Retirando…':'Retirar serviço'}</ActionButton></div></div></DialogContent></Dialog>
+  </section>;
+}

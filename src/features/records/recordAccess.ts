@@ -10,3 +10,5 @@ export function safeFileUrl(value: string) {
 
 export const canManageSat = (user: User | null) => !!user?.allowedProfiles?.some(sector => ['Diretoria', 'Subdiretoria'].includes(sector));
 export const canManageSupport = (user: User | null) => !!user?.allowedProfiles?.some(sector => ['Secretaria', 'Diretoria', 'Subdiretoria'].includes(sector));
+
+export const canManageModels = (user: User | null) => !!user?.allowedProfiles?.some(sector => ['Diretoria', 'Subdiretoria'].includes(sector));

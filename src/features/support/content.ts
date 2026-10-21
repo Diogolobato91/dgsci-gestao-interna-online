@@ -4,7 +4,7 @@ export const CONTENT: SupportContent[] = [
   {
     id: 'relatorio-vistoria', type: 'model', area: 'Vistoria', date: '2026-10-08', format: 'DOCX', version: 'Exemplo v1.0',
     title: 'Relatório de vistoria', description: 'Estrutura editável para organizar a identificação, os registros e as observações da vistoria.',
-    tags: ['relatório', 'inspeção', 'registro', 'documento'], file: 'relatorio-vistoria-demo.docx', featured: true,
+    tags: ['relatório', 'inspeção', 'registro', 'documento'], featured: true,
     sections: [
       { title: 'Quando consultar', text: 'Exemplo de organização de um relatório. A estrutura e os campos devem ser adaptados e aprovados pelo departamento antes de qualquer uso institucional.' },
       { title: 'Campos do modelo', items: ['Identificação do processo e da edificação', 'Data e responsável pelo registro', 'Documentos consultados e versão das referências', 'Observações e evidências', 'Pendências para conferência', 'Encaminhamento e revisão'] },
@@ -33,7 +33,7 @@ export const CONTENT: SupportContent[] = [
   {
     id: 'auto-infracao', type: 'model', area: 'Administrativo', date: '2026-10-06', format: 'DOCX', version: 'Exemplo v1.0',
     title: 'Estrutura de auto de infração', description: 'Esqueleto demonstrativo de documento, com campos em branco e sem fundamentação legal.',
-    tags: ['auto', 'infração', 'multas', 'documento'], file: 'auto-infracao-demo.docx',
+    tags: ['auto', 'infração', 'multas', 'documento'],
     sections: [{ title: 'Modelo de estrutura', text: 'Este arquivo serve apenas para demonstrar a consulta e o download de modelos no portal. Não é um auto de infração válido e não deve ser utilizado para autuação.' }, { title: 'Campos de exemplo', items: ['Identificação e número do documento', 'Dados do processo', 'Descrição dos fatos — a preencher', 'Fundamentação — a inserir pela área competente', 'Encaminhamento — a validar', 'Revisão e assinaturas — a definir'] }, { title: 'Revisão necessária', text: 'A redação, o enquadramento, a competência e os demais elementos deverão seguir o documento oficial aprovado. Nenhuma base legal é presumida neste exemplo.' }], related: ['registro-pendencias']
   },
   {
@@ -52,7 +52,7 @@ export const CONTENT: SupportContent[] = [
   {
     id: 'parecer-analise', type: 'model', area: 'Análise', date: '2026-10-04', format: 'DOCX', version: 'Exemplo v1.0',
     title: 'Estrutura de parecer de análise', description: 'Modelo editável de organização dos documentos consultados, observações e encaminhamento.',
-    tags: ['parecer', 'análise', 'projeto', 'modelo'], file: 'parecer-analise-demo.docx',
+    tags: ['parecer', 'análise', 'projeto', 'modelo'],
     sections: [{ title: 'Finalidade do exemplo', text: 'Demonstrar um modelo estruturado de registro de análise. Nenhum resultado técnico, enquadramento ou conclusão é fornecido neste arquivo.' }, { title: 'Estrutura de exemplo', items: ['Identificação do processo', 'Documentos e referências consultadas', 'Descrição dos pontos analisados', 'Observações para conferência', 'Conclusão — a elaborar pela área competente', 'Encaminhamento e revisão'] }], related: ['conferencia-documentos', 'consulta-medidas']
   },
   {
@@ -64,7 +64,7 @@ export const CONTENT: SupportContent[] = [
   {
     id: 'encaminhamento', type: 'model', area: 'Administrativo', date: '2026-10-02', format: 'DOCX', version: 'Exemplo v1.0',
     title: 'Registro de encaminhamento interno', description: 'Estrutura simples para identificar o assunto, os documentos associados e a área de destino.',
-    tags: ['encaminhamento', 'administrativo', 'processo', 'modelo'], file: 'encaminhamento-demo.docx',
+    tags: ['encaminhamento', 'administrativo', 'processo', 'modelo'],
     sections: [{ title: 'Uso demonstrativo', text: 'Exemplo de estrutura de comunicação interna. Não representa um fluxo aprovado e não envia nenhuma informação a outras pessoas.' }, { title: 'Campos do modelo', items: ['Identificação do processo', 'Assunto do encaminhamento', 'Área de origem e área de destino', 'Documentos associados', 'Observações', 'Data e responsável — a preencher'] }], related: ['parecer-analise']
   },
   {

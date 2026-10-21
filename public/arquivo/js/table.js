@@ -251,7 +251,7 @@ class TableManager {
 
           <div class="company-card-address">
             <i data-lucide="map-pin"></i>
-            <span>${this.escape(c.endereco || 'Endereço não informado')} • <strong>${this.escape(c.bairro || 'Belém')}</strong></span>
+            <span>${this.escape(c.endereco && c.endereco !== '-' ? c.endereco : 'Logradouro não informado')} • <strong>${this.escape(c.bairro && c.bairro !== '-' ? c.bairro : 'Bairro não informado')}</strong></span>
           </div>
 
           <div class="company-card-metrics">

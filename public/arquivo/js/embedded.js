@@ -24,9 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
   app.store.subscribe(sendStatus);
   addEventListener('message', event => {
     if (event.source !== parent || event.origin !== location.origin) return;
-    if (event.data?.type === 'dgsci:view' && views.has(event.data.view)) app.switchTab(event.data.view);
+    if (event.data?.type === 'dgsci:viewport' && Number.isFinite(event.data.top) && Number.isFinite(event.data.height)) { document.documentElement.style.setProperty('--host-top',Math.max(0,event.data.top)+'px');document.documentElement.style.setProperty('--host-height',Math.max(320,event.data.height)+'px'); }
+    if (event.data?.type === 'dgsci:view' && views.has(event.data.view)) { app.switchTab(event.data.view); window.geoMapManager?.map?.scrollZoom?.disable(); }
     if (event.data?.type === 'dgsci:sync') app.syncLiveSheet(true);
   });
+  let lastHeight = 0;
+  const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(() => { const height=Math.ceil(document.querySelector('.app-main')?.getBoundingClientRect().height || document.body.scrollHeight); if(Math.abs(height-lastHeight)>2){lastHeight=height;parent.postMessage({type:'dgsci:height',height:height+12},location.origin);} }) : null;
+  observer?.observe(document.querySelector('.app-main') || document.body);
   app.switchTab('companies');
   sendStatus();
 });

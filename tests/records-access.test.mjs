@@ -4,7 +4,7 @@ import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const result = await build({stdin:{contents:`export * from './src/features/records/recordAccess'; export {navigationConfig} from './src/config/navigation';`,resolveDir:root,loader:'ts'},bundle:true,platform:'node',format:'esm',write:false});
-const {canManageSupport,canManageSat,canManageOrdinances,isFullAdministrator,navigationConfig,safeFileUrl,normalizeSearch} = await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
+const {canManageModels,canManageSupport,canManageSat,canManageOrdinances,isFullAdministrator,navigationConfig,safeFileUrl,normalizeSearch} = await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
 const account = (profile, role = 'reader', allowedProfiles = [profile]) => ({matricula:'Teste',profile,role,allowedProfiles,isAuthenticated:true});
 test('portarias restritas à Subdiretoria e superadministrador',()=>{
  for(const profile of Object.keys(navigationConfig)) assert.equal(canManageOrdinances(account(profile)), profile === 'Subdiretoria');
@@ -35,4 +35,12 @@ test('edição de comando e regiões apenas para Diretoria e Subdiretoria; conte
   assert(!navigationConfig[profile].some(item=>item.path==='/modelos-auto-infracao'));
  }
  assert.deepEqual(Object.keys(navigationConfig).sort(),['Vistoriador','Análise','Multas','Secretaria','Subdiretoria','Diretoria'].sort());
+});
+
+test('modelos excluem Secretaria da edição e efetivo fica em Administração',()=>{
+ for(const profile of Object.keys(navigationConfig)){
+  assert.equal(canManageModels(account(profile)),['Diretoria','Subdiretoria'].includes(profile));
+  assert(!navigationConfig[profile].some(item=>item.path==='/ajuda-vistoriador'));
+  for(const item of navigationConfig[profile].filter(item=>item.path==='/relacao-efetivo')) assert.equal(item.section,'Administração');
+ }
 });

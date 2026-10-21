@@ -84,7 +84,7 @@ const AppRoutes = () => (
         <Route path="cmt-sub-sats" element={<SatCommands />} />
         <Route path="vistoria" element={<Navigate to="/dashboard" replace />} />
         <Route path="sat-regionais" element={<SATRegionais />} />
-        <Route path="ajuda-vistoriador" element={<SupportLibrary />} />
+        <Route path="ajuda-vistoriador" element={<Navigate to="/modelos-padronizados" replace />} />
         <Route path="modelos-padronizados" element={<SupportLibrary />} />
         <Route path="modelos-auto-infracao" element={<SupportLibrary />} />
         

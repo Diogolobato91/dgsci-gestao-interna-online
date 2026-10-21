@@ -81,3 +81,23 @@ html.embedded {
 
 }
 
+
+/* Uma única rolagem vertical, controlada pelo portal. */
+.embedded body{background:#fafafa;overflow-y:hidden;margin:0;min-height:0;height:auto}
+.embedded .app-layout{min-height:0;height:auto}
+.embedded .app-main{padding:0!important;height:auto!important;max-height:none!important;min-height:0;overflow:visible!important}
+.embedded .section-header{display:none}
+.embedded .data-card{box-shadow:none;border-radius:10px}
+.embedded .unlocated-card-section{margin-top:24px;border:1px solid #dedede;background:#fff}
+.embedded .unlocated-title{color:#292929!important;font-size:16px!important}
+.embedded .unlocated-badge-count{color:#a31621;background:#fbeef0;border-color:#e9cfd2}
+.embedded .unlocated-table-wrapper{display:block!important;max-height:none!important;overflow-x:auto;overflow-y:visible}
+.embedded .unlocated-cards-container{display:none!important}
+.embedded .unlocated-table-wrapper td{white-space:normal;vertical-align:top;padding:14px 12px}
+.embedded .unlocated-table-wrapper th{white-space:nowrap}
+.embedded .unlocated-table-wrapper td:nth-child(2){min-width:210px}
+.embedded .unlocated-table-wrapper td:nth-child(5){min-width:220px;overflow-wrap:anywhere}
+.embedded .table-responsive:not(.unlocated-table-wrapper){max-height:none!important;overflow-y:visible}
+.embedded .modal-backdrop{top:var(--host-top,0px);height:var(--host-height,100vh);bottom:auto}
+.embedded .modal-content{max-height:calc(var(--host-height,100vh) - 48px)!important}
+.embedded .address-missing{display:inline-block;color:#7d3138;background:#fff3f3;border-radius:5px;padding:4px 7px;font-size:11px}

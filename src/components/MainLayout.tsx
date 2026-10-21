@@ -16,7 +16,7 @@ export default function MainLayout() {
   const items = fullAccess ? [...baseItems, {id:'user-management',title:'Gestão de Usuários',path:'/gestao-usuarios',icon:UsersRound,section:'Administração do sistema'}] : baseItems;
   const groups = [...new Set(items.map(item => item.section || 'Consulta compartilhada'))];
   const title = pathname === '/favoritos' ? 'Meus favoritos' : items.find(item => item.path === pathname)?.title || 'Portal DGSCI';
-  const integrated = ['/gestao-usuarios','/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/controle-portarias', '/sat-regionais', '/cmt-sub-sats', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
+  const integrated = ['/escala-mensal','/gestao-usuarios','/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/controle-portarias', '/sat-regionais', '/cmt-sub-sats', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
   useEffect(() => { setOpen(false); document.title = `${title} · DGSCI`; window.scrollTo(0, 0); }, [pathname, title]);
   useEffect(() => {
     if (!open) return;

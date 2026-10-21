@@ -41,12 +41,6 @@ const commonItemsWithoutVistoria: MenuItem[] = [
     path: '/sat-regionais'
   },
   {
-    id: 'ajuda-vistoriador',
-    title: 'Ajuda Rápida ao Vistoriador',
-    icon: HelpCircle,
-    path: '/ajuda-vistoriador'
-  },
-  {
     id: 'modelos-padronizados',
     title: 'Modelos Padronizados',
     icon: FileText,
@@ -69,12 +63,6 @@ const commonItemsComplete: MenuItem[] = [
     title: 'SAT\'s Regionais',
     icon: MapPin,
     path: '/sat-regionais'
-  },
-  {
-    id: 'ajuda-vistoriador',
-    title: 'Ajuda Rápida ao Vistoriador',
-    icon: HelpCircle,
-    path: '/ajuda-vistoriador'
   },
   {
     id: 'modelos-padronizados',
@@ -122,19 +110,19 @@ export const navigationConfig: MenuConfig = {
       id: 'escala-mensal',
       title: 'Escala Mensal',
       icon: Calendar,
-      path: '/escala-mensal'
+      path: '/escala-mensal', section: 'Administração'
     },
     {
       id: 'relatorios',
       title: 'Relatórios',
       icon: BarChart3,
-      path: '/relatorios'
+      path: '/relatorios', section: 'Administração'
     },
     {
       id: 'relacao-efetivo',
       title: 'Relação de Efetivo',
       icon: UserCheck,
-      path: '/relacao-efetivo'
+      path: '/relacao-efetivo', section: 'Administração'
     }
   ],
   
@@ -163,7 +151,7 @@ export const navigationConfig: MenuConfig = {
       id: 'relacao-efetivo',
       title: 'Relação de Efetivo',
       icon: UserCheck,
-      path: '/relacao-efetivo'
+      path: '/relacao-efetivo', section: 'Administração'
     }
   ],
   
@@ -198,14 +186,14 @@ export const navigationConfig: MenuConfig = {
       title: 'Escala Mensal',
       icon: Calendar,
       path: '/escala-mensal',
-      section: 'Administrativo'
+      section: 'Administração'
     },
     {
       id: 'dir-relatorios',
       title: 'Relatórios',
       icon: BarChart3,
       path: '/relatorios',
-      section: 'Administrativo'
+      section: 'Administração'
     },
     // Seção Subdiretoria
     {
@@ -227,8 +215,7 @@ export const navigationConfig: MenuConfig = {
       id: 'relacao-efetivo',
       title: 'Relação de Efetivo',
       icon: UserCheck,
-      path: '/relacao-efetivo',
-      section: 'Diretoria'
+      path: '/relacao-efetivo', section: 'Administração'
     }
   ]
 };

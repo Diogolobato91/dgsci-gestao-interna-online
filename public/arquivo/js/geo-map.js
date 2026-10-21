@@ -1009,7 +1009,7 @@ class GeoMapManager {
           <tr>
             <td colspan="7" style="text-align: center; padding: 2rem; color: var(--success);">
               <i data-lucide="check-circle-2" style="width: 28px; height: 28px; margin: 0 auto 0.4rem auto; display: block;"></i>
-              Todos os estabelecimentos possuem endereço validado pela base oficial!
+              Todos os estabelecimentos desta consulta possuem localização no mapa.
             </td>
           </tr>
         `);
@@ -1018,7 +1018,7 @@ class GeoMapManager {
         cardsContainer.innerHTML = DOMPurify.sanitize(`
           <div style="text-align: center; padding: 2rem; color: var(--success);">
             <i data-lucide="check-circle-2" style="width: 28px; height: 28px; margin: 0 auto 0.4rem auto; display: block;"></i>
-            Todos os estabelecimentos possuem endereço validado pela base oficial!
+            Todos os estabelecimentos desta consulta possuem localização no mapa.
           </div>
         `);
       }
@@ -1037,7 +1037,7 @@ class GeoMapManager {
           </td>
           <td><code>${this.escape(c.cnpj || '-')}</code></td>
           <td>${window.tableManager ? window.tableManager.renderSectorBadge(c) : (c.setor || '-')}</td>
-          <td style="font-size: 0.78rem; color: var(--text-muted);">${this.escape(c.endereco || '(Endereço em branco na planilha)')}</td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">${c.endereco && c.endereco !== '-' ? this.escape(c.endereco) : '<span class="address-missing">Logradouro não informado</span>'}<div style="margin-top:5px;font-size:11px;color:var(--text-muted)">Bairro: ${this.escape(c.bairro && c.bairro !== '-' ? c.bairro : 'não informado')}</div></td>
           <td>${window.tableManager ? window.tableManager.renderStatusBadge(c.situacao, c.normalizedStatus) : c.situacao}</td>
           <td>
             <button class="btn btn-sm btn-outline btn-view-unlocated" data-id="${c.id}" title="Ver Ficha">
