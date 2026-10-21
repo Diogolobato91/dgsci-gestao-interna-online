@@ -19,6 +19,12 @@ import {
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
+const integratedItems: MenuItem[] = [
+  { id: 'estabelecimentos', title: 'Estabelecimentos', icon: Building2, path: '/estabelecimentos' },
+  { id: 'sat-command', title: "CMT e SUB SAT'S", icon: Users, path: '/cmt-sub-sats' },
+  { id: 'comunicados', title: 'Comunicados', icon: MessageSquare, path: '/comunicados' },
+];
+
 // Funcionalidades comuns (sem vistoria)
 const commonItemsWithoutVistoria: MenuItem[] = [
   {
@@ -27,6 +33,7 @@ const commonItemsWithoutVistoria: MenuItem[] = [
     icon: LayoutDashboard,
     path: '/dashboard'
   },
+  ...integratedItems,
   {
     id: 'sat-regionais',
     title: 'SAT\'s Regionais',
@@ -45,12 +52,7 @@ const commonItemsWithoutVistoria: MenuItem[] = [
     icon: FileText,
     path: '/modelos-padronizados'
   },
-  {
-    id: 'modelos-auto-infracao',
-    title: 'Modelos de Auto de Infração',
-    icon: AlertTriangle,
-    path: '/modelos-auto-infracao'
-  }
+
 ];
 
 // Funcionalidades completas (com vistoria) - apenas para Vistoria, Subdiretoria e Diretoria
@@ -61,12 +63,7 @@ const commonItemsComplete: MenuItem[] = [
     icon: LayoutDashboard,
     path: '/dashboard'
   },
-  {
-    id: 'vistoria',
-    title: 'Vistoria',
-    icon: MessageSquare,
-    path: '/vistoria'
-  },
+  ...integratedItems,
   {
     id: 'sat-regionais',
     title: 'SAT\'s Regionais',
@@ -85,16 +82,11 @@ const commonItemsComplete: MenuItem[] = [
     icon: FileText,
     path: '/modelos-padronizados'
   },
-  {
-    id: 'modelos-auto-infracao',
-    title: 'Modelos de Auto de Infração',
-    icon: AlertTriangle,
-    path: '/modelos-auto-infracao'
-  }
+
 ];
 
 export const navigationConfig: MenuConfig = {
-  'Vistoria': [
+  'Vistoriador': [
     ...commonItemsComplete
   ],
   
@@ -124,7 +116,7 @@ export const navigationConfig: MenuConfig = {
     }
   ],
   
-  'ADM': [
+  'Secretaria': [
     ...commonItemsWithoutVistoria,
     {
       id: 'escala-mensal',
@@ -152,7 +144,8 @@ export const navigationConfig: MenuConfig = {
       id: 'controle-portarias',
       title: 'Controle de Portarias',
       icon: FileText,
-      path: '/controle-portarias'
+      path: '/controle-portarias',
+      section: 'Subdiretoria'
     },
     {
       id: 'comissao-tecnica',
@@ -162,9 +155,9 @@ export const navigationConfig: MenuConfig = {
     },
     {
       id: 'autorizacoes',
-      title: 'Autorizações',
+      title: 'Controle de Autorizações | Diárias',
       icon: CheckCircle,
-      path: '/autorizacoes'
+      path: '/controle-autorizacoes-diarias'
     },
     {
       id: 'relacao-efetivo',
@@ -224,19 +217,12 @@ export const navigationConfig: MenuConfig = {
     },
     {
       id: 'dir-autorizacoes',
-      title: 'Autorizações',
+      title: 'Controle de Autorizações | Diárias',
       icon: CheckCircle,
-      path: '/autorizacoes',
+      path: '/controle-autorizacoes-diarias',
       section: 'Subdiretoria'
     },
     // Seção Diretoria
-    {
-      id: 'dashboard-geral',
-      title: 'Dashboard Geral',
-      icon: TrendingUp,
-      path: '/dashboard-geral',
-      section: 'Diretoria'
-    },
     {
       id: 'relacao-efetivo',
       title: 'Relação de Efetivo',

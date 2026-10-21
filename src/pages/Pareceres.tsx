@@ -40,7 +40,7 @@ const Pareceres: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const canEdit = user?.profile === 'Diretoria' || user?.profile === 'Subdiretoria' || user?.profile === 'ADM';
+  const canEdit = user?.profile === 'Diretoria' || user?.profile === 'Subdiretoria' || user?.profile === 'Secretaria';
 
   const [pareceres] = useState<Parecer[]>([
     {

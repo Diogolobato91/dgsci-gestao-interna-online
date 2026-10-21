@@ -1,40 +1,56 @@
+import { lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 import LoginForm from "@/components/LoginForm";
 import MainLayout from "@/components/MainLayout";
-import Dashboard from "@/pages/Dashboard";
-import AjudaVistoriador from "@/pages/AjudaVistoriador";
-import ModelosPadronizados from "@/pages/ModelosPadronizados";
-import ModelosAutoInfracao from "@/pages/ModelosAutoInfracao";
-import Vistoria from "@/pages/Vistoria";
+const UserManagement = lazy(() => import('@/features/users/UserManagementPage'));
+const SatCommands = lazy(() => import('@/features/records/SatCommandsPage'));
 
-import EscalaMensal from "@/pages/EscalaMensal";
-import DashboardGeral from "@/pages/DashboardGeral";
-import ComissaoTecnica from "@/pages/ComissaoTecnica";
-import SATRegionais from "@/pages/SATRegionais";
-import RelacaoEfetivo from "@/pages/RelacaoEfetivo";
-import Pareceres from "@/pages/Pareceres";
-import Autorizacoes from "@/pages/Autorizacoes";
-import ControlePortarias from "@/pages/ControlePortarias";
+const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
+const DashboardGeral = lazy(() => import("@/pages/DashboardGeral"));
+const ComissaoTecnica = lazy(() => import("@/pages/ComissaoTecnica"));
+const SATRegionais = lazy(() => import("@/pages/SATRegionais"));
+const RelacaoEfetivo = lazy(() => import("@/pages/RelacaoEfetivo"));
+const Pareceres = lazy(() => import("@/pages/Pareceres"));
+const Autorizacoes = lazy(() => import("@/pages/Autorizacoes"));
+const ControlePortarias = lazy(() => import("@/pages/ControlePortarias"));
 import NotFound from "./pages/NotFound";
+
+import SupportLibrary from '@/features/support/SupportLibrary';
+import EstablishmentsWorkspace from '@/features/establishments/EstablishmentsWorkspace';
+import PendingModule from '@/features/support/PendingModule';
+import '@/features/support/portal.css';
+import '@/features/support/workspace.css';
 
 const queryClient = new QueryClient();
 
 // Componente para proteger rotas autenticadas
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
-  return user ? <>{children}</> : <Navigate to="/login" replace />;
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  if (loading) return <p className="session-loading" role="status">Conferindo sessão…</p>;
+  if (!user || (user.registrationStatus && user.registrationStatus !== 'approved')) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  return <>{children}</>;
 };
 
-// Componente para redirecionar usuários logados
+// Componente para redirecionar usuários logados aprovados
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
-  return !user ? <>{children}</> : <Navigate to="/dashboard" replace />;
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  const from = location.state?.from;
+  const destination = typeof from === "string" && from.startsWith("/") && !from.startsWith("//") && from !== "/login" ? from : "/dashboard";
+  if (loading) return <p className="session-loading" role="status">Conferindo sessão…</p>;
+  if (user && user.registrationStatus === 'approved') {
+    return <Navigate to={destination} replace />;
+  }
+  return <>{children}</>;
 };
 
 const AppRoutes = () => (
@@ -60,27 +76,33 @@ const AppRoutes = () => (
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="vistoria" element={<Vistoria />} />
+        <Route path="gestao-usuarios" element={<UserManagement />} />
+        <Route path="dashboard" element={<SupportLibrary />} />
+        <Route path="biblioteca" element={<SupportLibrary />} />
+        <Route path="comunicados" element={<SupportLibrary />} />
+        <Route path="favoritos" element={<SupportLibrary />} />
+        <Route path="estabelecimentos" element={<EstablishmentsWorkspace />} />
+        <Route path="mapa" element={<Navigate to="/estabelecimentos" replace />} />
+        <Route path="cmt-sub-sats" element={<SatCommands />} />
+        <Route path="vistoria" element={<Navigate to="/dashboard" replace />} />
         <Route path="sat-regionais" element={<SATRegionais />} />
-        <Route path="ajuda-vistoriador" element={<AjudaVistoriador />} />
-        <Route path="modelos-padronizados" element={<ModelosPadronizados />} />
-        <Route path="modelos-auto-infracao" element={<ModelosAutoInfracao />} />
+        <Route path="ajuda-vistoriador" element={<SupportLibrary />} />
+        <Route path="modelos-padronizados" element={<SupportLibrary />} />
+        <Route path="modelos-auto-infracao" element={<SupportLibrary />} />
         
-        <Route path="projetos" element={<Dashboard />} />
+        <Route path="projetos" element={<PendingModule />} />
         <Route path="pareceres" element={<Pareceres />} />
-        <Route path="gestao-autos" element={<Dashboard />} />
+        <Route path="gestao-autos" element={<PendingModule />} />
         <Route path="escala-mensal" element={<EscalaMensal />} />
-        <Route path="relatorios" element={<Dashboard />} />
+        <Route path="relatorios" element={<PendingModule />} />
         <Route path="controle-portarias" element={<ControlePortarias />} />
         <Route path="comissao-tecnica" element={<ComissaoTecnica />} />
         <Route path="autorizacoes" element={<Autorizacoes />} />
         <Route path="dashboard-geral" element={<DashboardGeral />} />
+        <Route path="controle-autorizacoes-diarias" element={<Autorizacoes />} />
         <Route path="relacao-efetivo" element={<RelacaoEfetivo />} />
       </Route>
 
-      {/* Redirecionamento padrão */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
       
       {/* 404 */}
       <Route path="*" element={<NotFound />} />

@@ -8,39 +8,39 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* DGSCI Theme - Dark background with orange accents */
-    --background: 212 100% 8%;
-    --foreground: 0 0% 100%;
+    /* DGSCI Theme - Dark background with red accents */
+    --background: 60 10% 98%;
+    --foreground: 223 10% 14%;
 
-    --card: 215 28% 17%;
-    --card-foreground: 215 20% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 223 10% 14%;
 
-    --popover: 215 28% 17%;
-    --popover-foreground: 215 20% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 223 10% 14%;
 
-    --primary: 16 100% 50%;
+    --primary: 350 85% 42%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 25% 27%;
-    --secondary-foreground: 215 20% 95%;
+    --secondary: 60 6% 94%;
+    --secondary-foreground: 223 10% 20%;
 
-    --muted: 215 25% 27%;
-    --muted-foreground: 215 10% 65%;
+    --muted: 60 6% 94%;
+    --muted-foreground: 220 4% 45%;
 
-    --accent: 16 100% 50%;
+    --accent: 350 85% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 25% 27%;
-    --input: 215 25% 27%;
-    --ring: 16 100% 50%;
+    --border: 60 4% 88%;
+    --input: 60 4% 88%;
+    --ring: 350 85% 42%;
 
     --radius: 0.5rem;
 
     /* Custom DGSCI tokens */
-    --dgsci-orange: 16 100% 50%;
+    --dgsci-orange: 350 85% 42%;
     --dgsci-dark: 212 100% 8%;
     --dgsci-card: 215 28% 17%;
     --dgsci-text-primary: 0 0% 100%;
@@ -48,7 +48,7 @@ All colors MUST be HSL.
     --dgsci-border: 215 25% 27%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(16 100% 45%));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(350 85% 34%));
     --gradient-card: linear-gradient(180deg, hsl(var(--card)), hsl(215 25% 15%));
 
     /* Shadows */
