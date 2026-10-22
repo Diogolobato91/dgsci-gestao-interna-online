@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 import { canManageSupport, canManageModels } from '@/features/records/recordAccess';
 import { useDatabaseRows } from '@/features/records/useDatabaseRows';
 import SupportEditor from './SupportEditor';
+import DailyRoster from '../records/DailyRoster';
 import { PageHeader, ActionButton, SearchField } from '@/components/workspace/Workspace';
 import { matchesContent, readLocal, saveLocal, SupportContent } from './catalog';
 
@@ -65,7 +66,19 @@ export default function SupportLibrary() {
 
   return <div className="portal-page workspace-page">
     <PageHeader eyebrow="Gestão e apoio operacional" title={pathname==='/dashboard'?'Painel principal':heading} description={initialType==='notice'?'Informações e atualizações para os setores da DGSCI.':initialType==='guide'?'Orientações e documentos para apoiar a rotina de vistoria.':initialType==='model'?'Documentos padronizados e modelos de auto de infração.':'Documentos, orientações e consultas internas da DGSCI / CBMPA.'} icon={initialType==='notice'?Megaphone:initialType==='guide'?Compass:BookOpen} actions={<><ActionButton disabled={loading} onClick={reload}><RefreshCw size={16}/>Atualizar</ActionButton>{canEdit&&<ActionButton variant="primary" onClick={()=>setEditor({item:null})}><Plus size={17}/>{initialType==='notice'?'Novo comunicado':initialType==='guide'?'Nova orientação':initialType==='model'?'Novo modelo':'Novo comunicado'}</ActionButton>}</>}/>
-    {pathname==='/dashboard'&&<div className="overview-access"><Link to="/estabelecimentos"><span className="overview-access-icon"><Building2 size={23}/></span><div><strong>Estabelecimentos</strong><p>Cadastros, mapa e indicadores</p></div><ArrowUpRight size={18}/></Link><Link to="/cmt-sub-sats"><span className="overview-access-icon"><Compass size={23}/></span><div><strong>Comando das SATs</strong><p>Comandantes e subcomandantes</p></div><ArrowUpRight size={18}/></Link></div>}
+    {pathname==='/dashboard'&&<>
+      <section className="dashboard-notices" aria-labelledby="dashboard-notices-title">
+        <div className="data-panel-heading"><div><span className="portal-eyebrow">INFORMAÇÕES INSTITUCIONAIS</span><h2 id="dashboard-notices-title">Comunicados</h2></div><Link to="/comunicados">Ver todos <ArrowRight size={16}/></Link></div>
+        {loading?<p role="status">Carregando comunicados…</p>:error?<p role="alert">Não foi possível carregar os comunicados. Use Atualizar para tentar novamente.</p>:<>
+          <div className="dashboard-notice-grid">{content.filter(item=>item.type==='notice'&&!item.isDemo).sort((a,b)=>Number(b.featured)-Number(a.featured)||b.date.localeCompare(a.date)||a.title.localeCompare(b.title,'pt-BR')).slice(0,4).map(item=><article className={'dashboard-notice'+(item.featured?' is-featured':'')} key={item.id}>
+            <div className="dashboard-notice-label"><Megaphone size={18}/><span>{item.featured?'EM DESTAQUE':'COMUNICADO'}</span><time dateTime={item.date}>{new Intl.DateTimeFormat('pt-BR').format(new Date(item.date+'T12:00:00Z'))}</time></div>
+            <h3><button onClick={()=>setSelected(item)}>{item.title}</button></h3><p>{item.description}</p><ActionButton onClick={()=>setSelected(item)}>Ler comunicado <ArrowRight size={16}/></ActionButton>
+          </article>)}</div>
+          {!content.some(item=>item.type==='notice'&&!item.isDemo)&&<p className="dashboard-empty">Nenhum comunicado institucional publicado.</p>}
+        </>}
+      </section>
+      <DailyRoster/>
+      <div className="overview-access"><Link to="/estabelecimentos"><span className="overview-access-icon"><Building2 size={23}/></span><div><strong>Estabelecimentos</strong><p>Cadastros, mapa e indicadores</p></div><ArrowUpRight size={18}/></Link><Link to="/cmt-sub-sats"><span className="overview-access-icon"><Compass size={23}/></span><div><strong>Comando das SATs</strong><p>Comandantes e subcomandantes</p></div><ArrowUpRight size={18}/></Link></div></>}
     {error&&<div className="workspace-feedback is-error" role="alert">{error}</div>}
     <div className="library-workspace">
     <section id="biblioteca" className="portal-library">
