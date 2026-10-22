@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X, LogOut, LockKeyhole, ChevronRight, UserRound, UsersRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import ActivityTracker from '@/features/audit/ActivityTracker';
 import NoticeNotifications from '@/features/support/NoticeNotifications';
 import { navigationConfig } from '@/config/navigation';
 import { isFullAdministrator } from '@/features/records/recordAccess';
@@ -14,10 +15,10 @@ export default function MainLayout() {
   const closeButton = useRef<HTMLButtonElement>(null);
   const fullAccess = isFullAdministrator(user);
   const baseItems = fullAccess ? [...new Map(Object.values(navigationConfig).flat().map(item => [item.path, item])).values()] : navigationConfig[user.profile];
-  const items = fullAccess ? [...baseItems, {id:'user-management',title:'Gestão de Usuários',path:'/gestao-usuarios',icon:UsersRound,section:'Administração do sistema'}] : baseItems;
+  const items = fullAccess ? [...baseItems, {id:'user-management',title:'Gestão de Usuários',path:'/gestao-usuarios',icon:UsersRound,section:'Administração do sistema'},{id:'audit-system',title:'Auditoria do sistema',path:'/auditoria',icon:LockKeyhole,section:'Administração do sistema'}] : baseItems;
   const groups = [...new Set(items.map(item => item.section || 'Consulta compartilhada'))];
-  const title = pathname === '/minha-conta' ? 'Minha conta' : pathname === '/favoritos' ? 'Meus favoritos' : items.find(item => item.path === pathname)?.title || 'Portal DGSCI';
-  const integrated = ['/minha-conta','/escala-mensal','/gestao-usuarios','/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/controle-portarias', '/sat-regionais', '/cmt-sub-sats', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
+  const title = pathname === '/auditoria' ? 'Auditoria do sistema' : pathname === '/minha-conta' ? 'Minha conta' : pathname === '/favoritos' ? 'Meus favoritos' : items.find(item => item.path === pathname)?.title || 'Portal DGSCI';
+  const integrated = ['/auditoria','/minha-conta','/escala-mensal','/gestao-usuarios','/dashboard', '/biblioteca', '/favoritos', '/comunicados', '/modelos-padronizados', '/ajuda-vistoriador', '/modelos-auto-infracao', '/estabelecimentos', '/mapa', '/relacao-efetivo', '/controle-portarias', '/sat-regionais', '/cmt-sub-sats', '/dashboard-geral', '/autorizacoes', '/controle-autorizacoes-diarias'].includes(pathname);
   useEffect(() => { setOpen(false); document.title = `${title} · DGSCI`; window.scrollTo(0, 0); }, [pathname, title]);
   useEffect(() => {
     if (!open) return;
@@ -35,7 +36,7 @@ export default function MainLayout() {
     return () => document.removeEventListener('keydown', listener);
   }, [open]);
   return <div className="dgsci-shell">
-    <a className="portal-skip" href="#workspace-main">Pular para o conteúdo</a>
+    <ActivityTracker/><a className="portal-skip" href="#workspace-main">Pular para o conteúdo</a>
     {open && <button className="shell-backdrop" aria-label="Fechar navegação" onClick={() => { setOpen(false); menuButton.current?.focus(); }} />}
     <aside id="portal-sidebar" className={`shell-sidebar ${open ? 'is-open' : ''}`} aria-label="Navegação principal">
       <div className="shell-brand"><img src="/portal/assets/dgsci-logo.png" alt="" width="42" height="42" /><div><strong>DGSCI<span>.</span></strong><small>GESTÃO E APOIO OPERACIONAL</small></div><button ref={closeButton} className="shell-close" onClick={() => { setOpen(false); menuButton.current?.focus(); }} aria-label="Fechar menu"><X size={19} /></button></div>

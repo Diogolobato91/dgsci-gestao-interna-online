@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, Bookmark, Building2, Check, Compass, FileText, Info, Megaphone, Search, X, Plus, Pencil, BookOpen, RefreshCw } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Bookmark, Building2, Check, Compass, FileText, Info, Megaphone, Search, X, Plus, Pencil, BookOpen, RefreshCw, Archive, ArchiveRestore } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { TYPE_LABELS } from './content';
@@ -9,6 +9,8 @@ import { supabase } from '@/lib/supabase';
 import { canManageSupport, canManageModels } from '@/features/records/recordAccess';
 import { useDatabaseRows } from '@/features/records/useDatabaseRows';
 import SupportEditor from './SupportEditor';
+import ArchiveDialog from './ArchiveDialog';
+import {logActivity} from '@/features/audit/activity';
 import DailyRoster from '../records/DailyRoster';
 import CleaningRoster from '../records/CleaningRoster';
 import { PageHeader, ActionButton, SearchField } from '@/components/workspace/Workspace';
@@ -19,13 +21,14 @@ export default function SupportLibrary() {
   const { pathname } = useLocation();
   const { user } = useAuth(); const canEdit = pathname === '/modelos-padronizados' || pathname === '/modelos-auto-infracao' ? canManageModels(user) : canManageSupport(user);
   const canEditItem = (item: SupportContent) => item.type === 'model' ? canManageModels(user) : canManageSupport(user);
-  const {data,loading,error,reload} = useDatabaseRows<SupportContent & {is_demo:boolean}>('support_documents','id,type,title,description,area,date,format,tags,version,file,featured,checklist,related,sections,attachments,is_demo,revision','id');
-  const content = useMemo(()=>data.filter(item=>item.type!=='guide').map(({is_demo,...item})=>({...item,isDemo:is_demo})),[data]);
+  const [archivedOnly,setArchivedOnly]=useState(false),[archiveItem,setArchiveItem]=useState<SupportContent|null>(null);
+  const {data,loading,error,reload} = useDatabaseRows<SupportContent & {is_demo:boolean}>('support_documents','id,type,title,description,area,date,format,tags,version,file,featured,checklist,related,sections,attachments,is_demo,revision,archived_at,archived_by,archive_reason','id');
+  const content = useMemo(()=>data.filter(item=>item.type!=='guide'&&Boolean(item.archived_at)===(archivedOnly&&pathname!=='/dashboard')).map(({is_demo,...item})=>({...item,isDemo:is_demo})),[data,archivedOnly,pathname]);
   const [editor,setEditor] = useState<{item:SupportContent|null}|null>(null);
   const [downloading,setDownloading] = useState('');
   async function downloadAttachment(path:string,name:string){
     if(!supabase||downloading)return;setDownloading(path);
-    try{const {data:blob,error:problem}=await supabase.storage.from('dgsci-support').download(path);if(problem||!blob)throw new Error();const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+    try{const {data:blob,error:problem}=await supabase.storage.from('dgsci-support').download(path);if(problem||!blob)throw new Error();void logActivity('download_request','support_documents',path);const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
     catch{toast({title:'Não foi possível baixar o anexo',description:'Confira sua conexão e permissão.',variant:'destructive'});}finally{setDownloading('');}
   }
   const initialType = pathname === '/modelos-padronizados' || pathname === '/modelos-auto-infracao' ? 'model' : pathname === '/ajuda-vistoriador' ? 'guide' : pathname === '/comunicados' ? 'notice' : 'all';
@@ -45,7 +48,7 @@ export default function SupportLibrary() {
   });
   const { toast } = useToast();
   useEffect(() => {
-    setType(initialType); setArea('all'); setQuery(''); setSelected(null);
+    setType(initialType); setArea('all'); setQuery(''); setSelected(null); setArchivedOnly(false);
   }, [pathname, initialType]);
   const results = useMemo(() => content.filter(item => matchesContent(item, query, type, area) && (!favoritesOnly || favorites.includes(item.id)))
     .sort((a, b) => sort === 'alpha' ? a.title.localeCompare(b.title, 'pt-BR') : b.date.localeCompare(a.date)), [content, query, type, area, favoritesOnly, favorites, sort]);
@@ -87,6 +90,7 @@ export default function SupportLibrary() {
     {pathname!=='/dashboard'&&<div className="library-workspace">
     <section id="biblioteca" className="portal-library">
       <div className="data-panel-heading"><h2>{pathname==='/dashboard'?'Biblioteca de apoio':favoritesOnly?'Conteúdos salvos':'Acervo para consulta'}</h2><span className="workspace-count">{results.length}</span></div>
+      {canEdit&&<div className="workspace-segments support-archive-filter" role="group" aria-label="Situação do conteúdo"><button aria-pressed={!archivedOnly} onClick={()=>setArchivedOnly(false)}>Ativos</button><button aria-pressed={archivedOnly} onClick={()=>setArchivedOnly(true)}><Archive size={15}/>Arquivados</button></div>}
       <div className="library-search-row"><SearchField id="library-query" value={query} onChange={setQuery} placeholder="Pesquisar por título, conteúdo ou assunto…"/>{type==='model'&&<div className="workspace-segments" role="group" aria-label="Categoria dos modelos"><button aria-pressed={area==='all'} onClick={()=>{setQuery('');setArea('all');}}>Todos os modelos</button><button aria-pressed={area==='Notificação e Autos'} onClick={()=>setArea('Notificação e Autos')}>Notificação e Autos</button></div>}</div>
       <div className="portal-filters"><div role="group" aria-label="Tipo de conteúdo">{(initialType==='all'?[['all', 'Todos'], ['model', 'Modelos'], ['notice', 'Comunicados']]:[[initialType,initialType==='model'?'Modelos':initialType==='guide'?'Ajuda rápida':'Comunicados']]).map(([value, label]) => <button key={value} aria-pressed={type === value} className={type === value ? 'active' : ''} onClick={() => setType(value)}>{label}<span>{content.filter(item => matchesContent(item, query, value, area) && (!favoritesOnly || favorites.includes(item.id))).length}</span></button>)}</div>
         <label><span className="sr-only">Filtrar por área</span><select value={area} onChange={e => setArea(e.target.value)}><option value="all">Todas as áreas</option>{[...new Set(content.map(item => item.area))].map(value => <option key={value}>{value}</option>)}</select></label>
@@ -95,8 +99,8 @@ export default function SupportLibrary() {
       {loading&&<p className="workspace-load" role="status">Carregando conteúdos…</p>}
       <div className="portal-cards">{results.map(item => { const Icon = icons[item.type]; return <article className="portal-card" key={item.id}>
         <div className="portal-card-top"><span><Icon size={14} />{TYPE_LABELS[item.type]}</span><button aria-label={`${favorites.includes(item.id) ? 'Remover dos' : 'Salvar nos'} favoritos: ${item.title}`} aria-pressed={favorites.includes(item.id)} onClick={() => toggleFavorite(item.id)}><Bookmark size={18} fill={favorites.includes(item.id) ? 'currentColor' : 'none'} /></button></div>
-        <button className="portal-card-title" onClick={() => setSelected(item)}><h3>{item.title}</h3></button><p className="support-card-preview">{item.description}</p><div className="portal-card-tags"><span>{item.area}</span><span>{item.isDemo ? 'Demonstração' : 'Cadastrado pelo setor'}</span></div>
-        <footer><span>{new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(new Date(item.date+'T12:00:00Z'))} · {item.format}</span><div>{canEditItem(item)&&<ActionButton variant="ghost" onClick={()=>setEditor({item})} aria-label={'Editar '+item.title} title="Editar conteúdo"><Pencil size={16}/></ActionButton>}{item.attachments?.[0]&&<ActionButton disabled={!!downloading} onClick={()=>downloadAttachment(item.attachments![0].path,item.attachments![0].name)}>Baixar</ActionButton>}<ActionButton onClick={()=>setSelected(item)}>{item.type==='notice'?'Ler comunicado':'Consultar'}<ArrowRight size={14}/></ActionButton></div></footer>
+        <button className="portal-card-title" onClick={() => setSelected(item)}><h3>{item.title}</h3></button><p className="support-card-preview">{item.description}</p><div className="portal-card-tags"><span>{item.area}</span><span>{item.archived_at?'Arquivado':item.isDemo ? 'Demonstração' : 'Cadastrado pelo setor'}</span></div>
+        <footer><span>{new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'short'}).format(new Date(item.date+'T12:00:00Z'))} · {item.format}</span><div>{canEditItem(item)&&!item.archived_at&&<ActionButton variant="ghost" onClick={()=>setEditor({item})} aria-label={'Editar '+item.title} title="Editar conteúdo"><Pencil size={16}/></ActionButton>}{canEditItem(item)&&<ActionButton variant="ghost" onClick={()=>setArchiveItem(item)} aria-label={(item.archived_at?'Restaurar ':'Arquivar ')+item.title}>{item.archived_at?<ArchiveRestore size={16}/>:<Archive size={16}/>} {item.archived_at?'Restaurar':'Arquivar'}</ActionButton>}{item.attachments?.[0]&&<ActionButton disabled={!!downloading} onClick={()=>downloadAttachment(item.attachments![0].path,item.attachments![0].name)}>Baixar</ActionButton>}<ActionButton onClick={()=>setSelected(item)}>{item.type==='notice'?'Ler comunicado':'Consultar'}<ArrowRight size={14}/></ActionButton></div></footer>
       </article>; })}</div>
       {!loading && !error && results.length === 0 && <div className="portal-empty"><Search size={30} /><h3>{favoritesOnly && !favorites.length ? 'Sua consulta, do seu jeito' : 'Nenhum conteúdo encontrado'}</h3><p>{favoritesOnly && !favorites.length ? 'Marque os conteúdos que deseja encontrar aqui.' : 'Tente outro termo ou remova os filtros.'}</p><button onClick={clear}>Limpar busca e filtros</button>{favoritesOnly && <Link to="/dashboard">Explorar biblioteca <ArrowRight size={14} /></Link>}</div>}
     </section>
@@ -106,15 +110,17 @@ export default function SupportLibrary() {
     <footer className="portal-footer"><strong>DGSCI<span>.</span></strong><span>Portal de apoio à rotina operacional</span><small>Conteúdos marcados como demonstração aguardam validação institucional.</small></footer>
     <Dialog open={!!selected} onOpenChange={open => { if (!open) setSelected(null); }}><DialogContent className="portal-dialog max-w-2xl max-h-[88dvh] overflow-y-auto">
       {selected && <><DialogHeader><p className="portal-eyebrow">{TYPE_LABELS[selected.type]} · {selected.area}</p><DialogTitle className="text-2xl">{selected.title}</DialogTitle><DialogDescription className="support-full-text">{selected.description}</DialogDescription></DialogHeader>
+        {selected.archived_at&&<p className="workspace-feedback">Conteúdo arquivado em {new Date(selected.archived_at).toLocaleString('pt-BR',{timeZone:'America/Fortaleza'})}. Motivo: {selected.archive_reason}</p>}
         {selected.isDemo&&<div className="portal-note"><Info size={16} /><p><strong>Conteúdo demonstrativo — sem validade institucional.</strong> Consulte os documentos oficiais antes de usar.</p></div>}
         {selected.sections.map((section, i) => <section key={i}><h3>{section.title}</h3>{section.text && <p>{section.text}</p>}{section.items && <ul>{section.items.map(text => <li key={text}>{text}</li>)}</ul>}</section>)}
         {selected.checklist?.length>0 && <section><h3>Checklist ilustrativo <small>{checked.length}/{selected.checklist.length}</small></h3><progress aria-label="Progresso do checklist" max={selected.checklist.length} value={checked.length} />{selected.checklist.map((text, index) => <label className="portal-check" key={text}><input type="checkbox" checked={checked.includes(index)} onChange={() => updateChecklist(selected, index)} /><span>{text}</span></label>)}</section>}
         {selected.related.length > 0 && <section><h3>Conteúdos relacionados</h3>{selected.related.map(id => content.find(item => item.id === id)).filter(Boolean).map(item => <button className="portal-related" key={item.id} onClick={() => setSelected(item)}>{item.title}<ArrowRight size={15} /></button>)}</section>}
         {selected.attachments?.length>0&&<section><h3>Anexos</h3>{selected.attachments.map(file=><button className="portal-related" key={file.path} disabled={!!downloading} onClick={()=>downloadAttachment(file.path,file.name)}>{downloading===file.path?'Baixando…':file.name}<ArrowRight size={15}/></button>)}</section>}
-        {canEditItem(selected)&&<button className="record-edit" onClick={()=>{setEditor({item:selected});setSelected(null);}}>Alterar conteúdo e anexos</button>}
+        {canEditItem(selected)&&!selected.archived_at&&<button className="record-edit" onClick={()=>{setEditor({item:selected});setSelected(null);}}>Alterar conteúdo e anexos</button>}
         <div className="portal-dialog-actions"><button className="portal-secondary" onClick={() => toggleFavorite(selected.id)}><Bookmark size={16} />{favorites.includes(selected.id) ? 'Favorito salvo' : 'Salvar favorito'}</button>{selected.file && /^[a-zA-Z0-9._-]+$/.test(selected.file) && <a className="portal-primary" download href={`/portal/assets/models/${selected.file}`}>Baixar modelo .docx <ArrowRight size={16} /></a>}</div>
       </>}
     </DialogContent></Dialog>
+    {archiveItem&&<ArchiveDialog item={archiveItem} onClose={()=>setArchiveItem(null)} onSaved={()=>{setSelected(null);reload();window.dispatchEvent(new Event('dgsci:new-notice'));toast({title:archiveItem.archived_at?'Conteúdo restaurado.':'Conteúdo arquivado.'});}}/>}
     {editor&&<SupportEditor item={editor.item} initialType={editor.item?.type ?? (initialType==='model'?'model':'notice')} onClose={()=>setEditor(null)} onSaved={()=>{setSelected(null);reload();toast({title:'Conteúdo salvo.'});}}/>}
   </div>;
 }

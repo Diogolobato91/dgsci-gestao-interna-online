@@ -1,5 +1,6 @@
 export type ContentType = 'model' | 'guide' | 'notice';
 export interface SupportContent {
+  archived_at?:string|null; archived_by?:string|null; archive_reason?:string|null;
   id: string; type: ContentType; area: string; date: string; format: string;
   title: string; description: string; tags: string[]; version?: string;
   attachments?: {path:string;name:string}[]; isDemo?: boolean; revision?: number;

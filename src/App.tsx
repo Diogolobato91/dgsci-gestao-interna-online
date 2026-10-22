@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
 import LoginForm from "@/components/LoginForm";
 import MainLayout from "@/components/MainLayout";
+const AuditPage=lazy(()=>import('@/features/audit/AuditHistory'));
 const MyAccount = lazy(() => import('@/features/users/MyAccountPage'));
 const UserManagement = lazy(() => import('@/features/users/UserManagementPage'));
 const SatCommands = lazy(() => import('@/features/records/SatCommandsPage'));
@@ -75,6 +76,7 @@ const AppRoutes = () => (
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="auditoria" element={<AuditPage/>}/>
         <Route path="minha-conta" element={<MyAccount/>}/>
         <Route path="gestao-usuarios" element={<UserManagement />} />
         <Route path="dashboard" element={<SupportLibrary />} />

@@ -112,5 +112,8 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
   await db.exec(fs.readFileSync(path.join(root,'supabase','account_and_notification_center.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','account-notification-center-rls.sql'),'utf-8'));
 
+  await db.exec(fs.readFileSync(path.join(root,'supabase','archive_and_audit.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'tests','archive-audit-rls.sql'),'utf-8'));
+
   assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
 });

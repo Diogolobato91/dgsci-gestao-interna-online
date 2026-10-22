@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     try { await originalSync(...args); } finally { syncing = false; }
   };
   app.store.subscribe(sendStatus);
+  document.addEventListener('click',event=>{
+    const target=event?.target?.closest?.('#btnExportUnlocatedExcel,#btnExportCompaniesExcel,#btnPrintCompanyDossier');
+    if(target)parent.postMessage({type:'dgsci:activity',reference:target.id},location.origin);
+  });
   addEventListener('message', event => {
     if (event.source !== parent || event.origin !== location.origin) return;
     if (event.data?.type === 'dgsci:viewport' && Number.isFinite(event.data.top) && Number.isFinite(event.data.height)) { document.documentElement.style.setProperty('--host-top',Math.max(0,event.data.top)+'px');document.documentElement.style.setProperty('--host-height',Math.max(320,event.data.height)+'px'); }

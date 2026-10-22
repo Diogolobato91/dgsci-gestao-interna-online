@@ -1,0 +1,11 @@
+import { useState } from 'react';
+import { Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription } from '@/components/ui/dialog';
+import { ActionButton } from '@/components/workspace/Workspace';
+import { supabase } from '@/lib/supabase';
+import type { SupportContent } from './catalog';
+export default function ArchiveDialog({item,onClose,onSaved}:{item:SupportContent;onClose:()=>void;onSaved:()=>void}){
+ const restore=!!item.archived_at;const [reason,setReason]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ return <Dialog open onOpenChange={o=>{if(!o&&!busy)onClose();}}><DialogContent className="record-dialog compact-dialog"><DialogHeader><DialogTitle>{restore?'Restaurar conteúdo':'Arquivar conteúdo'}</DialogTitle><DialogDescription>{item.title}. {restore?'O conteúdo voltará à consulta principal.':'O conteúdo sairá da consulta principal; documentos e histórico serão preservados.'}</DialogDescription></DialogHeader><form className="record-form" onSubmit={async e=>{e.preventDefault();if(!supabase||busy)return;setBusy(true);setError('');try{const r=await supabase.rpc('set_document_archive',{p_id:item.id,p_revision:item.revision,p_archived:!restore,p_reason:restore?null:reason.trim()});if(r.error)throw new Error(r.error.code==='40001'?'O conteúdo foi alterado. Feche e atualize a lista.':r.error.code==='22023'?r.error.message:'Não foi possível concluir. Confira a conexão e sua permissão.');onSaved();onClose();}catch(e){setError(e instanceof Error?e.message:'Não foi possível concluir.');}finally{setBusy(false);}}}>
+ {!restore&&<div className="form-field"><label htmlFor="archive-reason">Motivo do arquivamento *</label><textarea id="archive-reason" required minLength={3} maxLength={500} rows={3} value={reason} onChange={e=>setReason(e.target.value)}/></div>}{restore&&item.archive_reason&&<p>Motivo do arquivamento: {item.archive_reason}</p>}{error&&<p className="form-error" role="alert">{error}</p>}<div className="record-actions"><ActionButton disabled={busy} onClick={onClose}>Cancelar</ActionButton><ActionButton disabled={busy} type="submit" variant="primary">{busy?'Salvando…':restore?'Restaurar':'Confirmar arquivamento'}</ActionButton></div>
+ </form></DialogContent></Dialog>;
+}

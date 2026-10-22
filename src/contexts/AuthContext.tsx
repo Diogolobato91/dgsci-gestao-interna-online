@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { AuthContextType, User, UserProfile, RegisterData, RegistrationStatusInfo } from '@/types/auth';
+import {logActivity} from '@/features/audit/activity';
 import { supabase } from '@/lib/supabase';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -204,6 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setAuthError('');
     if (supabase) {
+      void logActivity('session_close');
       void supabase.auth.signOut().then(({ error }) => {
         if (error) setAuthError('A sessão local foi encerrada. Tente sair novamente.');
       });

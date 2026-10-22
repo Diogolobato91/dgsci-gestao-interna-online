@@ -1,3 +1,4 @@
+import {logActivity} from '@/features/audit/activity';
 import { useEffect, useRef, useState } from 'react';
 import { Building2, MapPinned, BarChart3, RefreshCw, Info } from 'lucide-react';
 import { PageHeader, ActionButton } from '@/components/workspace/Workspace';
@@ -14,7 +15,8 @@ export default function EstablishmentsWorkspace() {
   useEffect(() => { setView(location.pathname === '/mapa' ? 'map' : 'overview'); }, [location.pathname]);
   useEffect(() => {
     const listener = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin || event.source !== iframe.current?.contentWindow || !['dgsci:status','dgsci:height'].includes(event.data?.type)) return;
+      if (event.origin !== window.location.origin || event.source !== iframe.current?.contentWindow || !['dgsci:status','dgsci:height','dgsci:activity'].includes(event.data?.type)) return;
+      if(event.data.type==='dgsci:activity'){if(['btnExportUnlocatedExcel','btnExportCompaniesExcel','btnPrintCompanyDossier'].includes(event.data.reference))void logActivity('download_request','estabelecimentos',event.data.reference);return;}
       if (event.data.type === 'dgsci:height' && Number.isFinite(event.data.height)) { setFrameHeight(Math.max(500, event.data.height)); return; }
       if (typeof event.data.message === 'string') setStatus(event.data.message.slice(0, 160));
       if (event.data.ready === true) setReady(true);

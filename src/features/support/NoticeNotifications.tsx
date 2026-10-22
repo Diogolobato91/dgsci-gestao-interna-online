@@ -1,3 +1,4 @@
+import {logActivity} from '@/features/audit/activity';
 import { useEffect, useRef, useState } from 'react';
 import { Megaphone, Paperclip, ArrowRight, Bell, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -40,7 +41,7 @@ export default function NoticeNotifications(){
    if(openFull)setReading(true);else{current.current=null;setNotice(null);setReading(false);}
   }catch{setError('Não foi possível registrar o aviso. Tente novamente.');}finally{setBusy(false);}
  }
- async function download(path:string,name:string){if(!supabase||busy)return;setBusy(true);setError('');try{const result=await supabase.storage.from('dgsci-support').download(path);if(result.error||!result.data)throw new Error();const url=URL.createObjectURL(result.data);const link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch{setError('Não foi possível baixar o anexo. Confira sua conexão.');}finally{setBusy(false);}}
+ async function download(path:string,name:string){if(!supabase||busy)return;setBusy(true);setError('');try{const result=await supabase.storage.from('dgsci-support').download(path);if(result.error||!result.data)throw new Error();void logActivity('download_request','support_documents',path);const url=URL.createObjectURL(result.data);const link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch{setError('Não foi possível baixar o anexo. Confira sua conexão.');}finally{setBusy(false);}}
  async function readFromCenter(item:Notice){
   if(!supabase||!user?.id||busy)return;setBusy(true);setListError('');try{const r=await supabase.from('notice_receipts').upsert({user_id:user.id,publication_id:item.publication_id},{onConflict:'user_id,publication_id',ignoreDuplicates:true});if(r.error)throw r.error;setCenter(false);current.current=item;setNotice(item);setReading(true);setError('');setRevision(n=>n+1);}catch{setListError('Não foi possível abrir o comunicado. Tente novamente.');}finally{setBusy(false);}
  }

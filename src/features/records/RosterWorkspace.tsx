@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import {RosterHistoryButton} from '@/features/audit/AuditHistory';
 import CleaningRoster from './CleaningRoster';
 import RosterExportDialog from './RosterExportDialog';
 import CleaningIcon from './CleaningIcon';
@@ -93,7 +94,7 @@ export default function RosterWorkspace() {
   }
   const footer = (close:()=>void, title='Salvar', disabled=false) => <>{formError&&<p role="alert" className="form-error">{formError}</p>}<div className="record-actions"><ActionButton disabled={busy} onClick={close}>Cancelar</ActionButton><ActionButton type="submit" variant="primary" disabled={busy||disabled}>{busy?'Salvando…':title}</ActionButton></div></>;
   return <section className="workspace-page roster-page">
-    <PageHeader eyebrow="Administração" title="Escala mensal" description="Plantão, previsão da Administração e escala dos voluntários civis." icon={CalendarDays}/>
+    <PageHeader eyebrow="Administração" title="Escala mensal" description="Plantão, previsão da Administração e escala dos voluntários civis." icon={CalendarDays} actions={canEdit?<RosterHistoryButton/>:undefined}/>
     <nav className="roster-navigation" aria-label="Tipos de escala">
       {[
         {id:'plantao',title:'Plantão',description:'Equipe diária de serviço',icon:ShieldCheck,path:'/escala-mensal'},
