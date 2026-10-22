@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import PersonalDataEditor from './PersonalDataEditor';
+import { MILITARY_RANKS } from '@/lib/rankHierarchy';
 import {
   UsersRound,
   Trash2,
@@ -91,7 +91,6 @@ export default function UserManagementPage() {
   const [revision, setRevision] = useState(0);
 
   // Modais de ação
-  const [personalUser,setPersonalUser]=useState<ManagedUser|null>(null);
   const [viewingUser, setViewingUser] = useState<ManagedUser | null>(null);
   const [approvingUser, setApprovingUser] = useState<{
     user: ManagedUser;
@@ -105,10 +104,14 @@ export default function UserManagementPage() {
   const [editingUser, setEditingUser] = useState<{
     user: ManagedUser;
     name: string;
+    rank: string; mf: string; cpf: string; birth: string; phone: string;
     sectors: UserProfile[];
     superadmin: boolean;
     enabled: boolean;
   } | null>(null);
+  function openEdit(account:ManagedUser){
+    setFormError('');setEditingUser({user:account,name:account.display_name,rank:account.posto_graduacao||'',mf:account.matricula||'',cpf:maskCpf(account.cpf),birth:account.data_nascimento||'',phone:account.contato||'',sectors:account.sectors||[],superadmin:isManagedSuperadmin(account),enabled:account.enabled});
+  }
   const [deletingUser, setDeletingUser] = useState<ManagedUser | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [blockingUser, setBlockingUser] = useState<ManagedUser | null>(null);
@@ -296,14 +299,16 @@ export default function UserManagementPage() {
   const handleSaveEdit = async () => {
     if (!editingUser || !supabase || busy) return;
     const selected = editingUser.superadmin ? USER_SECTORS : editingUser.sectors;
-    if (!editingUser.name.trim() || !selected.length) {
+    if (!editingUser.name.trim() || (!['pending_approval','rejected'].includes(editingUser.user.status) && !selected.length)) {
       setFormError('Informe o nome e ao menos um setor.');
       return;
     }
     setBusy(true);
     setFormError('');
     try {
-      const { error: problem } = await supabase.rpc('admin_save_user', {
+      const { error: problem } = editingUser.user.user_id ? await supabase.rpc('admin_save_user_full', {
+        p_user_id:editingUser.user.user_id,p_version:editingUser.user.version,p_details:{nome:editingUser.name.trim(),posto:editingUser.rank||null,matricula:editingUser.mf.trim()||null,cpf:editingUser.cpf.replace(/\D/g,'')||null,nascimento:editingUser.birth||null,contato:editingUser.phone.replace(/\D/g,'')||null},p_sectors:selected,p_enabled:editingUser.enabled,p_superadmin:editingUser.superadmin,
+      }) : await supabase.rpc('admin_save_user', {
         p_email: editingUser.user.email.trim().toLowerCase(),
         p_display_name: editingUser.name.trim(),
         p_sectors: selected,
@@ -512,7 +517,7 @@ export default function UserManagementPage() {
 
                       <td className="table-actions">
                         <div>
-                          {account.user_id&&<ActionButton variant="secondary" disabled={busy} onClick={()=>setPersonalUser(account)}><Pencil size={15}/>Dados pessoais</ActionButton>}
+                          <ActionButton variant="ghost" disabled={busy} onClick={()=>openEdit(account)}><Pencil size={15}/>Editar</ActionButton>
                           <ActionButton variant="ghost" className="workspace-button-danger" disabled={busy || account.email.toLowerCase() === ownEmail} onClick={() => { setDeletingUser(account); setDeleteConfirmation(''); setFormError(''); }} aria-label={'Excluir conta de ' + account.display_name}><Trash2 size={15}/>Excluir</ActionButton>
                           {/* Ações específicas para cadastro pendente */}
                           {isPending ? (
@@ -570,24 +575,7 @@ export default function UserManagementPage() {
                           ) : (
                             /* Ações para conta ativa/bloqueada */
                             <>
-                              <ActionButton
-                                variant="ghost"
-                                disabled={busy}
-                                onClick={() => {
-                                  setFormError('');
-                                  setEditingUser({
-                                    user: account,
-                                    name: account.display_name,
-                                    sectors: account.sectors || [],
-                                    superadmin: isSuper,
-                                    enabled: account.enabled,
-                                  });
-                                }}
-                                title={'Editar ' + account.display_name}
-                              >
-                                <Pencil size={15} />
-                                Editar
-                              </ActionButton>
+
 
                               <ActionButton
                                 variant="ghost"
@@ -667,7 +655,6 @@ export default function UserManagementPage() {
       </div>
 
       {/* 1. DIALOG DE VISUALIZAÇÃO DE DADOS COMPLETOS */}
-      {personalUser&&<PersonalDataEditor account={personalUser} onClose={()=>setPersonalUser(null)} onSaved={()=>{reload();setMessage('Dados pessoais atualizados.');}}/>}
       <Dialog open={!!viewingUser} onOpenChange={open => !open && setViewingUser(null)}>
         <DialogContent className="record-dialog compact-dialog">
           <DialogHeader>
@@ -928,7 +915,7 @@ export default function UserManagementPage() {
             </span>
             <DialogTitle>Editar usuário</DialogTitle>
             <DialogDescription>
-              Ajuste nome, setores ou privilégios de acesso.
+              Atualize a identificação, os dados pessoais e as permissões neste formulário.
             </DialogDescription>
           </DialogHeader>
 
@@ -969,6 +956,14 @@ export default function UserManagementPage() {
                 </div>
               </section>
 
+              {editingUser.user.user_id&&<section className="editor-section"><h3>Dados pessoais</h3>
+                <div className="form-field"><label htmlFor="user-rank">Posto / graduação</label><select id="user-rank" value={editingUser.rank} onChange={e=>setEditingUser({...editingUser,rank:e.target.value})}><option value="">Não informado</option>{MILITARY_RANKS.map(r=><option key={r}>{r}</option>)}</select></div>
+                <div className="form-field"><label htmlFor="user-mf">Matrícula</label><input id="user-mf" maxLength={50} value={editingUser.mf} onChange={e=>setEditingUser({...editingUser,mf:e.target.value})}/></div>
+                <div className="form-field"><label htmlFor="user-cpf">CPF</label><input id="user-cpf" inputMode="numeric" maxLength={14} value={editingUser.cpf} onChange={e=>setEditingUser({...editingUser,cpf:maskCpf(e.target.value)})}/></div>
+                <div className="form-field"><label htmlFor="user-birth">Data de nascimento</label><input id="user-birth" type="date" min="1900-01-01" value={editingUser.birth} onChange={e=>setEditingUser({...editingUser,birth:e.target.value})}/></div>
+                <div className="form-field"><label htmlFor="user-phone">Contato com DDD</label><input id="user-phone" type="tel" maxLength={20} value={editingUser.phone} onChange={e=>setEditingUser({...editingUser,phone:e.target.value})}/></div>
+              </section>}
+              {['pending_approval','rejected'].includes(editingUser.user.status)?<p className="workspace-description">A correção preserva a situação do cadastro. Use Aprovar ou Reavaliar para liberar acesso.</p>:<>
               <section className="editor-section">
                 <h3>Setores autorizados *</h3>
                 <div className="user-sector-options">
@@ -1030,6 +1025,8 @@ export default function UserManagementPage() {
                   </span>
                 </label>
               </section>
+
+              </>}
 
               {formError && (
                 <p className="form-error" role="alert">

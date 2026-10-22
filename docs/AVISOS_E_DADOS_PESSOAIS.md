@@ -12,7 +12,7 @@ As tabelas de publicação e recibos têm RLS. Usuários só registram e consult
 
 ## Dados pessoais
 
-Em **Gestão de Usuários → Dados pessoais**, o superadministrador corrige nome, posto/graduação, matrícula, CPF, nascimento e contato. Dados desconhecidos podem permanecer em branco. O e-mail de autenticação e a senha não são modificados por essa ação.
+Em **Gestão de Usuários → Editar**, o superadministrador corrige nome, posto/graduação, matrícula, CPF, nascimento e contato. Dados desconhecidos podem permanecer em branco. O e-mail de autenticação e a senha não são modificados por essa ação.
 
 A RPC verifica o superadministrador ativo no banco, valida CPF, graduação, nascimento, telefone e duplicidades, usa versão contra sobrescrita concorrente e registra antes/depois na auditoria privada. Atualiza o nome exibido nas fontes de acesso. A situação, a aprovação, os setores e as permissões permanecem intactos, inclusive em contas pendentes ou bloqueadas.
 
@@ -20,5 +20,5 @@ A ação corrige o cadastro da conta; não associa automaticamente contas ao efe
 
 ## Instalação e testes
 
-Migration: `supabase/notices_and_personal_data.sql`.
+Migrations: `supabase/notices_and_personal_data.sql` e `supabase/unified_user_edit.sql`. O formulário Editar salva dados pessoais e permissões numa transação; falhas revertem ambas as partes. Cadastros pendentes ou rejeitados permitem corrigir a identificação, mantendo Aprovar/Reavaliar como ação obrigatória para concessão de acesso.
 Suíte transacional: `tests/notices-personal-data-rls.sql`, incluída no teste PostgreSQL/PGlite. Os testes conferem correção cadastral, preservação da pendência, auditoria, CPF inválido/duplicado, versão obsoleta, isolamento de recibos e bloqueio de acessos não autorizados.
