@@ -29,3 +29,9 @@ export function cellColors(cell?: PlanCell) {
   const status = PLANNING_STATUS[cell?.status || ''] || PLANNING_STATUS[''];
   return { backgroundColor: /^#[a-f\d]{6}$/i.test(cell?.bg || '') ? cell!.bg : status.bg, color: /^#[a-f\d]{6}$/i.test(cell?.fg || '') ? cell!.fg : status.fg };
 }
+
+export function whatsappContactUrl(phone:string|null|undefined){
+ const digits=(phone||'').replace(/\D/g,'');
+ const national=digits.length===12||digits.length===13?digits.startsWith('55')?digits.slice(2):'':digits;
+ return /^[1-9]\d{9,10}$/.test(national)?'https://wa.me/55'+national:null;
+}

@@ -345,3 +345,5 @@
 .notice-notification-body.is-reading>p{display:block;overflow:visible}
 .notice-notification-body section{margin-top:18px}.notice-notification-body section h3{font-weight:650}.notice-notification-body section p{white-space:pre-wrap}.notice-notification-body ul{padding-left:20px;list-style:disc}
 .notice-notification>.workspace-button{max-width:100%;white-space:normal;overflow-wrap:anywhere;justify-content:flex-start}
+
+.roster-whatsapp{margin-top:10px;color:#166534;border-color:#c5dfcc;background:#f4faf5;justify-content:center}.roster-whatsapp:hover{background:#e8f4eb;border-color:#9bc7a7}.roster-whatsapp:focus-visible{outline:3px solid #166534;outline-offset:3px}
