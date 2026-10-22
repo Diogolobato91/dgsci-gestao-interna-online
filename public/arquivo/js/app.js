@@ -637,36 +637,16 @@ class DashboardApp {
     .print-container {
       width: 100%;
     }
-    .header-bar {
-      border-bottom: 2px solid #000;
-      padding-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-    .header-titles h1 {
-      font-size: 12pt;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: #000;
-    }
-    .header-titles h2 {
-      font-size: 8.5pt;
-      font-weight: bold;
-      color: #222;
-      margin-top: 2px;
-    }
-    .header-titles h3 {
-      font-size: 7.5pt;
-      color: #444;
-      margin-top: 1px;
-    }
-    .header-meta {
-      text-align: right;
-      font-size: 7.5pt;
-      color: #333;
-      line-height: 1.3;
-    }
+    .header-bar { border-bottom:1.2px solid #991723;padding-bottom:8px;margin-bottom:8px;text-align:left;font-weight:normal; }
+    .header-brand {display:flex;align-items:center;gap:5mm;}
+    .header-logo {width:14.34mm;height:18mm;object-fit:contain;flex-shrink:0;}
+    .header-titles h1 {font-size:9pt;font-weight:700;color:#232323;}
+    .header-titles h2 {font-size:7.2pt;font-weight:400;color:#232323;margin-top:3px;}
+    .header-titles h3 {font-size:12pt;font-weight:700;color:#232323;margin-top:6px;}
+    .header-meta {font-size:8pt;color:#555;line-height:1.5;margin-top:8px;display:flex;justify-content:space-between;gap:12px;}
+    .print-layout {width:100%;border-collapse:collapse;}
+    .print-layout>thead {display:table-header-group;}
+    .print-layout>thead>tr>td,.print-layout>tbody>tr>td {padding:0;border:0;}
     .company-card {
       margin-top: 10px;
       background: #f4f4f4;
@@ -723,20 +703,20 @@ class DashboardApp {
   </style>
 </head>
 <body>
-  <div class="print-container">
-    <div class="header-bar">
+  <div class="print-container"><table class="print-layout"><thead><tr><td>
+    <div class="header-bar"><div class="header-brand"><img class="header-logo" src="/portal/assets/dgsci-logo.png" alt="DGSCI"/>
       <div class="header-titles">
         <h1>CORPO DE BOMBEIROS MILITAR DO PARÁ</h1>
-        <h2>DEPARTAMENTO-GERAL DE SEGURANÇA CONTRA INCÊNDIO E EMERGÊNCIAS (DGSCI)</h2>
-        <h3>FICHA CADASTRAL E HISTÓRICO DE FISCALIZAÇÃO</h3>
+        <h2>DEPARTAMENTO GERAL DE SEGURANÇA CONTRA INCÊNDIO E EMERGÊNCIAS</h2>
+        <h3>Ficha cadastral e histórico de fiscalização</h3>
       </div>
-      <div class="header-meta">
+      </div><div class="header-meta">
         <div><strong>EMISSÃO:</strong> ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
         <div><strong>DIVISÃO CBMPA:</strong> ${company.divisao || '-'} • <strong>REG:</strong> #${company.itemNum || company.pasta}</div>
       </div>
     </div>
 
-    <div class="company-card">
+    </td></tr></thead><tbody><tr><td><div class="company-card">
       <div class="company-name">${company.razao}</div>
       <div class="company-sub">
         <strong>CNPJ / CPF:</strong> ${company.cnpj || 'Não informado'} &nbsp;|&nbsp; 
@@ -779,7 +759,7 @@ class DashboardApp {
         </tr>
         ` : ''}
       </tbody>
-    </table>
+    </table></td></tr></tbody></table>
   </div>
 </body>
 </html>
@@ -803,10 +783,10 @@ class DashboardApp {
     frameDoc.write(DOMPurify.sanitize(printHtml, { WHOLE_DOCUMENT: true }));
     frameDoc.close();
 
-    setTimeout(() => {
-      printFrame.contentWindow.focus();
-      printFrame.contentWindow.print();
-    }, 250);
+    const logo=frameDoc.querySelector('.header-logo');
+    const ready=logo?.decode?logo.decode():Promise.resolve();
+    ready.then(()=>{printFrame.contentWindow.focus();printFrame.contentWindow.print();})
+      .catch(()=>this.showToast('Não foi possível carregar a logo para impressão. Tente novamente.', 'error'));
   }
 
   setupThemeToggle() {
