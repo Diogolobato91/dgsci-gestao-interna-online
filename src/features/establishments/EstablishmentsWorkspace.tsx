@@ -15,7 +15,7 @@ export default function EstablishmentsWorkspace() {
   useEffect(() => {
     const listener = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== iframe.current?.contentWindow || !['dgsci:status','dgsci:height'].includes(event.data?.type)) return;
-      if (event.data.type === 'dgsci:height' && Number.isFinite(event.data.height)) { setFrameHeight(Math.max(500, Math.min(30000, event.data.height))); return; }
+      if (event.data.type === 'dgsci:height' && Number.isFinite(event.data.height)) { setFrameHeight(Math.max(500, event.data.height)); return; }
       if (typeof event.data.message === 'string') setStatus(event.data.message.slice(0, 160));
       if (event.data.ready === true) setReady(true);
     };

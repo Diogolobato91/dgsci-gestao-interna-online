@@ -101,3 +101,18 @@ html.embedded {
 .embedded .modal-backdrop{top:var(--host-top,0px);height:var(--host-height,100vh);bottom:auto}
 .embedded .modal-content{max-height:calc(var(--host-height,100vh) - 48px)!important}
 .embedded .address-missing{display:inline-block;color:#7d3138;background:#fff3f3;border-radius:5px;padding:4px 7px;font-size:11px}
+
+/* A integração não deve criar uma segunda página rolável dentro do portal. */
+html.embedded{height:auto!important;min-height:0!important;overflow:clip!important}
+.embedded body{height:auto!important;max-height:none!important;overflow:clip!important;background:transparent}
+.embedded .app-layout,.embedded .app-main,.embedded .tab-content{height:auto!important;max-height:none!important;overflow:visible!important}
+.embedded .data-card,.embedded .store-locator-card,.embedded .map-view-card{border:0;border-radius:0;box-shadow:none;backdrop-filter:none;background:transparent;overflow:visible}
+.embedded .store-locator-mobile-toggle{display:none!important}
+.embedded .store-locator-layout{display:flex!important;flex-direction:column;height:auto!important;min-height:0!important;gap:20px}
+.embedded .store-locator-layout .locator-map-wrapper,.embedded .store-locator-layout.show-list .locator-map-wrapper{display:block!important;order:0;width:100%!important;height:clamp(340px,calc(var(--host-height,720px) * .65),600px)!important;min-height:340px!important;border:1px solid #dedede;border-radius:12px;overflow:hidden}
+.embedded .store-locator-layout .locator-sidebar,.embedded .store-locator-layout.show-list .locator-sidebar{display:flex!important;order:1;width:100%!important;height:auto!important;max-height:none!important;border:0!important;overflow:visible!important;background:transparent}
+.embedded .locator-listings{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;flex:none;max-height:none!important;height:auto!important;overflow:visible!important;padding:14px 0}
+.embedded .locator-item{margin:0;min-width:0}
+.embedded .table-responsive{height:auto!important;max-height:none!important;overflow-x:auto!important;overflow-y:hidden!important}
+.embedded .unlocated-card-section{margin-top:24px;border:0;border-top:1px solid #dedede;border-radius:0;padding-top:20px}
+@media(max-width:600px){.embedded .locator-listings{grid-template-columns:minmax(0,1fr)}}

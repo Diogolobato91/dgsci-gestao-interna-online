@@ -331,7 +331,10 @@ class GeoMapManager {
       zoom: 12.8,
       pitch: 35, // 3D tilt cinematográfico do Mapbox
       bearing: 0,
-      attributionControl: false
+      attributionControl: false,
+      // No portal, a roda rola a página; no celular, dois dedos manipulam o mapa.
+      scrollZoom: !document.documentElement.classList.contains('embedded'),
+      cooperativeGestures: document.documentElement.classList.contains('embedded')
     });
     } catch (error) {
       this.map = null;
@@ -907,10 +910,9 @@ class GeoMapManager {
 
     if (selectedCard) {
       selectedCard.classList.add('active');
-      selectedCard.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest'
-      });
+      if (!document.documentElement.classList.contains('embedded')) {
+        selectedCard.scrollIntoView({behavior:'smooth',block:'nearest'});
+      }
     }
 
     // Se estiver no celular e na visualização da lista, volta automaticamente para o mapa

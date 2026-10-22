@@ -99,3 +99,15 @@ test('mapa sem WebGL exibe orientação sem quebrar a consulta', () => {
   assert.equal(context.window.geoMapManager.map, null);
   assert.match(messages[0], /consulta dos estabelecimentos continua disponível/);
 });
+
+test('mapa integrado preserva rolagem da página; versão independente mantém zoom pela roda',()=>{
+ for(const embedded of [true,false]){
+  let options;
+  const container={replaceChildren(){},appendChild(){}};
+  const context=vm.createContext({window:{DGSCI_GEO_KEYS:{}},document:{addEventListener(){},getElementById(){return container;},documentElement:{getAttribute(){return'light';},classList:{contains(name){return name==='embedded'&&embedded;}}},createElement(){return{};}},
+   mapboxgl:{Map:class{constructor(config){options=config;throw new Error('Sem WebGL no teste');}}},console:{warn(){}},fetch:async()=>({ok:false})});
+  vm.runInContext(fs.readFileSync('public/arquivo/js/geo-map.js','utf8'),context);
+  context.window.geoMapManager.initMap();
+  assert.equal(options.scrollZoom,!embedded);assert.equal(options.cooperativeGestures,embedded);
+ }
+});
