@@ -336,3 +336,12 @@
 .library-workspace .portal-card footer{margin-top:auto;flex-wrap:wrap}
 .library-workspace .portal-card footer>div{flex-wrap:wrap}
 .support-full-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;color:#4b5563}
+
+.notice-notification{width:calc(100% - 32px);max-width:620px;max-height:88dvh;overflow-y:auto;border-radius:16px;padding:26px}
+.notice-notification-eyebrow{display:flex;align-items:center;gap:8px;color:#a71927;font-size:12px;font-weight:700;margin-bottom:12px}
+.notice-notification h2{overflow-wrap:anywhere;padding-right:18px;line-height:1.5}
+.notice-notification-body{font-size:14px;line-height:1.8;color:#4b5563;overflow-wrap:anywhere}
+.notice-notification-body>p{white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.notice-notification-body.is-reading>p{display:block;overflow:visible}
+.notice-notification-body section{margin-top:18px}.notice-notification-body section h3{font-weight:650}.notice-notification-body section p{white-space:pre-wrap}.notice-notification-body ul{padding-left:20px;list-style:disc}
+.notice-notification>.workspace-button{max-width:100%;white-space:normal;overflow-wrap:anywhere;justify-content:flex-start}

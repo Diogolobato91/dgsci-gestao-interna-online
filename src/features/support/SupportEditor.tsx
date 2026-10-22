@@ -33,7 +33,7 @@ export default function SupportEditor({item,initialType,onClose,onSaved}:{item:S
         const response=item?await supabase.from('support_documents').update(values).eq('id',id).eq('revision',item.revision).select('id'):await supabase.from('support_documents').insert({id,...values}).select('id');
         if(response.error)throw new Error('Não foi possível salvar. Confira sua conexão e permissão.');
         if(!response.data?.length)throw new Error('O documento foi alterado por outra pessoa. Atualize a lista e tente novamente.');
-        onSaved();onClose();
+        onSaved();onClose();if(!item&&type==='notice')window.dispatchEvent(new Event('dgsci:new-notice'));
       }catch(reason){if(uploaded.length)await supabase.storage.from('dgsci-support').remove(uploaded);setError(reason instanceof Error?reason.message:'Não foi possível salvar.');}
       finally{setBusy(false);}
     }}>

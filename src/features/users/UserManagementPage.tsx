@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import PersonalDataEditor from './PersonalDataEditor';
 import {
   UsersRound,
   Trash2,
@@ -90,6 +91,7 @@ export default function UserManagementPage() {
   const [revision, setRevision] = useState(0);
 
   // Modais de ação
+  const [personalUser,setPersonalUser]=useState<ManagedUser|null>(null);
   const [viewingUser, setViewingUser] = useState<ManagedUser | null>(null);
   const [approvingUser, setApprovingUser] = useState<{
     user: ManagedUser;
@@ -510,6 +512,7 @@ export default function UserManagementPage() {
 
                       <td className="table-actions">
                         <div>
+                          {account.user_id&&<ActionButton variant="secondary" disabled={busy} onClick={()=>setPersonalUser(account)}><Pencil size={15}/>Dados pessoais</ActionButton>}
                           <ActionButton variant="ghost" className="workspace-button-danger" disabled={busy || account.email.toLowerCase() === ownEmail} onClick={() => { setDeletingUser(account); setDeleteConfirmation(''); setFormError(''); }} aria-label={'Excluir conta de ' + account.display_name}><Trash2 size={15}/>Excluir</ActionButton>
                           {/* Ações específicas para cadastro pendente */}
                           {isPending ? (
@@ -664,6 +667,7 @@ export default function UserManagementPage() {
       </div>
 
       {/* 1. DIALOG DE VISUALIZAÇÃO DE DADOS COMPLETOS */}
+      {personalUser&&<PersonalDataEditor account={personalUser} onClose={()=>setPersonalUser(null)} onSaved={()=>{reload();setMessage('Dados pessoais atualizados.');}}/>}
       <Dialog open={!!viewingUser} onOpenChange={open => !open && setViewingUser(null)}>
         <DialogContent className="record-dialog compact-dialog">
           <DialogHeader>

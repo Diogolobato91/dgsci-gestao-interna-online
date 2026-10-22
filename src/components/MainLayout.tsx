@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X, LogOut, LockKeyhole, ChevronRight, UserRound, UsersRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import NoticeNotifications from '@/features/support/NoticeNotifications';
 import { navigationConfig } from '@/config/navigation';
 import { isFullAdministrator } from '@/features/records/recordAccess';
 
@@ -46,7 +47,7 @@ export default function MainLayout() {
     </aside>
     <div className="shell-content">
       <header className="shell-topbar"><div><button ref={menuButton} className="shell-menu" onClick={() => setOpen(true)} aria-label="Abrir menu" aria-expanded={open} aria-controls="portal-sidebar"><Menu size={21} /></button><span>Portal DGSCI</span><i>/</i><strong>{title}</strong></div><div><span className="shell-account"><UserRound size={16}/><span>{user.matricula}</span></span><span className="shell-stage"><span />Em desenvolvimento</span><button onClick={logout} className="shell-exit"><LogOut size={15} /><span>Sair</span></button></div></header>
-      <main id="workspace-main" className="shell-main" tabIndex={-1}>{!integrated && <div className="portal-note"><p><strong>Rotina demonstrativa do projeto anterior.</strong> Dados e alterações desta tela são exemplos locais. A persistência compartilhada será implementada na próxima etapa.</p></div>}<Suspense fallback={<p className="workspace-status" role="status">Carregando módulo…</p>}><Outlet /></Suspense></main>
+      <main id="workspace-main" className="shell-main" tabIndex={-1}>{!integrated && <div className="portal-note"><p><strong>Rotina demonstrativa do projeto anterior.</strong> Dados e alterações desta tela são exemplos locais. A persistência compartilhada será implementada na próxima etapa.</p></div>}<Suspense fallback={<p className="workspace-status" role="status">Carregando módulo…</p>}><Outlet /></Suspense><NoticeNotifications/></main>
     </div>
   </div>;
 }
