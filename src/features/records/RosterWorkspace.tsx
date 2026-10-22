@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import CleaningRoster from './CleaningRoster';
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, Pencil, Phone, Trash2, RefreshCw, ShieldCheck, ClipboardList, Sparkles, Check } from 'lucide-react';
+import CleaningIcon from './CleaningIcon';
+import { CalendarDays, ChevronLeft, ChevronRight, Plus, Pencil, Phone, Trash2, RefreshCw, ShieldCheck, ClipboardList, Check } from 'lucide-react';
 import { PageHeader, ActionButton, LoadState } from '@/components/workspace/Workspace';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -96,7 +97,7 @@ export default function RosterWorkspace() {
       {[
         {id:'plantao',title:'Plantão',description:'Equipe diária de serviço',icon:ShieldCheck,path:'/escala-mensal'},
         {id:'administracao',title:'Previsão da Administração',description:'Planejamento mensal do efetivo',icon:ClipboardList,path:'/escala-mensal?aba=administracao'},
-        {id:'vc',title:'Escala dos VCs',description:'Conservação e limpeza',icon:Sparkles,path:'/escala-mensal?aba=vc'},
+        {id:'vc',title:'Escala dos VCs',description:'Conservação e limpeza',icon:CleaningIcon,path:'/escala-mensal?aba=vc'},
       ].map(({id,title,description,icon:Icon,path})=><Link key={id} to={path} aria-current={tab===id?'page':undefined} className={'roster-navigation-item'+(tab===id?' is-active':'')}>
         <span className="roster-navigation-icon"><Icon size={23} aria-hidden="true"/></span>
         <span className="roster-navigation-text"><strong>{title}</strong><span>{description}</span></span>
