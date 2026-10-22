@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import CleaningRoster from './CleaningRoster';
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, Pencil, Phone, Trash2, RefreshCw } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Plus, Pencil, Phone, Trash2, RefreshCw, ShieldCheck, ClipboardList, Sparkles, Check } from 'lucide-react';
 import { PageHeader, ActionButton, LoadState } from '@/components/workspace/Workspace';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,9 +16,8 @@ import type { StaffAbsence } from './staffAvailability';
 export default function RosterWorkspace() {
   const { user } = useAuth();
   const canEdit = !!user?.allowedProfiles?.some(p => ['Secretaria','Diretoria','Subdiretoria'].includes(p));
-  const [params,setParams]=useSearchParams();
+  const [params]=useSearchParams();
   const tab=params.get('aba')==='vc'?'vc':params.get('aba')==='administracao'?'administracao':'plantao';
-  const setTab=(value:string)=>setParams(value==='plantao'?{}:{aba:value});
   const [month,setMonth] = useState(() => institutionalToday().slice(0,7));
   const [day,setDay] = useState(() => institutionalToday());
   const [people,setPeople] = useState<RosterPerson[]>([]), [duties,setDuties] = useState<Plantao[]>([]);
@@ -93,7 +92,17 @@ export default function RosterWorkspace() {
   const footer = (close:()=>void, title='Salvar', disabled=false) => <>{formError&&<p role="alert" className="form-error">{formError}</p>}<div className="record-actions"><ActionButton disabled={busy} onClick={close}>Cancelar</ActionButton><ActionButton type="submit" variant="primary" disabled={busy||disabled}>{busy?'Salvando…':title}</ActionButton></div></>;
   return <section className="workspace-page roster-page">
     <PageHeader eyebrow="Administração" title="Escala mensal" description="Plantão, previsão da Administração e escala dos voluntários civis." icon={CalendarDays}/>
-    <div className="workspace-segments" role="tablist" aria-label="Escalas"><button role="tab" aria-selected={tab==='plantao'} onClick={()=>setTab('plantao')}>Plantão</button><button role="tab" aria-selected={tab==='administracao'} onClick={()=>setTab('administracao')}>Previsão da Administração</button><button role="tab" aria-selected={tab==='vc'} onClick={()=>setTab('vc')}>Escala dos VCs</button></div>
+    <nav className="roster-navigation" aria-label="Tipos de escala">
+      {[
+        {id:'plantao',title:'Plantão',description:'Equipe diária de serviço',icon:ShieldCheck,path:'/escala-mensal'},
+        {id:'administracao',title:'Previsão da Administração',description:'Planejamento mensal do efetivo',icon:ClipboardList,path:'/escala-mensal?aba=administracao'},
+        {id:'vc',title:'Escala dos VCs',description:'Conservação e limpeza',icon:Sparkles,path:'/escala-mensal?aba=vc'},
+      ].map(({id,title,description,icon:Icon,path})=><Link key={id} to={path} aria-current={tab===id?'page':undefined} className={'roster-navigation-item'+(tab===id?' is-active':'')}>
+        <span className="roster-navigation-icon"><Icon size={23} aria-hidden="true"/></span>
+        <span className="roster-navigation-text"><strong>{title}</strong><span>{description}</span></span>
+        {tab===id&&<Check className="roster-navigation-check" size={19} aria-hidden="true"/>}
+      </Link>)}
+    </nav>
     {tab==='vc'?<CleaningRoster/>:<>
     <div className="roster-toolbar"><div className="roster-month"><ActionButton aria-label="Mês anterior" onClick={()=>move(-1)}><ChevronLeft size={18}/></ActionButton><h2>{label}</h2><ActionButton aria-label="Próximo mês" onClick={()=>move(1)}><ChevronRight size={18}/></ActionButton></div><div className="roster-month-controls"><label htmlFor="roster-month" className="sr-only">Mês da escala</label><input id="roster-month" type="month" min="1900-01" max="2199-12" value={month} onChange={e=>{if(/^\d{4}-\d{2}$/.test(e.target.value)){setMonth(e.target.value);setDay(e.target.value+'-01');}}}/><ActionButton onClick={()=>{setMonth(institutionalToday().slice(0,7));setDay(institutionalToday());}}>Hoje</ActionButton><ActionButton onClick={()=>setRevision(v=>v+1)}><RefreshCw size={14}/>Atualizar</ActionButton></div></div>
     {loading||error?<LoadState error={error} onRetry={()=>setRevision(v=>v+1)}/>:tab==='plantao'?<>
