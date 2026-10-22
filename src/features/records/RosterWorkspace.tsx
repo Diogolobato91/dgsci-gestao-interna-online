@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import CleaningRoster from './CleaningRoster';
 import { CalendarDays, ChevronLeft, ChevronRight, Plus, Pencil, Phone, Trash2, RefreshCw } from 'lucide-react';
 import { PageHeader, ActionButton, LoadState } from '@/components/workspace/Workspace';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -14,7 +16,9 @@ import type { StaffAbsence } from './staffAvailability';
 export default function RosterWorkspace() {
   const { user } = useAuth();
   const canEdit = !!user?.allowedProfiles?.some(p => ['Secretaria','Diretoria','Subdiretoria'].includes(p));
-  const [tab,setTab] = useState<'plantao'|'administracao'>('plantao');
+  const [params,setParams]=useSearchParams();
+  const tab=params.get('aba')==='vc'?'vc':params.get('aba')==='administracao'?'administracao':'plantao';
+  const setTab=(value:string)=>setParams(value==='plantao'?{}:{aba:value});
   const [month,setMonth] = useState(() => institutionalToday().slice(0,7));
   const [day,setDay] = useState(() => institutionalToday());
   const [people,setPeople] = useState<RosterPerson[]>([]), [duties,setDuties] = useState<Plantao[]>([]);
@@ -35,6 +39,7 @@ export default function RosterWorkspace() {
   const label = new Date(year,monthNo-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   useEffect(() => {
     let alive = true; setLoading(true); setError('');
+    if(tab==='vc'){setLoading(false);return;}
     if (!canEdit || !supabase) { setError('Sua conta não tem acesso à escala da Administração.'); setLoading(false); return; }
     void (async () => {
       const results = await Promise.all([
@@ -54,7 +59,7 @@ export default function RosterWorkspace() {
       setLoading(false);
     })().catch(() => { if(alive) {setLoading(false);setError('Não foi possível carregar a escala.');} });
     return () => { alive = false; };
-  },[start,end,revision,canEdit,user?.id]);
+  },[start,end,revision,canEdit,user?.id,tab]);
   useEffect(()=>{
     let alive=true;setDraftAbsences([]);setAvailabilityError('');
     if(!draft?.service_date||!canEdit){setAvailabilityLoading(false);return;}
@@ -87,8 +92,9 @@ export default function RosterWorkspace() {
   }
   const footer = (close:()=>void, title='Salvar', disabled=false) => <>{formError&&<p role="alert" className="form-error">{formError}</p>}<div className="record-actions"><ActionButton disabled={busy} onClick={close}>Cancelar</ActionButton><ActionButton type="submit" variant="primary" disabled={busy||disabled}>{busy?'Salvando…':title}</ActionButton></div></>;
   return <section className="workspace-page roster-page">
-    <PageHeader eyebrow="Administração" title="Escala mensal" description="Equipe de plantão e previsão de serviço da Administração." icon={CalendarDays}/>
-    <div className="workspace-segments" role="tablist" aria-label="Escalas"><button role="tab" aria-selected={tab==='plantao'} onClick={()=>setTab('plantao')}>Plantão</button><button role="tab" aria-selected={tab==='administracao'} onClick={()=>setTab('administracao')}>Previsão da Administração</button></div>
+    <PageHeader eyebrow="Administração" title="Escala mensal" description="Plantão, previsão da Administração e escala dos voluntários civis." icon={CalendarDays}/>
+    <div className="workspace-segments" role="tablist" aria-label="Escalas"><button role="tab" aria-selected={tab==='plantao'} onClick={()=>setTab('plantao')}>Plantão</button><button role="tab" aria-selected={tab==='administracao'} onClick={()=>setTab('administracao')}>Previsão da Administração</button><button role="tab" aria-selected={tab==='vc'} onClick={()=>setTab('vc')}>Escala dos VCs</button></div>
+    {tab==='vc'?<CleaningRoster/>:<>
     <div className="roster-toolbar"><div className="roster-month"><ActionButton aria-label="Mês anterior" onClick={()=>move(-1)}><ChevronLeft size={18}/></ActionButton><h2>{label}</h2><ActionButton aria-label="Próximo mês" onClick={()=>move(1)}><ChevronRight size={18}/></ActionButton></div><div className="roster-month-controls"><label htmlFor="roster-month" className="sr-only">Mês da escala</label><input id="roster-month" type="month" min="1900-01" max="2199-12" value={month} onChange={e=>{if(/^\d{4}-\d{2}$/.test(e.target.value)){setMonth(e.target.value);setDay(e.target.value+'-01');}}}/><ActionButton onClick={()=>{setMonth(institutionalToday().slice(0,7));setDay(institutionalToday());}}>Hoje</ActionButton><ActionButton onClick={()=>setRevision(v=>v+1)}><RefreshCw size={14}/>Atualizar</ActionButton></div></div>
     {loading||error?<LoadState error={error} onRetry={()=>setRevision(v=>v+1)}/>:tab==='plantao'?<>
       <div className="roster-summary"><span><strong>{duties.length-conflicts.length}</strong> dias com equipe disponível</span><span><strong>3</strong> militares por plantão</span></div>
@@ -99,6 +105,7 @@ export default function RosterWorkspace() {
       <div className="roster-plan-heading"><div><h2>Previsão mensal de serviço</h2><p>Contadores de folga e marcações da Administração. A previsão não altera automaticamente a equipe do plantão.</p>{plan?.source_label&&<small>{plan.source_label}{plan.source_updated&&` · Atualização informada na origem: ${plan.source_updated}`}</small>}</div><div className="record-actions"><ActionButton onClick={()=>{setFormError('');setNotes(plan?.notes||'');}}><Pencil size={14}/>Observações</ActionButton><ActionButton variant="primary" onClick={()=>{setFormError('');setRowEdit({nome:'',posto_graduacao:'SD',section:DUTY_ROLES[0],cells:{}});}}><Plus size={15}/>Adicionar militar</ActionButton></div></div>
       <div className="roster-legend" aria-label="Legenda da previsão">{Object.entries(PLANNING_STATUS).filter(([k])=>k).map(([k,v])=><span key={k}><i style={{backgroundColor:v.bg}}/>{v.label}</span>)}</div><p className="roster-source-hint">As demais cores de fundo foram preservadas da planilha, sem atribuir situações por aproximação.</p><label className="roster-section-filter">Função <select value={section} onChange={e=>setSection(e.target.value)}><option>Todas</option>{DUTY_ROLES.map(r=><option key={r}>{r}</option>)}</select></label>
       {!rows.length?<div className="roster-empty"><CalendarDays size={30}/><strong>Previsão ainda não cadastrada neste mês</strong><p>Adicione os militares para iniciar o planejamento.</p></div>:<div className="roster-matrix-scroll" tabIndex={0} aria-label="Previsão mensal. Role horizontalmente para consultar os dias."><table className="roster-matrix"><thead><tr><th>Militar / função</th>{planningDates.map(d=><th key={d} scope="col"><span>{d.slice(8)}{d.slice(0,7)!==month&&`/${d.slice(5,7)}`}</span><small>{new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</small></th>)}</tr></thead><tbody>{rows.filter(r=>section==='Todas'||r.section===section).map(r=><tr key={r.id}><th scope="row"><button onClick={()=>{setFormError('');setRowEdit({...r});}}><strong style={{color:/^#[a-f0-9]{6}$/i.test(r.name_color)?r.name_color:undefined}}>{r.posto_graduacao} {r.nome}</strong><small>{r.section} · editar</small></button></th>{planningDates.map(d=>{const c=r.cells[d];return <td key={d}><button style={cellColors(c)} aria-label={`${r.nome}, ${d}: ${c?.value||'sem contador'}, ${PLANNING_STATUS[c?.status||'']?.label||'marcação da origem'}. Editar`} onClick={()=>{setFormError('');setCellEdit({row:r,date:d,cell:c?{...c}:{value:'',status:''}});}}>{c?.value||'—'}</button></td>;})}</tr>)}</tbody></table></div>}{plan?.notes&&<section className="roster-source-notes"><h3>Observações da Administração</h3><p>{plan.notes}</p></section>}
+    </>}
     </>}
     <Dialog open={!!draft} onOpenChange={o=>{if(!o&&!busy)setDraft(null);}}><DialogContent className="record-dialog editor-dialog"><DialogHeader><DialogTitle>{draft?.id?'Editar equipe de plantão':'Montar equipe de plantão'}</DialogTitle><DialogDescription>Preencha as três funções com militares distintos. O contato é consultado no cadastro.</DialogDescription></DialogHeader>{draft&&<form className="record-form" onSubmit={e=>{e.preventDefault();void save(async()=>{
       if(!validateTeam([draft.chief_id||'',draft.assistant_id||'',draft.expert_id||''],people))throw new Error('Selecione três militares distintos.');

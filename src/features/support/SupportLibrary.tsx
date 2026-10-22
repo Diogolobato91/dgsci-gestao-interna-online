@@ -10,6 +10,7 @@ import { canManageSupport, canManageModels } from '@/features/records/recordAcce
 import { useDatabaseRows } from '@/features/records/useDatabaseRows';
 import SupportEditor from './SupportEditor';
 import DailyRoster from '../records/DailyRoster';
+import CleaningRoster from '../records/CleaningRoster';
 import { PageHeader, ActionButton, SearchField } from '@/components/workspace/Workspace';
 import { matchesContent, readLocal, saveLocal, SupportContent } from './catalog';
 
@@ -80,6 +81,7 @@ export default function SupportLibrary() {
       </section>
       <DailyRoster/>
       </div>
+      <CleaningRoster compact/>
       <div className="overview-access"><Link to="/estabelecimentos"><span className="overview-access-icon"><Building2 size={23}/></span><div><strong>Estabelecimentos</strong><p>Cadastros, mapa e indicadores</p></div><ArrowUpRight size={18}/></Link><Link to="/cmt-sub-sats"><span className="overview-access-icon"><Compass size={23}/></span><div><strong>Comando das SATs</strong><p>Comandantes e subcomandantes</p></div><ArrowUpRight size={18}/></Link></div></>}
     {error&&<div className="workspace-feedback is-error" role="alert">{error}</div>}
     {pathname!=='/dashboard'&&<div className="library-workspace">
