@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import CleaningRoster from './CleaningRoster';
+import RosterExportDialog from './RosterExportDialog';
 import CleaningIcon from './CleaningIcon';
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, Pencil, Phone, Trash2, RefreshCw, ShieldCheck, ClipboardList, Check, MessageCircle } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Plus, Pencil, Phone, Trash2, RefreshCw, ShieldCheck, ClipboardList, Check, MessageCircle, Download } from 'lucide-react';
 import { PageHeader, ActionButton, LoadState } from '@/components/workspace/Workspace';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +20,7 @@ export default function RosterWorkspace() {
   const canEdit = !!user?.allowedProfiles?.some(p => ['Secretaria','Diretoria','Subdiretoria'].includes(p));
   const [params]=useSearchParams();
   const tab=params.get('aba')==='vc'?'vc':params.get('aba')==='administracao'?'administracao':'plantao';
+  const [exportOpen,setExportOpen]=useState(false);
   const [month,setMonth] = useState(() => institutionalToday().slice(0,7));
   const [day,setDay] = useState(() => institutionalToday());
   const [people,setPeople] = useState<RosterPerson[]>([]), [duties,setDuties] = useState<Plantao[]>([]);
@@ -104,7 +106,7 @@ export default function RosterWorkspace() {
       </Link>)}
     </nav>
     {tab==='vc'?<CleaningRoster/>:<>
-    <div className="roster-toolbar"><div className="roster-month"><ActionButton aria-label="Mês anterior" onClick={()=>move(-1)}><ChevronLeft size={18}/></ActionButton><h2>{label}</h2><ActionButton aria-label="Próximo mês" onClick={()=>move(1)}><ChevronRight size={18}/></ActionButton></div><div className="roster-month-controls"><label htmlFor="roster-month" className="sr-only">Mês da escala</label><input id="roster-month" type="month" min="1900-01" max="2199-12" value={month} onChange={e=>{if(/^\d{4}-\d{2}$/.test(e.target.value)){setMonth(e.target.value);setDay(e.target.value+'-01');}}}/><ActionButton onClick={()=>{setMonth(institutionalToday().slice(0,7));setDay(institutionalToday());}}>Hoje</ActionButton><ActionButton onClick={()=>setRevision(v=>v+1)}><RefreshCw size={14}/>Atualizar</ActionButton></div></div>
+    <div className="roster-toolbar"><div className="roster-month"><ActionButton aria-label="Mês anterior" onClick={()=>move(-1)}><ChevronLeft size={18}/></ActionButton><h2>{label}</h2><ActionButton aria-label="Próximo mês" onClick={()=>move(1)}><ChevronRight size={18}/></ActionButton></div><div className="roster-month-controls"><label htmlFor="roster-month" className="sr-only">Mês da escala</label><input id="roster-month" type="month" min="1900-01" max="2199-12" value={month} onChange={e=>{if(/^\d{4}-\d{2}$/.test(e.target.value)){setMonth(e.target.value);setDay(e.target.value+'-01');}}}/><ActionButton onClick={()=>{setMonth(institutionalToday().slice(0,7));setDay(institutionalToday());}}>Hoje</ActionButton><ActionButton onClick={()=>setRevision(v=>v+1)}><RefreshCw size={14}/>Atualizar</ActionButton>{tab==='plantao'&&canEdit&&<ActionButton disabled={loading||!!error} onClick={()=>setExportOpen(true)}><Download size={16}/>Baixar PDF</ActionButton>}</div></div>
     {loading||error?<LoadState error={error} onRetry={()=>setRevision(v=>v+1)}/>:tab==='plantao'?<>
       <div className="roster-summary"><span><strong>{duties.length-conflicts.length}</strong> dias com equipe disponível</span><span><strong>3</strong> militares por plantão</span></div>
       {!!conflicts.length&&<div className="staff-warning" role="alert"><strong>Há {conflicts.length} plantão(ões) com militar afastado</strong><p>Revise as equipes. Os afastamentos não apagam os plantões existentes.</p><div className="record-actions">{conflicts.map(d=><ActionButton key={d.id} onClick={()=>setDay(d.service_date)}>{shortDate(d.service_date)}</ActionButton>)}</div></div>}
@@ -116,6 +118,7 @@ export default function RosterWorkspace() {
       {!rows.length?<div className="roster-empty"><CalendarDays size={30}/><strong>Previsão ainda não cadastrada neste mês</strong><p>Adicione os militares para iniciar o planejamento.</p></div>:<div className="roster-matrix-scroll" tabIndex={0} aria-label="Previsão mensal. Role horizontalmente para consultar os dias."><table className="roster-matrix"><thead><tr><th>Militar / função</th>{planningDates.map(d=><th key={d} scope="col"><span>{d.slice(8)}{d.slice(0,7)!==month&&`/${d.slice(5,7)}`}</span><small>{new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</small></th>)}</tr></thead><tbody>{rows.filter(r=>section==='Todas'||r.section===section).map(r=><tr key={r.id}><th scope="row"><button onClick={()=>{setFormError('');setRowEdit({...r});}}><strong style={{color:/^#[a-f0-9]{6}$/i.test(r.name_color)?r.name_color:undefined}}>{r.posto_graduacao} {r.nome}</strong><small>{r.section} · editar</small></button></th>{planningDates.map(d=>{const c=r.cells[d];return <td key={d}><button style={cellColors(c)} aria-label={`${r.nome}, ${d}: ${c?.value||'sem contador'}, ${PLANNING_STATUS[c?.status||'']?.label||'marcação da origem'}. Editar`} onClick={()=>{setFormError('');setCellEdit({row:r,date:d,cell:c?{...c}:{value:'',status:''}});}}>{c?.value||'—'}</button></td>;})}</tr>)}</tbody></table></div>}{plan?.notes&&<section className="roster-source-notes"><h3>Observações da Administração</h3><p>{plan.notes}</p></section>}
     </>}
     </>}
+    {exportOpen&&<RosterExportDialog day={day} month={month} onClose={()=>setExportOpen(false)}/>}
     <Dialog open={!!draft} onOpenChange={o=>{if(!o&&!busy)setDraft(null);}}><DialogContent className="record-dialog editor-dialog"><DialogHeader><DialogTitle>{draft?.id?'Editar equipe de plantão':'Montar equipe de plantão'}</DialogTitle><DialogDescription>Preencha as três funções com militares distintos. O contato é consultado no cadastro.</DialogDescription></DialogHeader>{draft&&<form className="record-form" onSubmit={e=>{e.preventDefault();void save(async()=>{
       if(!validateTeam([draft.chief_id||'',draft.assistant_id||'',draft.expert_id||''],people))throw new Error('Selecione três militares distintos.');
       if(availabilityLoading||availabilityError)throw new Error('Atualize a disponibilidade antes de salvar a equipe.');
