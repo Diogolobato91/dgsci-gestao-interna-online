@@ -31,6 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastHeight = 0;
   const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(() => { const height=Math.ceil(document.querySelector('.app-main')?.getBoundingClientRect().height || document.body.scrollHeight); if(Math.abs(height-lastHeight)>2){lastHeight=height;parent.postMessage({type:'dgsci:height',height:height+12},location.origin);} }) : null;
   observer?.observe(document.querySelector('.app-main') || document.body);
-  app.switchTab('companies');
+  app.switchTab('overview');
   sendStatus();
 });

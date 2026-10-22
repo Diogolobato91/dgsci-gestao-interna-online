@@ -3,15 +3,15 @@ import { Building2, MapPinned, BarChart3, RefreshCw, Info } from 'lucide-react';
 import { PageHeader, ActionButton } from '@/components/workspace/Workspace';
 import { useLocation } from 'react-router-dom';
 
-const views = [{ id: 'companies', title: 'Estabelecimentos', Icon: Building2 }, { id: 'map', title: 'Mapa territorial', Icon: MapPinned }, { id: 'overview', title: 'Indicadores', Icon: BarChart3 }];
+const views = [{ id: 'overview', title: 'Indicadores', Icon: BarChart3 }, { id: 'map', title: 'Mapa territorial', Icon: MapPinned }, { id: 'companies', title: 'Estabelecimentos', Icon: Building2 }];
 export default function EstablishmentsWorkspace() {
   const location = useLocation();
   const iframe = useRef<HTMLIFrameElement>(null);
-  const [view, setView] = useState(location.pathname === '/mapa' ? 'map' : 'companies');
+  const [view, setView] = useState(location.pathname === '/mapa' ? 'map' : 'overview');
   const [status, setStatus] = useState('Conectando às planilhas…');
   const [ready, setReady] = useState(false);
   const [frameHeight, setFrameHeight] = useState(800);
-  useEffect(() => { setView(location.pathname === '/mapa' ? 'map' : 'companies'); }, [location.pathname]);
+  useEffect(() => { setView(location.pathname === '/mapa' ? 'map' : 'overview'); }, [location.pathname]);
   useEffect(() => {
     const listener = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== iframe.current?.contentWindow || !['dgsci:status','dgsci:height'].includes(event.data?.type)) return;

@@ -84,9 +84,9 @@ test('mensagens de outro domínio ou outra janela são ignoradas', () => {
   listener({ source: parent, origin: 'https://outro.test', data: { type: 'dgsci:view', view: 'map' } });
   listener({ source: {}, origin: 'https://portal.test', data: { type: 'dgsci:view', view: 'map' } });
   listener({ source: parent, origin: 'https://portal.test', data: { type: 'dgsci:view', view: 'invalid' } });
-  assert.deepEqual(calls, ['companies']);
+  assert.deepEqual(calls, ['overview']);
   listener({ source: parent, origin: 'https://portal.test', data: { type: 'dgsci:view', view: 'map' } });
-  assert.deepEqual(calls, ['companies', 'map']);
+  assert.deepEqual(calls, ['overview', 'map']);
   assert.equal(posts[0][0].ready, true);
 });
 test('mapa sem WebGL exibe orientação sem quebrar a consulta', () => {
