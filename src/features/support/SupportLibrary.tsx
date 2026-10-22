@@ -65,12 +65,13 @@ export default function SupportLibrary() {
   const heading = favoritesOnly ? 'Meus favoritos' : type === 'model' ? 'Modelos padronizados' : type === 'guide' ? 'Ajuda ao vistoriador' : type === 'notice' ? 'Comunicados' : 'Biblioteca de apoio';
 
   return <div className="portal-page workspace-page">
-    <PageHeader eyebrow="Gestão e apoio operacional" title={pathname==='/dashboard'?'Painel principal':heading} description={initialType==='notice'?'Informações e atualizações para os setores da DGSCI.':initialType==='guide'?'Orientações e documentos para apoiar a rotina de vistoria.':initialType==='model'?'Documentos padronizados e modelos de auto de infração.':'Documentos, orientações e consultas internas da DGSCI / CBMPA.'} icon={initialType==='notice'?Megaphone:initialType==='guide'?Compass:BookOpen} actions={<><ActionButton disabled={loading} onClick={reload}><RefreshCw size={16}/>Atualizar</ActionButton>{canEdit&&<ActionButton variant="primary" onClick={()=>setEditor({item:null})}><Plus size={17}/>{initialType==='notice'?'Novo comunicado':initialType==='guide'?'Nova orientação':initialType==='model'?'Novo modelo':'Novo comunicado'}</ActionButton>}</>}/>
+    <PageHeader eyebrow="Gestão e apoio operacional" title={pathname==='/dashboard'?'Painel principal':heading} description={pathname==='/dashboard'?'Comunicados institucionais e equipe de serviço do dia.':initialType==='notice'?'Informações e atualizações para os setores da DGSCI.':initialType==='guide'?'Orientações e documentos para apoiar a rotina de vistoria.':initialType==='model'?'Documentos padronizados e modelos de auto de infração.':'Documentos, orientações e consultas internas da DGSCI / CBMPA.'} icon={initialType==='notice'?Megaphone:initialType==='guide'?Compass:BookOpen} actions={<><ActionButton disabled={loading} onClick={reload}><RefreshCw size={16}/>Atualizar</ActionButton>{canEdit&&<ActionButton variant="primary" onClick={()=>setEditor({item:null})}><Plus size={17}/>{initialType==='notice'?'Novo comunicado':initialType==='guide'?'Nova orientação':initialType==='model'?'Novo modelo':'Novo comunicado'}</ActionButton>}</>}/>
     {pathname==='/dashboard'&&<>
+      <div className="dashboard-primary-grid">
       <section className="dashboard-notices" aria-labelledby="dashboard-notices-title">
         <div className="data-panel-heading"><div><span className="portal-eyebrow">INFORMAÇÕES INSTITUCIONAIS</span><h2 id="dashboard-notices-title">Comunicados</h2></div><Link to="/comunicados">Ver todos <ArrowRight size={16}/></Link></div>
         {loading?<p role="status">Carregando comunicados…</p>:error?<p role="alert">Não foi possível carregar os comunicados. Use Atualizar para tentar novamente.</p>:<>
-          <div className="dashboard-notice-grid">{content.filter(item=>item.type==='notice'&&!item.isDemo).sort((a,b)=>Number(b.featured)-Number(a.featured)||b.date.localeCompare(a.date)||a.title.localeCompare(b.title,'pt-BR')).slice(0,4).map(item=><article className={'dashboard-notice'+(item.featured?' is-featured':'')} key={item.id}>
+          <div className="dashboard-notice-grid">{content.filter(item=>item.type==='notice'&&!item.isDemo).sort((a,b)=>Number(b.featured)-Number(a.featured)||b.date.localeCompare(a.date)||a.title.localeCompare(b.title,'pt-BR')).slice(0,2).map(item=><article className={'dashboard-notice'+(item.featured?' is-featured':'')} key={item.id}>
             <div className="dashboard-notice-label"><Megaphone size={18}/><span>{item.featured?'EM DESTAQUE':'COMUNICADO'}</span><time dateTime={item.date}>{new Intl.DateTimeFormat('pt-BR').format(new Date(item.date+'T12:00:00Z'))}</time></div>
             <h3><button onClick={()=>setSelected(item)}>{item.title}</button></h3><p>{item.description}</p><ActionButton onClick={()=>setSelected(item)}>Ler comunicado <ArrowRight size={16}/></ActionButton>
           </article>)}</div>
@@ -78,9 +79,10 @@ export default function SupportLibrary() {
         </>}
       </section>
       <DailyRoster/>
+      </div>
       <div className="overview-access"><Link to="/estabelecimentos"><span className="overview-access-icon"><Building2 size={23}/></span><div><strong>Estabelecimentos</strong><p>Cadastros, mapa e indicadores</p></div><ArrowUpRight size={18}/></Link><Link to="/cmt-sub-sats"><span className="overview-access-icon"><Compass size={23}/></span><div><strong>Comando das SATs</strong><p>Comandantes e subcomandantes</p></div><ArrowUpRight size={18}/></Link></div></>}
     {error&&<div className="workspace-feedback is-error" role="alert">{error}</div>}
-    <div className="library-workspace">
+    {pathname!=='/dashboard'&&<div className="library-workspace">
     <section id="biblioteca" className="portal-library">
       <div className="data-panel-heading"><h2>{pathname==='/dashboard'?'Biblioteca de apoio':favoritesOnly?'Conteúdos salvos':'Acervo para consulta'}</h2><span className="workspace-count">{results.length}</span></div>
       <div className="library-search-row"><SearchField id="library-query" value={query} onChange={setQuery} placeholder="Pesquisar por título, conteúdo ou assunto…"/>{type==='model'&&<div className="workspace-segments" role="group" aria-label="Categoria dos modelos"><button aria-pressed={area==='all'} onClick={()=>{setQuery('');setArea('all');}}>Todos os modelos</button><button aria-pressed={area==='Notificação e Autos'} onClick={()=>setArea('Notificação e Autos')}>Notificação e Autos</button></div>}</div>
@@ -97,6 +99,8 @@ export default function SupportLibrary() {
       {!loading && !error && results.length === 0 && <div className="portal-empty"><Search size={30} /><h3>{favoritesOnly && !favorites.length ? 'Sua consulta, do seu jeito' : 'Nenhum conteúdo encontrado'}</h3><p>{favoritesOnly && !favorites.length ? 'Marque os conteúdos que deseja encontrar aqui.' : 'Tente outro termo ou remova os filtros.'}</p><button onClick={clear}>Limpar busca e filtros</button>{favoritesOnly && <Link to="/dashboard">Explorar biblioteca <ArrowRight size={14} /></Link>}</div>}
     </section>
     </div>
+    }
+    {pathname==='/dashboard'&&<Link className="dashboard-library-link" to="/biblioteca"><BookOpen size={18}/> Consultar biblioteca de documentos <ArrowRight size={16}/></Link>}
     <footer className="portal-footer"><strong>DGSCI<span>.</span></strong><span>Portal de apoio à rotina operacional</span><small>Conteúdos marcados como demonstração aguardam validação institucional.</small></footer>
     <Dialog open={!!selected} onOpenChange={open => { if (!open) setSelected(null); }}><DialogContent className="portal-dialog max-w-2xl max-h-[88dvh] overflow-y-auto">
       {selected && <><DialogHeader><p className="portal-eyebrow">{TYPE_LABELS[selected.type]} · {selected.area}</p><DialogTitle className="text-2xl">{selected.title}</DialogTitle><DialogDescription>{selected.description}</DialogDescription></DialogHeader>
