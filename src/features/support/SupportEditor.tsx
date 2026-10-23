@@ -1,3 +1,4 @@
+import {recordSaveError} from '@/features/records/recordValidation';
 import { useState } from 'react';
 import { Save, Paperclip, X, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -20,6 +21,8 @@ export default function SupportEditor({item,initialType,onClose,onSaved}:{item:S
       event.preventDefault();if(!supabase||busy)return;setBusy(true);setError('');const uploaded:string[]=[];
       try {
         if(!title.trim())throw new Error('Informe o nome.');
+        if(!model&&!description.trim())throw new Error('Informe o texto do comunicado.');
+        if(attachments.length+files.length>10)throw new Error('Anexe até 10 arquivos por registro.');
         if(model&&!attachments.length&&!files.length)throw new Error('Anexe o documento do modelo.');
         if(files.some(file=>file.size>20*1024*1024))throw new Error('Cada arquivo deve ter até 20 MB.');
         const id=item?.id??crypto.randomUUID();const next=[...attachments];
@@ -31,13 +34,13 @@ export default function SupportEditor({item,initialType,onClose,onSaved}:{item:S
         }
         const values={type,featured:model?false:featured,title:title.trim(),description:description.trim(),area:model?'Notificação e Autos':'Geral',sections:[],checklist:[],attachments:next,is_demo:false,tags:model?['Notificação e Autos']:[],date:new Date().toLocaleDateString('en-CA'),format:next.length?'ARQUIVO':'LEITURA',file:null};
         const response=item?await supabase.from('support_documents').update(values).eq('id',id).eq('revision',item.revision).select('id'):await supabase.from('support_documents').insert({id,...values}).select('id');
-        if(response.error)throw new Error('Não foi possível salvar. Confira sua conexão e permissão.');
+        if(response.error)throw new Error(recordSaveError(response.error));
         if(!response.data?.length)throw new Error('O documento foi alterado por outra pessoa. Atualize a lista e tente novamente.');
         onSaved();onClose();if(!item&&type==='notice')window.dispatchEvent(new Event('dgsci:new-notice'));
       }catch(reason){if(uploaded.length)await supabase.storage.from('dgsci-support').remove(uploaded);setError(reason instanceof Error?reason.message:'Não foi possível salvar.');}
       finally{setBusy(false);}
     }}>
-      <section className="editor-section"><div className="form-field"><label htmlFor="support-title">{model?'Nome do modelo':'Assunto'} *</label><input id="support-title" required maxLength={180} value={title} onChange={e=>setTitle(e.target.value)} autoFocus/></div><div className="form-field"><label htmlFor="support-description">{model?'Descrição':'Texto do comunicado'}</label><textarea id="support-description" rows={model?3:6} value={description} onChange={e=>setDescription(e.target.value)}/></div></section>
+      <section className="editor-section"><div className="form-field"><label htmlFor="support-title">{model?'Nome do modelo':'Assunto'} *</label><input id="support-title" required maxLength={180} value={title} onChange={e=>setTitle(e.target.value)} autoFocus/></div><div className="form-field"><label htmlFor="support-description">{model?'Descrição':'Texto do comunicado'}</label><textarea id="support-description" rows={model?3:6} required={!model} value={description} onChange={e=>setDescription(e.target.value)}/></div></section>
       {!model&&<label className="portal-check"><input type="checkbox" checked={featured} onChange={e=>setFeatured(e.target.checked)}/><span>Destacar comunicado no painel principal</span></label>}
       <section className="editor-section"><h3>{model?'Documento *':'Anexos'}</h3><div className="editor-upload"><Paperclip size={24}/><div><strong>{model?'Anexar documento':'Anexar arquivo'}</strong><p>PDF, Word, Excel ou imagem. Até 20 MB por arquivo.</p></div><label className="workspace-button workspace-button-secondary" htmlFor="support-files">Selecionar arquivo</label><input className="sr-only" id="support-files" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.txt" onChange={event=>{setFiles([...files,...Array.from(event.target.files??[])]);event.target.value='';}}/></div>
       {attachments.map(file=><div className="editor-file" key={file.path}><FileText size={17}/><strong>{file.name}</strong><ActionButton variant="ghost" aria-label={'Retirar '+file.name} onClick={()=>setAttachments(attachments.filter(row=>row.path!==file.path))}><X size={16}/></ActionButton></div>)}

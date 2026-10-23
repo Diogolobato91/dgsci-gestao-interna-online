@@ -93,7 +93,7 @@ export default function StaffPage() {
             }
             footer={<TablePagination {...pagination} />}
           >
-            <div className="records-table">
+            <div className="records-table" tabIndex={0} role="region" aria-label="Tabela de registros; deslize para consultar as demais colunas">
               <table>
                 <thead>
                   <tr>

@@ -22,3 +22,11 @@ export function financeError(error:{code?:string;message?:string}|null) {
  if(error?.code==='42501')return 'Somente a Subdiretoria pode fazer esta alteração.';
  return 'Não foi possível salvar. Confira os dados e tente novamente.';
 }
+
+export function financialCompleteness(rows: {valorDespesa:number|null;valorArrecadado:number|null;status?:string;workflowStatus?:WorkflowStatus}[]) {
+ const active=rows.filter(r=>(r.workflowStatus||normalizeWorkflow(r.status))!=='cancelado');
+ return {active:active.length,cancelled:rows.length-active.length,missingExpense:active.filter(r=>r.valorDespesa==null).length,missingRevenue:active.filter(r=>r.valorArrecadado==null).length};
+}
+export function financialStatus(row:{status?:string;workflowStatus?:WorkflowStatus}) {
+ return WORKFLOW_STATUS[row.workflowStatus||normalizeWorkflow(row.status)];
+}

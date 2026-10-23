@@ -97,12 +97,11 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
   await db.exec(fs.readFileSync(path.join(root,'supabase','cleaning_roster.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','cleaning-roster-rls.sql'),'utf-8'));
 
-  // Estrutura real dos documentos; a política vigente de leitura/escrita é carregada da origem.
-  const supportSql=fs.readFileSync(path.join(root,'supabase','sector_permissions.sql'),'utf-8');
-  await db.exec(supportSql.slice(supportSql.indexOf('create table public.support_documents'),supportSql.indexOf('alter table public.sat_regions enable')));
-  await db.exec('alter table public.support_documents enable row level security; revoke all on public.support_documents from anon,authenticated; grant select,insert,update on public.support_documents to authenticated;');
-  const librarySql=fs.readFileSync(path.join(root,'supabase','library_and_roster.sql'),'utf-8');
-  await db.exec(librarySql.slice(librarySql.indexOf('drop policy if exists support_documents_insert'),librarySql.indexOf('drop policy if exists support_files_insert')));
+  // Estruturas e políticas reais de SATs, portarias, biblioteca e arquivos.
+  await db.exec(fs.readFileSync(path.join(root,'supabase','sat_portarias.sql'),'utf-8'));
+  await db.exec(`create function storage.foldername(text) returns text[] language sql immutable as $$select (string_to_array($1,'/'))[1:array_length(string_to_array($1,'/'),1)-1]$$;`);
+  await db.exec(fs.readFileSync(path.join(root,'supabase','sector_permissions.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'supabase','library_and_roster.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'supabase','notices_and_personal_data.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','notices-personal-data-rls.sql'),'utf-8'));
 
@@ -114,6 +113,9 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
 
   await db.exec(fs.readFileSync(path.join(root,'supabase','archive_and_audit.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','archive-audit-rls.sql'),'utf-8'));
+
+  await db.exec(fs.readFileSync(path.join(root,'supabase','record_quality.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'tests','permissions-matrix-rls.sql'),'utf-8'));
 
   assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
 });
