@@ -48,6 +48,7 @@ do $$declare rev int;begin
  perform set_config('request.jwt.claims','{"session_id":"audit-test-session"}',true);
  perform public.log_portal_activity('session_open');perform public.log_portal_activity('session_open');
  perform public.log_portal_activity('page_view','/dashboard');
+ perform public.log_portal_activity('download_request','support_documents','audit-test-model');
  begin perform public.log_portal_activity('update','app_members','spoof');raise exception 'Ação de banco forjada';exception when invalid_parameter_value then null;end;
 end$$;
 reset role;
@@ -65,7 +66,8 @@ reset role;
 do $$begin
  if not exists(select 1 from private.audit_events where resource='user_registrations' and after_values->>'user_id'='91000000-0000-4000-8000-000000000002' and after_values->>'cpf'='[dado protegido]') then raise exception 'CPF não protegido no snapshot';end if;
  if (select count(*) from private.audit_events where action='session_open' and session_id='audit-test-session')<>1 then raise exception 'Sessão duplicada';end if;
- if not exists(select 1 from private.audit_events where source='portal' and action='page_view' and actor_id='91000000-0000-4000-8000-000000000003')then raise exception 'Ator da navegação incorreto';end if;
+ if exists(select 1 from private.audit_events where action='page_view' and actor_id='91000000-0000-4000-8000-000000000003')then raise exception 'Navegação foi gravada';end if;
+ if not exists(select 1 from private.audit_events where source='portal' and action='download_request' and actor_id='91000000-0000-4000-8000-000000000003')then raise exception 'Ator do download incorreto';end if;
  begin update private.audit_events set actor_name='Adulterado';raise exception 'Histórico mutável';exception when insufficient_privilege then null;end;
  begin delete from private.audit_events;raise exception 'Histórico apagável';exception when insufficient_privilege then null;end;
 end$$;
