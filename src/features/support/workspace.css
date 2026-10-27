@@ -375,3 +375,5 @@
  .roster-matrix-scroll{max-height:none;overflow-x:auto}.roster-matrix thead th{position:static}.roster-matrix thead th:first-child{position:sticky;left:0}.roster-matrix th:first-child{min-width:130px;max-width:150px}
  .finance-kpi strong{overflow-wrap:anywhere}.finance-balance-select select{max-width:100%;min-width:0}.audit-timeline>li{flex-wrap:wrap}.workspace-pagination{flex-wrap:wrap;font-size:12px}.workspace-pagination>div{max-width:100%;flex-wrap:wrap}
 }
+
+.my-account-contact h2{display:flex;align-items:center;gap:8px}.my-account-contact .record-form{display:grid;gap:18px}

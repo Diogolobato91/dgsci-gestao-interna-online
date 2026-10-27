@@ -56,3 +56,13 @@ A migration SQL aplica a confirmação automática no momento do cadastro via tr
 - `tests/rank-hierarchy.test.mjs`: testes unitários da ordenação do efetivo e tolerância a grafias.
 - `tests/user-validation.test.mjs`: testes unitários de máscaras, CPF e formulário.
 - `tests/user-management.test.mjs`: testes de renderização de segurança e bloqueio de senhas.
+
+## Senhas e Minha conta
+
+Minha conta permite consultar a identificação e o contato, sem editar dados cadastrais. A alteração de senha exige senha atual, nova senha (8 a 128 caracteres) e confirmação. A Edge Function `account-password` autentica o solicitante, autoriza a operação pelo banco, verifica a senha atual com um cliente Auth isolado e altera apenas a senha. Nenhuma credencial é armazenada em logs, metadados do usuário ou armazenamento local pelo formulário.
+
+Na Gestão de Usuários, somente o superadministrador pode resetar contas já vinculadas ao Auth. O botão exige confirmação do e-mail, confere a versão cadastral e define `12345678` exclusivamente no servidor. Não altera aprovação, bloqueio, setores ou papéis. O usuário deve trocar a senha padrão em Minha conta. Para a própria conta do administrador, utiliza-se o formulário de alteração com senha atual, em vez do reset administrativo.
+
+Solicitação e resultado são registrados na auditoria, sem valores de senha. O cliente não pode registrar uma conclusão: `finish_password_action` é exclusivo de `service_role`. Tentativas são limitadas a cinco solicitações por usuário em cinco minutos. A antiga RPC de edição do próprio contato foi revogada para usuários autenticados; o contato pode ser corrigido pelo gestor em Editar usuário.
+
+Implantação: `supabase/password_management.sql` e função `supabase/functions/account-password` com verificação JWT habilitada. Segredos administrativos permanecem no ambiente da Edge Function. Os testes SQL usam transação e rollback; os testes do handler substituem o Auth por adaptadores, sem alterar senhas de usuários reais.

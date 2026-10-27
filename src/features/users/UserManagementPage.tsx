@@ -1,3 +1,4 @@
+import PasswordResetDialog from './PasswordResetDialog';
 import { useCallback, useEffect, useState } from 'react';
 import { MILITARY_RANKS } from '@/lib/rankHierarchy';
 import {
@@ -112,6 +113,7 @@ export default function UserManagementPage() {
   function openEdit(account:ManagedUser){
     setFormError('');setEditingUser({user:account,name:account.display_name,rank:account.posto_graduacao||'',mf:account.matricula||'',cpf:maskCpf(account.cpf),birth:account.data_nascimento||'',phone:account.contato||'',sectors:account.sectors||[],superadmin:isManagedSuperadmin(account),enabled:account.enabled});
   }
+  const [resettingUser,setResettingUser]=useState<ManagedUser|null>(null);
   const [deletingUser, setDeletingUser] = useState<ManagedUser | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [blockingUser, setBlockingUser] = useState<ManagedUser | null>(null);
@@ -518,6 +520,7 @@ export default function UserManagementPage() {
                       <td className="table-actions">
                         <div>
                           <ActionButton variant="ghost" disabled={busy} onClick={()=>openEdit(account)}><Pencil size={15}/>Editar</ActionButton>
+                          <ActionButton variant="ghost" disabled={busy||!account.user_id||account.email.toLowerCase()===ownEmail} onClick={()=>setResettingUser(account)}><LockKeyhole size={15}/>Resetar senha</ActionButton>
                           <ActionButton variant="ghost" className="workspace-button-danger" disabled={busy || account.email.toLowerCase() === ownEmail} onClick={() => { setDeletingUser(account); setDeleteConfirmation(''); setFormError(''); }} aria-label={'Excluir conta de ' + account.display_name}><Trash2 size={15}/>Excluir</ActionButton>
                           {/* Ações específicas para cadastro pendente */}
                           {isPending ? (
@@ -655,6 +658,7 @@ export default function UserManagementPage() {
       </div>
 
       {/* 1. DIALOG DE VISUALIZAÇÃO DE DADOS COMPLETOS */}
+      {resettingUser&&<PasswordResetDialog account={resettingUser} onClose={()=>setResettingUser(null)} onSaved={setMessage}/>}
       <Dialog open={!!viewingUser} onOpenChange={open => !open && setViewingUser(null)}>
         <DialogContent className="record-dialog compact-dialog">
           <DialogHeader>

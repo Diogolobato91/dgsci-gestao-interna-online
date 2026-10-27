@@ -35,6 +35,8 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
       end if;
     end$$;
 
+    do $$begin if not exists(select 1 from pg_roles where rolname='service_role')then create role service_role;end if;end$$;
+
     create or replace function auth.uid() returns uuid language sql stable as $$
       select coalesce(
         nullif(current_setting('request.jwt.claim.sub', true), ''),
@@ -116,6 +118,9 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
 
   await db.exec(fs.readFileSync(path.join(root,'supabase','record_quality.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','permissions-matrix-rls.sql'),'utf-8'));
+
+  await db.exec(fs.readFileSync(path.join(root,'supabase','password_management.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'tests','password-management-rls.sql'),'utf-8'));
 
   assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
 });
