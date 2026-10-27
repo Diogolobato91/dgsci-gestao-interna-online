@@ -18,6 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState('');
   const generation = useRef(0);
+  const resolvedAccount = useRef<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -27,11 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const resolveSession = async (session: Session | null, quiet = false) => {
+    const resolveSession = async (session: Session | null) => {
       const current = ++generation.current;
       if (!alive) return;
-      if (!quiet) setLoading(true);
+      // SIGNED_IN também ocorre ao retornar à aba. Uma conta já conferida
+      // atualiza permissões em segundo plano sem desmontar os formulários.
+      const background = !!session && resolvedAccount.current === session.user.id;
+      if (!background) setLoading(true);
       if (!session) {
+        resolvedAccount.current = null;
         setUser(null);
         setLoading(false);
         return;
@@ -52,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (member?.enabled) {
           const allowed = profiles.filter(profile => Array.isArray(member.sectors) && member.sectors.includes(profile));
           if (allowed.length > 0) {
+            resolvedAccount.current = session.user.id;
             setAuthError('');
             const next: User = {
               id: session.user.id,
@@ -96,11 +102,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           enabled: false,
         };
 
+        resolvedAccount.current = session.user.id;
         setUser(previous => JSON.stringify(previous) === JSON.stringify(nextPendingUser) ? previous : nextPendingUser);
         setAuthError('');
       } catch {
         if (alive && current === generation.current) {
-          if (!quiet) setUser(null);
+          if (!background) { resolvedAccount.current = null; setUser(null); }
           setAuthError('Não foi possível conferir suas permissões. Tente novamente.');
         }
       } finally {
@@ -116,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!alive || document.visibilityState === 'hidden') return;
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (alive) await resolveSession(session, true);
+        if (alive) await resolveSession(session);
       } catch {
         // Falha transitória não invalida sessão em formulário ativo
       }
@@ -202,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     generation.current++;
+    resolvedAccount.current = null;
     setUser(null);
     setAuthError('');
     if (supabase) {
