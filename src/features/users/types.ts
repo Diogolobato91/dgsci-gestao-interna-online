@@ -1,13 +1,7 @@
+import {ALL_SECTORS,CORE_SECTORS} from '@/lib/sectors';
 import type { UserProfile } from '@/types/auth';
 
-export const USER_SECTORS: UserProfile[] = [
-  'Diretoria',
-  'Subdiretoria',
-  'Secretaria',
-  'Vistoriador',
-  'Análise',
-  'Multas',
-];
+export const USER_SECTORS:UserProfile[]=[...ALL_SECTORS];
 
 export type UserStatus =
   | 'active'
@@ -65,4 +59,4 @@ export interface UserAuditEntry {
 export const isManagedSuperadmin = (account: Pick<ManagedUser, 'role' | 'sectors'>) =>
   account.role === 'administrator' &&
   Array.isArray(account.sectors) &&
-  USER_SECTORS.every(sector => account.sectors.includes(sector));
+  CORE_SECTORS.every(sector => account.sectors.includes(sector));

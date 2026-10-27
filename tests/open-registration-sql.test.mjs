@@ -123,5 +123,9 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
   await db.exec(fs.readFileSync(path.join(root,'supabase','password_management.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','password-management-rls.sql'),'utf-8'));
 
+  await db.exec(fs.readFileSync(path.join(root,'supabase','accreditation.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'supabase','accreditation_source_import.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'tests','accreditation-rls.sql'),'utf-8'));
+
   assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
 });

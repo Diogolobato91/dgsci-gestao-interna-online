@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { AuthContextType, User, UserProfile, RegisterData, RegistrationStatusInfo } from '@/types/auth';
+import {ALL_SECTORS} from '@/lib/sectors';
 import {logActivity} from '@/features/audit/activity';
 import { supabase } from '@/lib/supabase';
 
@@ -11,7 +12,7 @@ export const useAuth = () => {
   return context;
 };
 
-const profiles: UserProfile[] = ['Diretoria', 'Subdiretoria', 'Secretaria', 'Vistoriador', 'Análise', 'Multas'];
+const profiles: UserProfile[] = ALL_SECTORS;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

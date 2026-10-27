@@ -1,6 +1,6 @@
 import type { User } from '@/types/auth';
-import { navigationConfig } from '@/config/navigation';
-export const isFullAdministrator = (user: User | null) => user?.role === 'administrator' && Object.keys(navigationConfig).every(sector => user.allowedProfiles?.includes(sector as User['profile']));
+import { CORE_SECTORS } from '@/lib/sectors';
+export const isFullAdministrator = (user: User | null) => user?.role === 'administrator' && CORE_SECTORS.every(sector => user.allowedProfiles?.includes(sector));
 export const canManageOrdinances = (user: User | null) => !!user && (isFullAdministrator(user) || !!user.allowedProfiles?.includes('Subdiretoria'));
 export const normalizeSearch = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
 export function safeFileUrl(value: string) {

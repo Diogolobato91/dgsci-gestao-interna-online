@@ -34,7 +34,7 @@ test('edição de comando e regiões apenas para Diretoria e Subdiretoria; conte
   assert.equal(canManageSupport(account(profile)),['Secretaria','Diretoria','Subdiretoria'].includes(profile));
   assert(!navigationConfig[profile].some(item=>item.path==='/modelos-auto-infracao'));
  }
- assert.deepEqual(Object.keys(navigationConfig).sort(),['Vistoriador','Análise','Multas','Secretaria','Subdiretoria','Diretoria'].sort());
+ assert.deepEqual(Object.keys(navigationConfig).sort(),['Vistoriador','Análise','Multas','Secretaria','Subdiretoria','Diretoria','Credenciamento'].sort());
 });
 
 test('modelos excluem Secretaria da edição e efetivo fica em Administração',()=>{
@@ -43,4 +43,11 @@ test('modelos excluem Secretaria da edição e efetivo fica em Administração',
   assert(!navigationConfig[profile].some(item=>item.path==='/ajuda-vistoriador'));
   for(const item of navigationConfig[profile].filter(item=>item.path==='/relacao-efetivo')) assert.equal(item.section,'Administração');
  }
+});
+
+test('superadmin existente não perde acesso com a criação de novo setor',()=>{
+ const core=['Diretoria','Subdiretoria','Secretaria','Vistoriador','Análise','Multas'];
+ assert.equal(isFullAdministrator(account('Diretoria','administrator',core)),true);
+ assert.equal(isFullAdministrator(account('Credenciamento','administrator',['Credenciamento'])),false);
+ for(const items of Object.values(navigationConfig))assert.ok(items.some(i=>i.path==='/credenciamento'));
 });

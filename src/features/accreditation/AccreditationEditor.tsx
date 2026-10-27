@@ -1,0 +1,17 @@
+import {useState}from'react';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription}from'@/components/ui/dialog';
+import {ActionButton}from'@/components/workspace/Workspace';
+import {supabase}from'@/lib/supabase';
+import {recordSaveError}from'@/features/records/recordValidation';
+import type {Accreditation}from'./model';
+const fields=[['modality','Modalidade (relação geral)',200,true],['name','Empresa ou profissional',250,true],['contact','Contato',300,false],['region','Região',200,false],['protocol','Protocolo',160,false]]as const;
+export default function AccreditationEditor({item,kind,modalities,onClose,onSaved}:{item:Accreditation|null;kind:Accreditation['kind'];modalities:string[];onClose:()=>void;onSaved:()=>void}){
+ const [draft,setDraft]=useState<Record<string,string>>({modality:item?.modality||'',name:item?.name||'',contact:item?.contact||'',region:item?.region||'',protocol:item?.protocol||'',valid_until:item?.valid_until||''});
+ const [busy,setBusy]=useState(false),[error,setError]=useState('');
+ return <Dialog open onOpenChange={o=>{if(!o&&!busy)onClose();}}><DialogContent className="record-dialog editor-dialog"><DialogHeader><DialogTitle>{item?'Editar credenciamento':'Novo credenciamento'} — {kind==='company'?'Empresa':'Profissional'}</DialogTitle><DialogDescription>A validade define automaticamente se o credenciamento aparece na consulta de vigentes.</DialogDescription></DialogHeader><form className="record-form" onSubmit={async e=>{e.preventDefault();if(busy||!supabase)return;setBusy(true);setError('');try{
+  if(!draft.modality.trim()||draft.name.trim().length<2||!/^\d{4}-\d{2}-\d{2}$/.test(draft.valid_until))throw new Error('Preencha modalidade, nome e validade.');
+  const values={...Object.fromEntries(Object.entries(draft).map(([k,v])=>[k,v.trim()])),kind};
+  const r=item?await supabase.from('accreditations').update(values).eq('id',item.id).eq('version',item.version).select('id'):await supabase.from('accreditations').insert(values).select('id');
+  if(r.error)throw new Error(recordSaveError(r.error));if(!r.data?.length)throw new Error('O registro mudou durante a edição. Atualize a relação.');onSaved();onClose();
+ }catch(e){setError(e instanceof Error?e.message:'Não foi possível salvar.');}finally{setBusy(false);}}}><section className="editor-section"><div className="form-grid">{fields.map(([key,label,max,required])=><div className="form-field" key={key}><label htmlFor={'accreditation-'+key}>{label}{required?' *':''}</label><input id={'accreditation-'+key} value={draft[key]} maxLength={max} required={required} type={key==='contact'?'tel':'text'} list={key==='modality'?'accreditation-modalities':undefined} onChange={e=>setDraft({...draft,[key]:e.target.value})}/></div>)}<datalist id="accreditation-modalities">{modalities.map(m=><option key={m} value={m}/>)}</datalist><div className="form-field"><label htmlFor="accreditation-validity">Validade *</label><input id="accreditation-validity" type="date" required min="1900-01-01" value={draft.valid_until} onChange={e=>setDraft({...draft,valid_until:e.target.value})}/></div></div></section>{error&&<p className="form-error" role="alert">{error}</p>}<div className="record-actions"><ActionButton disabled={busy} onClick={onClose}>Cancelar</ActionButton><ActionButton type="submit" variant="primary" disabled={busy}>{busy?'Salvando…':'Salvar credenciamento'}</ActionButton></div></form></DialogContent></Dialog>;
+}

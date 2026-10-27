@@ -4,7 +4,8 @@ export type UserProfile =
   | 'Multas'
   | 'Secretaria'
   | 'Subdiretoria'
-  | 'Diretoria';
+  | 'Diretoria'
+  | 'Credenciamento';
 
 export interface User {
   id?: string;
