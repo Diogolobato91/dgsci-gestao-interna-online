@@ -12,3 +12,8 @@ test('CAT precede unidades em ordem numérica, sem ordenar 10 antes de 2',()=>{
  assert.equal(unitOrder('1ºGPA'),1);assert.equal(unitOrder('CAT'),-1);
  assert(unitOrder('Outro')>unitOrder('29º GBM'));
 });
+
+test('DGSCI aparece antes dos GBMs, inclusive das novas unidades',()=>{
+ const rows=['35ºGBM','27º GBM','DGSCI','2ºGBM'].map(gbm=>({gbm,sat:gbm})).sort(compareSatRegions);
+ assert.equal(rows[0].gbm,'DGSCI');assert.equal(rows[1].gbm,'2ºGBM');
+});

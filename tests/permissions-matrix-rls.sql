@@ -20,7 +20,7 @@ create temporary table quality_test_scope(dummy boolean) on commit drop;
 create function pg_temp.check_sector(p_sat boolean,p_admin boolean,p_finance boolean,p_ordinance boolean,p_super boolean) returns void
 language plpgsql security invoker as $$declare n integer;begin
  if not exists(select 1 from public.sat_regions where id='quality-region') then raise exception 'Consulta compartilhada indisponível';end if;
- update public.sat_regions set municipios='Teste revisto' where id='quality-region';get diagnostics n=row_count;
+ update public.sat_regions set crb='CRB II',risp='3º RISP',municipios='Teste revisto' where id='quality-region';get diagnostics n=row_count;
  if (n=1)<>p_sat then raise exception 'Permissão SAT incorreta';end if;
  update public.sat_commands set commander_name='Comandante teste' where source_key='quality-command';get diagnostics n=row_count;
  if (n=1)<>p_sat then raise exception 'Permissão comando incorreta';end if;

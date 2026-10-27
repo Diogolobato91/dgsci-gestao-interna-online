@@ -117,6 +117,7 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
   await db.exec(fs.readFileSync(path.join(root,'tests','archive-audit-rls.sql'),'utf-8'));
 
   await db.exec(fs.readFileSync(path.join(root,'supabase','record_quality.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'supabase','sat_regions_crb_risp.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','permissions-matrix-rls.sql'),'utf-8'));
 
   await db.exec(fs.readFileSync(path.join(root,'supabase','password_management.sql'),'utf-8'));
