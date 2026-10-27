@@ -1,15 +1,22 @@
 # Escala dos voluntários civis
 
-Em Escala mensal → Escala dos VCs, **Cadastrar dia ou semana** abre o formulário.
-Escolha uma data. Para preencher a semana de segunda a domingo que contém essa data,
-marque **Semana inteira** e selecione os dias desejados, incluindo fins de semana.
-Os responsáveis e observações informados são repetidos nos dias selecionados;
-cada dia pode ser editado posteriormente. Não há repetição automática futura.
-Uma semana pode atravessar competências; os registros aparecem no mês correspondente.
+Em Escala mensal → Escala dos VCs, **Montar/editar semana** abre uma tabela de
+setores (linhas) por dias (colunas). Escolha uma data e use **Carregar semana**.
+Cada célula tem seu próprio responsável e cada dia tem suas próprias observações.
+Os responsáveis não são repetidos automaticamente. No celular, botões de segunda
+a domingo alternam o dia exibido, preservando os demais preenchimentos.
 
-O salvamento é um único INSERT em lote. Uma data existente ou um afastamento em
-qualquer data impede o lote inteiro, sem substituir escalas já cadastradas.
-As regras de disponibilidade, autoria, versão e auditoria continuam no banco.
+Dias existentes são carregados com suas versões e podem ser ajustados; dias novos
+ficam sem designação até você escolher os responsáveis. Desmarque os dias que não
+deseja salvar. Somente dias novos selecionados ou dias existentes alterados são
+enviados ao banco. Uma semana pode atravessar meses e anos.
+O botão **Cadastrar dia** permanece para ajustes pontuais e cópias de um único dia.
+
+O salvamento usa `save_cleaning_week`, uma transação para até sete dias da mesma
+semana. A RPC é SECURITY INVOKER e mantém RLS, autoria, versões, auditoria e as
+validações de afastamento. Uma versão desatualizada, cadastro simultâneo ou
+indisponibilidade de responsável impede o lote inteiro, sem gravar parte da semana.
+Datas repetidas e semanas misturadas são rejeitadas. Não é um upsert incondicional.
 
 **Adicionar setor/local** salva um local reutilizável e inclui seu campo de responsável
 na edição atual. Exemplo: Banheiro do 2º andar. O local fica disponível nos próximos
@@ -25,6 +32,6 @@ Permissões mantidas: Secretaria, Diretoria e Subdiretoria (incluindo superadmin
 com os setores institucionais) cadastram locais e escalas. Usuários habilitados consultam.
 A criação dos locais e alterações das escalas são registradas na auditoria.
 
-Banco: `supabase/cleaning_week_and_locations.sql`.
+Banco: `supabase/cleaning_week_and_locations.sql` e `supabase/cleaning_week_editor.sql`.
 Validação: testes de limites de semana, locais dinâmicos e suíte SQL com rollback,
 incluindo lote de sete dias, conflito, afastamento, autoria e negação a leitores.
