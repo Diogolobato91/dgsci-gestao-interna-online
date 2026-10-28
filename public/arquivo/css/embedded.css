@@ -1,120 +1,44 @@
-html.embedded {
-  --bg-app:#fafaf8;
-  --bg-card:#fff;
-  --bg-sidebar:#fff;
-  --bg-card-hover:#f5f5ef;
-  --bg-input:#f7f7f2;
-  --primary:#c72d42;
-  --primary-hover:#aa1f32;
-  --primary-glow:rgba(200,16,46,.15);
-  --bg-glass:#fafaf8;
-  --border-color:#e4e4db;
-  --text-main:#30353b;
-  --text-muted:#757d85;
-  --text-dim:#959ca3
-}
-
-.embedded .app-header,.embedded .app-sidebar,.embedded .app-mobile-nav {
-  display:none!important
-}
-
-.embedded body {
-  background:#fafaf8;
-  overflow-x:hidden;
-  padding-bottom:0
-}
-
-.embedded .app-layout {
-  display:block;
-  min-height:100dvh
-}
-
-.embedded .app-main {
-  padding:19px!important;
-  width:100%;
-  min-width:0;
-  overflow-x:hidden
-}
-
-.embedded .section-header {
-  margin-bottom:20px
-}
-
-.embedded .section-title {
-  font-size:1.2rem
-}
-
-.embedded .section-desc {
-  font-size:.75rem
-}
-
-.embedded .loading-overlay {
-  position:fixed;
-  inset:0;
-  background:#fafaf8ee;
-  z-index:100
-}
-
-.embedded .map-unavailable {
-  padding:35px;
-  line-height:1.8;
-  font-size:13px;
-  color:#7a6a59;
-  max-width:620px;
-  background:#ffedef;
-  margin:25px;
-  border:1px solid #ecc9ce;
-  border-radius:8px
-}
-
-@media(max-width:600px) {
-  .embedded .app-main {
-  padding:12px!important
-}
-.embedded .map-unavailable {
-  padding:20px;
-  margin:12px
-}
-.embedded .section-title {
-  font-size:1rem
-}
-
-}
-
-
-/* Uma única rolagem vertical, controlada pelo portal. */
-.embedded body{background:#fafafa;overflow-y:hidden;margin:0;min-height:0;height:auto}
-.embedded .app-layout{min-height:0;height:auto}
-.embedded .app-main{padding:0!important;height:auto!important;max-height:none!important;min-height:0;overflow:visible!important}
-.embedded .section-header{display:none}
-.embedded .data-card{box-shadow:none;border-radius:10px}
-.embedded .unlocated-card-section{margin-top:24px;border:1px solid #dedede;background:#fff}
-.embedded .unlocated-title{color:#292929!important;font-size:16px!important}
-.embedded .unlocated-badge-count{color:#a31621;background:#fbeef0;border-color:#e9cfd2}
-.embedded .unlocated-table-wrapper{display:block!important;max-height:none!important;overflow-x:auto;overflow-y:visible}
-.embedded .unlocated-cards-container{display:none!important}
-.embedded .unlocated-table-wrapper td{white-space:normal;vertical-align:top;padding:14px 12px}
-.embedded .unlocated-table-wrapper th{white-space:nowrap}
-.embedded .unlocated-table-wrapper td:nth-child(2){min-width:210px}
-.embedded .unlocated-table-wrapper td:nth-child(5){min-width:220px;overflow-wrap:anywhere}
-.embedded .table-responsive:not(.unlocated-table-wrapper){max-height:none!important;overflow-y:visible}
-.embedded .modal-backdrop{top:var(--host-top,0px);height:var(--host-height,100vh);bottom:auto}
-.embedded .modal-content{max-height:calc(var(--host-height,100vh) - 48px)!important}
-.embedded .address-missing{display:inline-block;color:#7d3138;background:#fff3f3;border-radius:5px;padding:4px 7px;font-size:11px}
-
-/* A integração não deve criar uma segunda página rolável dentro do portal. */
-html.embedded{height:auto!important;min-height:0!important;overflow:clip!important}
-.embedded body{height:auto!important;max-height:none!important;overflow:clip!important;background:transparent}
-.embedded .app-layout,.embedded .app-main,.embedded .tab-content{height:auto!important;max-height:none!important;overflow:visible!important}
-.embedded .data-card,.embedded .store-locator-card,.embedded .map-view-card{border:0;border-radius:0;box-shadow:none;backdrop-filter:none;background:transparent;overflow:visible}
-.embedded .store-locator-mobile-toggle{display:none!important}
-.embedded .store-locator-layout{display:flex!important;flex-direction:column;height:auto!important;min-height:0!important;gap:20px}
-.embedded .store-locator-layout .locator-map-wrapper,.embedded .store-locator-layout.show-list .locator-map-wrapper{display:block!important;order:0;width:100%!important;height:clamp(340px,calc(var(--host-height,720px) * .65),600px)!important;min-height:340px!important;border:1px solid #dedede;border-radius:12px;overflow:hidden}
-.embedded .store-locator-layout .locator-sidebar,.embedded .store-locator-layout.show-list .locator-sidebar{display:flex!important;order:1;width:100%!important;height:auto!important;max-height:none!important;border:0!important;overflow:visible!important;background:transparent}
-.embedded .locator-listings{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;flex:none;max-height:none!important;height:auto!important;overflow:visible!important;padding:14px 0}
-.embedded .locator-item{margin:0;min-width:0}
-.embedded .table-responsive{height:auto!important;max-height:none!important;overflow-x:auto!important;overflow-y:hidden!important}
-.embedded .unlocated-card-section{margin-top:24px;border:0;border-top:1px solid #dedede;border-radius:0;padding-top:20px}
-@media(max-width:600px){.embedded .locator-listings{grid-template-columns:minmax(0,1fr)}}
-
-.embedded .record-database-info{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;font-size:12px;color:#555}.embedded #excelDropzone,.embedded #btnSyncNow{display:none!important}
+/* Integration boundary: messages are accepted only from the same-origin parent. */
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.parent === window || new URLSearchParams(location.search).get('embedded') !== '1') return;
+  document.documentElement.classList.add('embedded');
+  document.documentElement.setAttribute('data-theme', 'light');
+  const app = window.app;
+  if (!app) return;
+  const views = new Set(['companies', 'map', 'overview', 'analytics']);
+  const sendStatus = () => {
+    const count = app.store.companies.length;
+    const date = app.store.lastSync ? new Date(app.store.lastSync).toLocaleString('pt-BR') : null;
+    const message = app.databaseMode ? `${count.toLocaleString('pt-BR')} registros no banco${date?' · Última alteração: '+date:''}` : date ? `${count.toLocaleString('pt-BR')} registros · Última consulta completa: ${date}` : 'Buscando os dados das planilhas…';
+    parent.postMessage({ type: 'dgsci:status', ready: true, message }, location.origin);
+  };
+  let syncing = true;
+  Promise.resolve(app.initialSync).finally(() => { syncing = false; });
+  document.addEventListener('click',event=>{
+    const button=event?.target?.closest?.('.btn-edit-establishment');
+    if(button&&app.canEditEstablishments)parent.postMessage({type:'dgsci:edit-establishment',id:button.dataset.id},location.origin);
+  });
+  const originalSync = app.syncLiveSheet.bind(app);
+  app.syncLiveSheet = async (...args) => {
+    if (syncing) return;
+    syncing = true;
+    parent.postMessage({ type: 'dgsci:status', ready: true, message: app.databaseMode?'Consultando o banco de estabelecimentos…':'Atualizando as planilhas. A última consulta completa será preservada em caso de falha.' }, location.origin);
+    try { await originalSync(...args); } finally { syncing = false; }
+  };
+  app.store.subscribe(sendStatus);
+  document.addEventListener('click',event=>{
+    const target=event?.target?.closest?.('#btnExportUnlocatedExcel,#btnExportCompaniesExcel,#btnPrintCompanyDossier');
+    if(target)parent.postMessage({type:'dgsci:activity',reference:target.id},location.origin);
+  });
+  addEventListener('message', event => {
+    if (event.source !== parent || event.origin !== location.origin) return;
+    if (event.data?.type === 'dgsci:viewport' && Number.isFinite(event.data.top) && Number.isFinite(event.data.height)) { document.documentElement.style.setProperty('--host-top',Math.max(0,event.data.top)+'px');document.documentElement.style.setProperty('--host-height',Math.max(160,event.data.height)+'px'); }
+    if (event.data?.type === 'dgsci:view' && views.has(event.data.view)) { app.switchTab(event.data.view); window.geoMapManager?.map?.scrollZoom?.disable(); }
+    if (event.data?.type === 'dgsci:sync') app.syncLiveSheet(true);
+  });
+  let lastHeight = 0;
+  const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(() => { const height=Math.ceil(document.querySelector('.app-main')?.getBoundingClientRect().height || document.body.scrollHeight); if(Math.abs(height-lastHeight)>2){lastHeight=height;parent.postMessage({type:'dgsci:height',height:height+12},location.origin);} }) : null;
+  observer?.observe(document.querySelector('.app-main') || document.body);
+  app.switchTab('overview');
+  sendStatus();
+});

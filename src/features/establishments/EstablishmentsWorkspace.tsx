@@ -40,7 +40,7 @@ export default function EstablishmentsWorkspace() {
     if (ready) iframe.current?.contentWindow?.postMessage({ type: 'dgsci:view', view }, window.location.origin);
   }, [view, ready]);
   useEffect(() => {
-    const send = () => { const rect=iframe.current?.getBoundingClientRect(); if(rect) iframe.current?.contentWindow?.postMessage({type:'dgsci:viewport',top:Math.max(0,-rect.top),height:window.innerHeight},window.location.origin); };
+    const send = () => { const rect=iframe.current?.getBoundingClientRect(); const viewportTop=Math.max(0,document.querySelector('.shell-topbar')?.getBoundingClientRect().bottom??0); if(rect) iframe.current?.contentWindow?.postMessage({type:'dgsci:viewport',top:Math.max(0,viewportTop-rect.top),height:Math.max(160,Math.min(window.innerHeight,rect.bottom)-Math.max(viewportTop,rect.top)-16)},window.location.origin); };
     window.addEventListener('scroll',send,{passive:true});window.addEventListener('resize',send);send();
     return () => {window.removeEventListener('scroll',send);window.removeEventListener('resize',send);};
   },[ready,frameHeight]);

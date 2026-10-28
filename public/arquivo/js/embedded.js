@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   addEventListener('message', event => {
     if (event.source !== parent || event.origin !== location.origin) return;
-    if (event.data?.type === 'dgsci:viewport' && Number.isFinite(event.data.top) && Number.isFinite(event.data.height)) { document.documentElement.style.setProperty('--host-top',Math.max(0,event.data.top)+'px');document.documentElement.style.setProperty('--host-height',Math.max(320,event.data.height)+'px'); }
+    if (event.data?.type === 'dgsci:viewport' && Number.isFinite(event.data.top) && Number.isFinite(event.data.height)) { document.documentElement.style.setProperty('--host-top',Math.max(0,event.data.top)+'px');document.documentElement.style.setProperty('--host-height',Math.max(160,event.data.height)+'px'); }
     if (event.data?.type === 'dgsci:view' && views.has(event.data.view)) { app.switchTab(event.data.view); window.geoMapManager?.map?.scrollZoom?.disable(); }
     if (event.data?.type === 'dgsci:sync') app.syncLiveSheet(true);
   });

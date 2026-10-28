@@ -350,9 +350,10 @@ class GeoMapManager {
       return;
     }
 
-    this.map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'top-right');
+    this.map.addControl(new mapboxgl.NavigationControl({ showZoom: true, showCompass: false }), 'top-right');
     this.map.addControl(new mapboxgl.AttributionControl({ compact: true }), 'bottom-right');
 
+    if(typeof ResizeObserver==='function'){this.mapResizeObserver?.disconnect();this.mapResizeObserver=new ResizeObserver(()=>this.map?.resize());this.mapResizeObserver.observe(document.getElementById(containerId));}
     this.setupStyleSwitcher();
 
     this.map.on('load', () => {
