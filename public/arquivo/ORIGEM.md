@@ -3,8 +3,16 @@
 Origem: https://github.com/Diogolobato91/arquivo-dgsci
 Commit de origem: 57e038aacc989cdbf02b683ebeafee08093c613e
 
-Módulo local reaproveitado para a primeira integração, mantendo Google Sheets como fonte e Mapbox como motor do mapa. O componente React incorpora esta versão local, sem depender da interface hospedada no Netlify.
+Interface local reaproveitada para indicadores, consulta e mapa. O motor do mapa
+continua sendo Mapbox, com rolagem cooperativa no portal. Saídas HTML são sanitizadas
+com DOMPurify e existe orientação para navegadores sem WebGL.
 
-Adaptações: caminhos relativos das coordenadas; navegação coordenada com o React; tema claro/laranja; mensagens de atualização; preservação da última consulta completa quando alguma aba falhar; sanitização das saídas HTML com DOMPurify; aviso quando WebGL não estiver disponível. As classificações existentes são mantidas e deverão ser revisadas com o setor antes de orientar decisões administrativas.
+No portal, a rota React autenticada consulta o Supabase e entrega os dados em memória
+ao iframe local, conferindo origem e janela nas mensagens. `embedded=1&database=1`
+desliga consultas Google Sheets, cache legado e sincronização automática. Cadastro
+e edição são feitos no React e protegidos por RLS, autoria e versão no banco.
+A interface independente mantém o comportamento legado com Google Sheets.
 
-Não inclui integração com SISGAT, edição dos cadastros, banco compartilhado ou autorização real por setor. A seleção do setor é uma demonstração visual. O acesso à prévia é restringido pela hospedagem privada.
+As classificações dos indicadores refletem o arquivo e precisam de conferência do
+setor para decisões administrativas. Não há consulta direta nem integração com SISGAT.
+Detalhes de migração e operação em `docs/ESTABELECIMENTOS.md` na raiz do projeto.

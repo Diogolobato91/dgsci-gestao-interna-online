@@ -11,6 +11,7 @@ class DashboardApp {
     this.tables = window.tableManager;
     this.geoMap = window.geoMapManager;
     
+    this.databaseMode = window.parent !== window && new URLSearchParams(location.search).get('database') === '1';
     this.autoSyncTimer = null;
     this.activeTab = 'overview';
 
@@ -24,12 +25,28 @@ class DashboardApp {
 
     this.setupEventListeners();
     this.setupThemeToggle();
-    this.setupDropzone();
+    if (!this.databaseMode) this.setupDropzone();
 
     this.store.subscribe((store) => {
       this.updateUI(store);
     });
 
+    if (this.databaseMode) {
+      try { localStorage.removeItem('dgsci_data_cache'); } catch {}
+      await new Promise(resolve => {
+        addEventListener('message', event => {
+          if(event.source!==parent || event.origin!==location.origin || event.data?.type!=='dgsci:database-data' || !Array.isArray(event.data.payload?.companies))return;
+          this.canEditEstablishments=event.data.canEdit===true;
+          this.store.setData(event.data.payload);
+          const openModal=document.getElementById('companyDetailModal');
+          if(openModal?.classList?.contains?.('active')&&this.tables.currentCompany){const current=this.store.companies.find(c=>c.id===this.tables.currentCompany.id);if(current)this.tables.openCompanyModal(current,this.store);}
+          const overlay=document.getElementById('loadingOverlay');if(overlay)overlay.classList.add('hidden');
+          resolve();
+        });
+        parent.postMessage({type:'dgsci:database-ready'},location.origin);
+      });
+      return;
+    }
     this.loadFromCache();
 
     await this.syncLiveSheet();
@@ -331,6 +348,8 @@ class DashboardApp {
   }
 
   async syncLiveSheet(manual = false) {
+    if(this.databaseMode){parent.postMessage({type:'dgsci:database-refresh'},location.origin);return;}
+
     const overlay = document.getElementById('loadingOverlay');
     const progressText = document.getElementById('loadingProgressText');
     const syncStatus = document.getElementById('liveSyncStatus');

@@ -9,16 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const sendStatus = () => {
     const count = app.store.companies.length;
     const date = app.store.lastSync ? new Date(app.store.lastSync).toLocaleString('pt-BR') : null;
-    const message = date ? `${count.toLocaleString('pt-BR')} registros · Última consulta completa: ${date}` : 'Buscando os dados das planilhas…';
+    const message = app.databaseMode ? `${count.toLocaleString('pt-BR')} registros no banco${date?' · Última alteração: '+date:''}` : date ? `${count.toLocaleString('pt-BR')} registros · Última consulta completa: ${date}` : 'Buscando os dados das planilhas…';
     parent.postMessage({ type: 'dgsci:status', ready: true, message }, location.origin);
   };
   let syncing = true;
   Promise.resolve(app.initialSync).finally(() => { syncing = false; });
+  document.addEventListener('click',event=>{
+    const button=event?.target?.closest?.('.btn-edit-establishment');
+    if(button&&app.canEditEstablishments)parent.postMessage({type:'dgsci:edit-establishment',id:button.dataset.id},location.origin);
+  });
   const originalSync = app.syncLiveSheet.bind(app);
   app.syncLiveSheet = async (...args) => {
     if (syncing) return;
     syncing = true;
-    parent.postMessage({ type: 'dgsci:status', ready: true, message: 'Atualizando as planilhas. A última consulta completa será preservada em caso de falha.' }, location.origin);
+    parent.postMessage({ type: 'dgsci:status', ready: true, message: app.databaseMode?'Consultando o banco de estabelecimentos…':'Atualizando as planilhas. A última consulta completa será preservada em caso de falha.' }, location.origin);
     try { await originalSync(...args); } finally { syncing = false; }
   };
   app.store.subscribe(sendStatus);

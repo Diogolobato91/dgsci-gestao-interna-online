@@ -192,7 +192,7 @@ class SheetsSyncManager {
     let headerIndex = -1;
     for (let i = 0; i < Math.min(15, rows.length); i++) {
       const rowStr = rows[i].join(' ').toUpperCase();
-      if (rowStr.includes('CNPJ') || rowStr.includes('ENDEREÇO') || rowStr.includes('ENDERECO') || rowStr.includes('RAZÃO') || rowStr.includes('RAZAO') || rowStr.includes('PASTA')) {
+      if (rows[i].some(cell => /^(CNPJ|CPF|CNPJ\s*\/\s*CPF)$/i.test(String(cell).trim())) && /RAZ[ÃA]O|NOME FANTASIA|PASTA/i.test(rowStr)) {
         headerIndex = i;
         break;
       }
@@ -680,7 +680,7 @@ class SheetsSyncManager {
   }
 
   resolveColumns(headers) {
-    const norm = headers.map(h => (h || '').toString().toUpperCase().trim());
+    const norm = headers.map(h => (h || '').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim());
 
     let pastaIdx = 0;
     let razaoIdx = 1;
@@ -695,11 +695,11 @@ class SheetsSyncManager {
     let protProjIdx = 10;
     let grupoIdx = 11;
     let divIdx = 12;
-    let areaIdx = 14;
-    let pavIdx = 19;
+    let areaIdx = -1;
+    let pavIdx = -1;
     let cargaIdx = 20;
     let riscoIdx = 21;
-    let lotacaoIdx = 22;
+    let lotacaoIdx = -1;
     let statusAtivoIdx = 23;
     let situacaoIdx = 24;
     let obsIdx = 25;
@@ -707,6 +707,11 @@ class SheetsSyncManager {
     for (let i = 0; i < norm.length; i++) {
       const h = norm[i];
       if (h.includes('CNPJ') || h.includes('CPF')) cnpjIdx = i;
+      else if (h.startsWith('AREA')) areaIdx = i;
+      else if (h.includes('PAVIMENTO')) pavIdx = i;
+      else if (h.includes('LOTACAO')) lotacaoIdx = i;
+      else if (h === 'GRUPO') grupoIdx = i;
+      else if (h === 'DIVISAO') divIdx = i;
       else if (h.includes('ENDEREÇO') || h.includes('ENDERECO') || h.includes('LOGRADOURO')) endIdx = i;
       else if (h.includes('BAIRRO')) bairroIdx = i;
       else if (h.includes('CEP')) cepIdx = i;

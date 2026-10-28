@@ -49,7 +49,7 @@ class TableManager {
       const q = filters.search.toLowerCase().trim();
       items = items.filter(c => 
         (c.razao && c.razao.toLowerCase().includes(q)) ||
-        (c.cnpj && c.cnpj.includes(q)) ||
+        (c.cnpj && (c.cnpj.includes(q) || (q.replace(/\D/g,'').length>=3 && c.cnpj.replace(/\D/g,'').includes(q.replace(/\D/g,''))))) ||
         (c.endereco && c.endereco.toLowerCase().includes(q)) ||
         (c.bairro && c.bairro.toLowerCase().includes(q)) ||
         (c.pasta && c.pasta.toLowerCase().includes(q)) ||
@@ -342,6 +342,7 @@ class TableManager {
     cnpjEl.textContent = `CNPJ / CPF: ${company.cnpj || 'Não informado'} • Cadastro na Divisão ${company.divisao}: Item #${company.itemNum || company.pasta}`;
 
     bodyEl.innerHTML = DOMPurify.sanitize(`
+      ${window.app?.databaseMode?`<div class="record-database-info"><p>Última atualização: ${company.updated_by_name||'Não informada'} · ${company.updated_at?new Date(company.updated_at).toLocaleString('pt-BR',{timeZone:'America/Belem'}):'Não informada'}</p>${window.app.canEditEstablishments?`<button type="button" class="btn btn-primary btn-edit-establishment" data-id="${company.id}">Editar estabelecimento</button>`:''}</div>`:''}
       <div class="dossier-grid">
         <div class="dossier-item">
           <span class="dossier-label">Situação Cadastral / Licença</span>
