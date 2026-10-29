@@ -387,3 +387,8 @@
 @media(max-width:700px){.cleaning-week-dialog{padding:16px;width:calc(100vw - 16px)}.cleaning-week-mobile-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:12px}.cleaning-week-mobile-tabs button{display:flex;flex-direction:column;gap:2px;padding:8px 4px;min-height:54px}.cleaning-week-mobile-tabs small{font-size:10px}.cleaning-week-matrix table{min-width:0}.cleaning-week-matrix tr>:not(:first-child):not(.vc-active-day){display:none}.cleaning-week-matrix th:first-child{width:38%;font-size:12px}.cleaning-week-matrix select,.cleaning-week-matrix textarea{font-size:16px}.cleaning-week-toolbar .form-field{max-width:100%;flex:1}.cleaning-week-dialog form>.record-actions button{flex:1}}
 
 .establishment-fields{border:0;padding:0;margin:0;display:grid;gap:16px;min-width:0}
+
+.notification-bell.has-pending{border-color:#b51f30;color:#a71927;background:#fff3f4}
+.notification-bell.has-pending>svg{animation:notice-bell-nudge 6s ease-in-out infinite;transform-origin:50% 15%}
+@keyframes notice-bell-nudge{0%,18%,100%{transform:rotate(0)}3%,9%{transform:rotate(14deg)}6%,12%{transform:rotate(-14deg)}15%{transform:rotate(6deg)}}
+@media(prefers-reduced-motion:reduce){.notification-bell.has-pending>svg{animation:none}}
