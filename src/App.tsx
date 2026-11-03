@@ -16,7 +16,6 @@ const SatCommands = lazy(() => import('@/features/records/SatCommandsPage'));
 
 const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
 const DashboardGeral = lazy(() => import("@/pages/DashboardGeral"));
-const ComissaoTecnica = lazy(() => import("@/pages/ComissaoTecnica"));
 const SATRegionais = lazy(() => import("@/pages/SATRegionais"));
 const RelacaoEfetivo = lazy(() => import("@/pages/RelacaoEfetivo"));
 const Pareceres = lazy(() => import("@/pages/Pareceres"));
@@ -100,7 +99,7 @@ const AppRoutes = () => (
         <Route path="escala-mensal" element={<EscalaMensal />} />
         <Route path="relatorios" element={<PendingModule />} />
         <Route path="controle-portarias" element={<ControlePortarias />} />
-        <Route path="comissao-tecnica" element={<ComissaoTecnica />} />
+        <Route path="comissao-tecnica" element={<PendingModule />} />
         <Route path="autorizacoes" element={<Autorizacoes />} />
         <Route path="dashboard-geral" element={<DashboardGeral />} />
         <Route path="controle-autorizacoes-diarias" element={<Autorizacoes />} />
