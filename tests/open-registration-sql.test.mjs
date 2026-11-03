@@ -133,5 +133,7 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
   await db.exec(fs.readFileSync(path.join(root,'tests','cleaning-week-editor-rls.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'supabase','establishments.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','establishments-rls.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'supabase','cleaning_location_management.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'tests','cleaning-location-management-rls.sql'),'utf-8'));
   assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
 });

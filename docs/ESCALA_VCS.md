@@ -21,8 +21,7 @@ Datas repetidas e semanas misturadas são rejeitadas. Não é um upsert incondic
 **Adicionar setor/local** salva um local reutilizável e inclui seu campo de responsável
 na edição atual. Exemplo: Banheiro do 2º andar. O local fica disponível nos próximos
 cadastros mesmo se a edição do dia for cancelada. Nomes repetidos, ignorando espaços
-nas extremidades e caixa, são impedidos. O limite é de 40 atividades por dia,
-incluindo as seis originais, que permanecem obrigatórias na estrutura.
+nas extremidades e caixa, são impedidos. O limite é de 40 atividades por dia, com pelo menos uma atividade. Os locais iniciais também podem ser editados e excluídos dos novos preenchimentos.
 
 Locais adicionais são exibidos no painel do dia e na consulta mensal. O PDF mantém
 a tabela das seis atividades originais e acrescenta uma seção Data / Setor ou local /
@@ -35,3 +34,11 @@ A criação dos locais e alterações das escalas são registradas na auditoria.
 Banco: `supabase/cleaning_week_and_locations.sql` e `supabase/cleaning_week_editor.sql`.
 Validação: testes de limites de semana, locais dinâmicos e suíte SQL com rollback,
 incluindo lote de sete dias, conflito, afastamento, autoria e negação a leitores.
+
+Gestão de locais: **Montar/editar semana → Editar / excluir locais**. A edição e a
+exclusão exigem Secretaria, Diretoria ou Subdiretoria. A exclusão é lógica e auditada:
+o catálogo retira o local dos novos dias, preservando as escalas anteriores. O formulário
+da semana reflete a alteração; salve a semana se quiser aplicar a remoção aos dias
+selecionados. Uma versão antiga do catálogo é recusada e o último local ativo não
+pode ser excluído. A migração `supabase/cleaning_location_management.sql` deve estar
+aplicada antes da publicação da interface.

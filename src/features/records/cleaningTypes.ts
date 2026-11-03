@@ -12,10 +12,10 @@ export function emptyCleaningDay(day:string):CleaningDay {
   return {service_date:day,assignments:CLEANING_TASKS.map(t=>({task:t.key,staff_id:null,nome:''})),notes:'',version:0};
 }
 
-export type CleaningLocation = {id:string;label:string};
+export type CleaningLocation = {id:string;label:string;task_key?:string;deleted_at?:string|null;version?:number};
 export function cleaningTasks(rows:CleaningDay[]) {
- const tasks:{key:string;label:string;hint?:string}[]=[...CLEANING_TASKS];
- for(const row of rows) for(const a of row.assignments) if(a.label&&!tasks.some(t=>t.key===a.task))tasks.push({key:a.task,label:a.label});
+ const tasks:{key:string;label:string;hint?:string}[]=[];
+ for(const row of rows)for(const a of row.assignments)if(!tasks.some(t=>t.key===a.task)){const base=CLEANING_TASKS.find(t=>t.key===a.task);tasks.push({key:a.task,label:a.label||base?.label||'Local',hint:base&&'hint'in base?base.hint:undefined});}
  return tasks;
 }
 /** Semana de segunda a domingo, sem deslocamento por fuso horário. */
@@ -26,3 +26,5 @@ export function cleaningWeek(date:string):string[]{
  start.setUTCDate(start.getUTCDate()-((start.getUTCDay()+6)%7));
  return Array.from({length:7},(_,i)=>{const d=new Date(start);d.setUTCDate(d.getUTCDate()+i);return d.toISOString().slice(0,10);});
 }
+
+export const cleaningLocationKey=(l:CleaningLocation)=>l.task_key||'local_'+l.id;
