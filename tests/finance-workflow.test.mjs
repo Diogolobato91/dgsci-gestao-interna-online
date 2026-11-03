@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {build} from 'esbuild';
 const r=await build({entryPoints:['src/features/records/financialWorkflow.ts'],bundle:true,platform:'node',format:'esm',write:false});
-const {scopedBalance,normalizeWorkflow,financialCompleteness,financialStatus}=await import('data:text/javascript;base64,'+Buffer.from(r.outputFiles[0].text).toString('base64'));
+const {inServiceRange,scopedBalance,normalizeWorkflow,financialCompleteness,financialStatus}=await import('data:text/javascript;base64,'+Buffer.from(r.outputFiles[0].text).toString('base64'));
 test('saldo exige referência e considera somente competência e unidade correspondentes',()=>{
  const rows=[{category:'sat',competencia:'2026-10-01',unidade:'CAT',valorDespesa:50.25,valorArrecadado:100,status:'Pago'},
  {category:'sat',competencia:'2026-10-01',unidade:'CAT',valorDespesa:999,valorArrecadado:0,status:'Cancelado'},
@@ -28,4 +28,16 @@ test('saldo geral do mês inclui SATs e DGSCI, exclui cancelados e outras compet
  assert.equal(scopedBalance(rows,budget),598000);
  assert.equal(scopedBalance([...rows,{category:'dgsci',competencia:'2026-07-01',valorDespesa:null,valorArrecadado:0}],budget),null);
  assert.equal(scopedBalance([],budget),600000);
+});
+
+test('intervalo inclusivo usa início do serviço uma vez, atravessa meses e anos sem ratear',()=>{
+ const rows=[{dataInicio:'2026-12-31',dataFim:'2027-01-03',valorDespesa:120,valorArrecadado:0,category:'sat'}, {dataInicio:'2027-01-02',dataFim:'2027-01-02',valorDespesa:0,valorArrecadado:200,category:'dgsci'}, {dataInicio:'2027-01-03',dataFim:'2027-01-04',valorDespesa:999,valorArrecadado:0}, {dataInicio:'2027-01-01',valorDespesa:null,valorArrecadado:null,workflowStatus:'cancelado'}];
+ const budget={data_inicio:'2026-12-31',data_fim:'2027-01-02',unidade:'GERAL',saldo_inicial:1000};
+ assert.equal(scopedBalance(rows,budget),1080);
+ assert.equal(inServiceRange(rows[0],'2027-01-01','2027-01-31'),false);
+ assert.equal(inServiceRange({},'2027-01-01','2027-01-31'),false);
+ assert.equal(inServiceRange({},'',''),true);
+ assert.equal(scopedBalance([...rows,{valorDespesa:0,valorArrecadado:0}],budget),null);
+ assert.equal(scopedBalance([{...rows[0],valorArrecadado:null}],budget),null);
+ assert.equal(scopedBalance([],budget),1000);
 });

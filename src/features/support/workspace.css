@@ -392,3 +392,5 @@
 .notification-bell.has-pending>svg{animation:notice-bell-nudge 6s ease-in-out infinite;transform-origin:50% 15%}
 @keyframes notice-bell-nudge{0%,18%,100%{transform:rotate(0)}3%,9%{transform:rotate(14deg)}6%,12%{transform:rotate(-14deg)}15%{transform:rotate(6deg)}}
 @media(prefers-reduced-motion:reduce){.notification-bell.has-pending>svg{animation:none}}
+
+.finance-filters input[type=date]{padding:10px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-size:14px;min-height:44px;max-width:100%;width:100%}

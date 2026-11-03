@@ -7,7 +7,7 @@ test('controle carregado apresenta filtros, saldo e ações conforme o setor',as
    build.onLoad({filter:/usePrivateSnapshot\.ts$/},()=>({loader:'ts',contents:`export const usePrivateSnapshot=()=>({reload:()=>{},error:'',data:{importadoEm:null,budgets:[],saldos:[],dgsci:[],sat:[{id:'fixture',category:'sat',protocolo:'PROTOCOLO TESTE',unidade:'CAT',valorDespesa:120.5,valorArrecadado:200,workflowStatus:'aguardando',status:'Aguardando',competencia:null}]}});`}));
   }}]});
   const html=(await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'))).default.replace(/<!--[\s\S]*?-->/g,'');
-  assert.match(html,/PROTOCOLO TESTE/);assert.match(html,/Competência não informada/);assert.match(html,/Todas as unidades/);assert.match(html,/Saldo ainda não definido/);
+  assert.match(html,/PROTOCOLO TESTE/);assert.match(html,/Datas completas pendentes/);assert.match(html,/Todas as unidades/);assert.match(html,/Saldo ainda não definido/);
   if(sector==='Subdiretoria'){assert.match(html,/Novo processo/);assert.match(html,/Definir saldo inicial/);}else{assert.doesNotMatch(html,/Novo processo/);assert.doesNotMatch(html,/Definir saldo inicial/);}
  }
 });

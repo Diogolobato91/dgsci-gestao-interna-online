@@ -2,42 +2,35 @@
 
 ## Operação
 
-O controle permite cadastrar e editar processos SAT / UBM e DGSCI, com protocolo, unidade, referência, destino, efetivo, período de serviço, competência mensal, situação, despesas, arrecadações e observações.
+Cadastre processos SAT / UBM ou DGSCI com protocolo, unidade, referência, destino, efetivo, início e fim do serviço, situação, despesas, arrecadação e observações. Não há campo de competência no formulário. As datas são obrigatórias para novos processos e para completar os históricos no editor. A unidade identifica o processo, mas não é exigida para definir o saldo geral.
 
-As alterações ficam restritas à **Subdiretoria** e ao superadministrador com acesso completo. Diretoria e Secretaria consultam os registros e baixam documentos. Os demais setores, contas pendentes, bloqueadas e anônimos não acessam os dados financeiros.
+Somente Subdiretoria e superadministrador com acesso completo alteram. Diretoria e Secretaria consultam e baixam documentos. As regras de RLS continuam protegendo processos, saldos, auditoria e arquivos.
 
-As situações operacionais são **Aguardando**, **Autorizado**, **Pago** e **Cancelado**. As descrições originais da planilha permanecem preservadas e consultáveis. A situação operacional controla o painel e não representa uma execução de pagamento fora do sistema.
+Situações: Aguardando, Autorizado, Pago e Cancelado. Descrições e períodos textuais da origem continuam preservados; a situação operacional não realiza pagamentos externos.
 
-Processos novos exigem competência e unidade. Os processos importados sem competência continuam identificados como **Competência não informada**, sem atribuição automática de mês. A data da autorização e o período textual da origem também são preservados.
+## Consulta e saldo geral
 
-## Painel e saldo
+1. Escolha data inicial e final no painel. O intervalo pode atravessar meses e anos e inclui os dois limites.
+2. Use **Definir saldo inicial**. As datas da consulta já vêm preenchidas; informe o valor compartilhado entre SAT / UBM e DGSCI.
+3. O saldo corresponde a **saldo inicial + arrecadações − despesas**, excluindo cancelados.
+4. Cada processo entra integralmente pela data de início do serviço. Um serviço iniciado em 31/12 e encerrado em 03/01 entra na consulta que inclui 31/12; não é rateado ou contado novamente por terminar em janeiro.
 
-Busca, competência, unidade e situação filtram os indicadores e gráficos. As despesas/arrecadações excluem processos cancelados. Valores desconhecidos permanecem distintos de zero. A série mensal considera as últimas 12 competências informadas nos filtros, sem inventar períodos para os registros antigos.
+O saldo geral considera todas as unidades e as duas origens, independentemente de busca, unidade, situação e aba da listagem. Indicadores e gráficos seguem os filtros da consulta. Períodos com saldo podem ser recuperados no seletor; o mesmo intervalo pode ser editado com controle de versão. Intervalos diferentes representam consultas independentes, não transferências de saldo nem fechamento contábil automático.
 
-Para calcular o saldo de uma competência/unidade:
+Registros antigos sem datas estruturadas continuam visíveis quando não há filtro de data. **Revisar processos sem datas completas** facilita localizá-los. Não inferimos datas de textos ambíguos. Se houver processos ativos sem data de início, o saldo final permanece pendente, pois não é possível determinar a qual intervalo pertencem. Valores financeiros ausentes nos processos do intervalo também impedem confirmar o saldo. Campo vazio não equivale a zero.
 
-1. Selecione a competência e a unidade.
-2. Use **Definir saldo inicial** e informe o valor de referência.
-3. O controle calcula **saldo inicial + arrecadações − despesas** dos protocolos correspondentes, excluindo cancelados.
+A série mensal agrupa automaticamente pelos últimos 12 meses de início dos serviços encontrados na consulta; não exige cadastro de mês separado.
 
-Se houver valores financeiros ausentes nos processos correspondentes, o saldo calculado fica pendente de preenchimento. Informe zero quando não houver despesa ou arrecadação, em vez de deixar um valor desconhecido. O cálculo do saldo usa todos os protocolos da competência/unidade; a busca e o filtro de situação não recortam esse saldo.
+## Preservação e banco
 
-Os dois saldos legados permanecem separados na área **Saldos de referência**, com os valores e a identificação da origem. Não são somados nem transferidos automaticamente para competências/unidades sem confirmação do seu significado.
+`supabase/authorization_date_ranges.sql` adiciona `data_inicio` e `data_fim` às autorizações e aos saldos. Saldos mensais anteriores conservam seu intervalo do primeiro ao último dia do mês. Protocolos e valores históricos não são apagados. `competencia` continua apenas como compatibilidade interna derivada do início para novos dados estruturados; não orienta os filtros atuais.
 
-## Documentos e histórico
+Validações no banco rejeitam intervalos incompletos, invertidos ou fora dos limites, valores negativos/não finitos e alterações indevidas dos dados de origem. A autorização de importações documentais permanece restrita ao proprietário, preservando a origem. RLS e privilégios não são ampliados. Datas e valores alterados continuam auditados; versões protegem edições simultâneas.
 
-Após salvar o processo, use **Consultar** para anexar PDF, Word, Excel, PNG ou JPEG, com limite de 20 MB por arquivo. O bucket `dgsci-authorizations` é privado. O download usa a sessão autenticada e não gera links públicos permanentes. Os arquivos e metadados vinculados são preservados; a interface não oferece exclusão definitiva.
+Saldos antigos da fonte, quando existentes, são referências separadas e não são recalculados automaticamente.
 
-O histórico informa autor, data/hora e campos alterados, além dos anexos adicionados. A consulta mostra as últimas 100 ocorrências; as anteriores permanecem no banco. Processos importados começam a receber histórico nas próximas alterações. Datas de criação desconhecidas dos registros antigos permanecem nulas.
+## Documentos e validação
 
-## Banco e validação
+Após salvar, use **Consultar** para anexar PDF, Word, Excel, PNG ou JPEG (até 20 MB). O bucket é privado; o download usa a sessão autenticada. Histórico registra autor, horário e alterações, sem registrar simples navegação.
 
-Migration criada pela CLI oficial: `supabase/migrations/20261021204342_authorization_workflow.sql`, aplicada como `authorization_workflow` ao projeto DGSCI.
-
-Todas as novas tabelas têm RLS e privilégios explícitos. Validações do banco restringem valores negativos/não finitos, dados de origem, situações e vínculos de arquivos. Controle de versão protege edições simultâneas de processos e saldos iniciais. A auditoria é gerada por gatilhos e não pode ser apagada pelo cliente.
-
-Testes executados em PostgreSQL/PGlite e no Supabase remoto com rollback: cadastro, edição, conflito de versões, saldo por competência/unidade, auditoria, vínculo e acesso aos documentos, bloqueio de alterações por leitores, isolamento de contas pendentes/bloqueadas e acesso anônimo. Os testes de Storage usam somente metadados transitórios e não enviam arquivos fictícios. A proteção do Supabase contra exclusão SQL direta é respeitada; operações reais de arquivos usam a Storage API.
-
-A conferência da migração comparou os dados originais dos 87 processos e encontrou zero alterações nos campos anteriores, incluindo valores e datas de atualização. Competências, saldos iniciais e documentos reais novos continuam para preenchimento pela Subdiretoria. Não foram criados lançamentos fictícios no ambiente principal.
-
-Também foram verificados cálculos e arredondamento em centavos, exclusão de cancelados, saldo ausente/incompleto, renderização da tela por perfil, TypeScript e build. A conferência interativa dos formulários e de uploads/downloads no endereço publicado da Netlify permanece necessária.
+Testes PostgreSQL/PGlite e transação com rollback no Supabase verificam cadastro por datas, passagem de ano, intervalos inválidos, duplicidade de saldo, snapshot, auditoria e restrições por setor. Testes de cálculo cobrem limites inclusivos, cancelados, dados ausentes e preservação de centavos. TypeScript e build de produção também foram verificados. A validação interativa na Netlify não está incluída nesses testes.
