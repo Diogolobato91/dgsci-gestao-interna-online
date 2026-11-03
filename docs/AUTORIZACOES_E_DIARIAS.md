@@ -8,20 +8,15 @@ Somente Subdiretoria e superadministrador com acesso completo alteram. Diretoria
 
 Situações: Aguardando, Autorizado, Pago e Cancelado. Descrições e períodos textuais da origem continuam preservados; a situação operacional não realiza pagamentos externos.
 
-## Consulta e saldo geral
+## Consulta e saldo anual
 
-1. Escolha data inicial e final no painel. O intervalo pode atravessar meses e anos e inclui os dois limites.
-2. Use **Definir saldo inicial**. As datas da consulta já vêm preenchidas; informe o valor compartilhado entre SAT / UBM e DGSCI.
-3. O saldo corresponde a **saldo inicial + arrecadações − despesas**, excluindo cancelados.
-4. Cada processo entra integralmente pela data de início do serviço. Um serviço iniciado em 31/12 e encerrado em 03/01 entra na consulta que inclui 31/12; não é rateado ou contado novamente por terminar em janeiro.
+O saldo é único por exercício e compartilhado entre SAT / UBM e DGSCI. Selecione o ano no cartão de saldo e cadastre o saldo inicial anual. O formulário grava o intervalo canônico de 1º de janeiro a 31 de dezembro; editar o mesmo ano atualiza o cadastro existente com controle de versão. Não há campo de unidade nem datas nesse formulário.
 
-O saldo geral considera todas as unidades e as duas origens, independentemente de busca, unidade, situação e aba da listagem. Indicadores e gráficos seguem os filtros da consulta. Períodos com saldo podem ser recuperados no seletor; o mesmo intervalo pode ser editado com controle de versão. Intervalos diferentes representam consultas independentes, não transferências de saldo nem fechamento contábil automático.
+O saldo disponível anual é **saldo inicial + arrecadações − despesas** do exercício, excluindo cancelados. Cada processo é contado integralmente pelo início do serviço; não há rateio automático. O valor inicial salvo fica visível mesmo enquanto o cálculo final estiver pendente.
 
-Registros antigos sem datas estruturadas continuam visíveis quando não há filtro de data. **Revisar processos sem datas completas** facilita localizá-los. Não inferimos datas de textos ambíguos. Se houver processos ativos sem data de início, o saldo final permanece pendente, pois não é possível determinar a qual intervalo pertencem. Valores financeiros ausentes nos processos do intervalo também impedem confirmar o saldo. Campo vazio não equivale a zero.
+Os filtros de datas, unidade, situação, busca e a aba da listagem afetam apenas a consulta e seus gráficos. Não substituem o ano do cartão, não exigem outro saldo inicial e não recortam o saldo anual. A série mensal agrupa automaticamente pelo mês de início do serviço.
 
-A série mensal agrupa automaticamente pelos últimos 12 meses de início dos serviços encontrados na consulta; não exige cadastro de mês separado.
-
-Sem filtro de datas, o cartão de saldo mostra o último período geral cadastrado e seu saldo inicial, sem limitar a lista de processos. Pendências de cálculo não escondem o saldo inicial salvo. O botão Editar saldo inicial recupera as datas e o valor desse período.
+Registros antigos sem datas estruturadas continuam visíveis quando não há filtro de data. **Revisar processos sem datas completas** facilita localizá-los. Não inferimos datas de textos ambíguos. Processos ativos sem início impedem confirmar o saldo disponível, pois ainda não é possível determinar o exercício correspondente. Valores financeiros ausentes nos processos do ano também impedem confirmar o saldo. Campo vazio não equivale a zero.
 
 ## Preservação e banco
 

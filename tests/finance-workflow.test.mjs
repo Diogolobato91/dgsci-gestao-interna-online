@@ -41,3 +41,9 @@ test('intervalo inclusivo usa início do serviço uma vez, atravessa meses e ano
  assert.equal(scopedBalance([{...rows[0],valorArrecadado:null}],budget),null);
  assert.equal(scopedBalance([],budget),1000);
 });
+
+test('saldo anual inclui SAT e DGSCI ao longo do exercício e exclui outros anos',()=>{
+ const budget={data_inicio:'2026-01-01',data_fim:'2026-12-31',unidade:'GERAL',saldo_inicial:1000};
+ const rows=[{dataInicio:'2026-01-01',category:'sat',valorDespesa:100,valorArrecadado:0}, {dataInicio:'2026-12-31',category:'dgsci',valorDespesa:50,valorArrecadado:200}, {dataInicio:'2027-01-01',valorDespesa:999,valorArrecadado:0}, {dataInicio:'2026-07-01',workflowStatus:'cancelado',valorDespesa:999,valorArrecadado:0}];
+ assert.equal(scopedBalance(rows,budget),1050);
+});
