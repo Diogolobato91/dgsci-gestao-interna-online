@@ -12,11 +12,11 @@ Situações: Aguardando, Autorizado, Pago e Cancelado. Descrições e períodos 
 
 O saldo é único por exercício e compartilhado entre SAT / UBM e DGSCI. Selecione o ano no cartão de saldo e cadastre o saldo inicial anual. O formulário grava o intervalo canônico de 1º de janeiro a 31 de dezembro; editar o mesmo ano atualiza o cadastro existente com controle de versão. Não há campo de unidade nem datas nesse formulário.
 
-O saldo disponível anual é **saldo inicial + arrecadações − despesas** do exercício, excluindo cancelados. Cada processo é contado integralmente pelo início do serviço; não há rateio automático. O valor inicial salvo fica visível mesmo enquanto o cálculo final estiver pendente.
+O saldo disponível anual é **saldo inicial anual − despesas do ano** do exercício, excluindo cancelados. Cada processo é contado integralmente pelo início do serviço; não há rateio automático. O valor inicial salvo fica visível mesmo enquanto o cálculo final estiver pendente.
 
-Os filtros de datas, unidade, situação, busca e a aba da listagem afetam apenas a consulta e seus gráficos. Não substituem o ano do cartão, não exigem outro saldo inicial e não recortam o saldo anual. A série mensal agrupa automaticamente pelo mês de início do serviço.
+Os filtros de datas, unidade, situação, busca e a aba da listagem afetam apenas a consulta e seus gráficos. Não substituem o ano do cartão, não exigem outro saldo inicial e não recortam o saldo anual. O seletor Referência do saldo e o gráfico Últimos 12 meses de início do serviço foram retirados; os gráficos por origem e situação continuam disponíveis.
 
-Registros antigos sem datas estruturadas continuam visíveis quando não há filtro de data. **Revisar processos sem datas completas** facilita localizá-los. Não inferimos datas de textos ambíguos. Processos ativos sem início impedem confirmar o saldo disponível, pois ainda não é possível determinar o exercício correspondente. Valores financeiros ausentes nos processos do ano também impedem confirmar o saldo. Campo vazio não equivale a zero.
+Registros antigos sem datas estruturadas continuam visíveis quando não há filtro de data. **Revisar processos sem datas completas** facilita localizá-los. Não inferimos datas de textos ambíguos. Processos ativos sem início impedem confirmar o saldo disponível, pois ainda não é possível determinar o exercício correspondente. Despesas ausentes nos processos do ano também impedem confirmar o saldo; arrecadações ausentes não bloqueiam esse cálculo. A arrecadação é um indicador separado e não aumenta o saldo. O cartão Saldo atual usa o mesmo ano e cálculo do cartão anual. Campo vazio não equivale a zero.
 
 ## Preservação e banco
 

@@ -13,9 +13,9 @@ export function scopedBalance(rows:Authorization[],budget:Budget|undefined) {
  if(!budget)return null;
  if(budget.data_inicio&&budget.data_fim&&rows.some(r=>(r.workflowStatus||normalizeWorkflow(r.status))!=='cancelado'&&!r.dataInicio))return null;
  const selected=rows.filter(r=>(budget.data_inicio&&budget.data_fim?inServiceRange(r,budget.data_inicio,budget.data_fim):r.competencia===budget.competencia)&&(unitKey(budget.unidade)==='GERAL'||unitKey(r.unidade||(r.category==='dgsci'?'DGSCI':''))===unitKey(budget.unidade)));
- if(selected.some(r=>(r.workflowStatus||normalizeWorkflow(r.status))!=='cancelado'&&(r.valorDespesa==null||r.valorArrecadado==null)))return null;
+ if(selected.some(r=>(r.workflowStatus||normalizeWorkflow(r.status))!=='cancelado'&&r.valorDespesa==null))return null;
  const totals=financialTotals(selected);
- return Math.round((budget.saldo_inicial+totals.revenue-totals.expense)*100)/100;
+ return Math.round((budget.saldo_inicial-totals.expense)*100)/100;
 }
 export function financeError(error:{code?:string;message?:string}|null) {
  if(error?.code==='23505')return 'Já existe um registro para essa referência. Atualize a consulta.';
