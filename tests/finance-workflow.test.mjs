@@ -21,3 +21,11 @@ test('painel distingue valores ausentes de zero e ignora ausências de cancelado
  assert.deepEqual(financialCompleteness([]),{active:0,cancelled:0,missingExpense:0,missingRevenue:0});
  assert.equal(financialStatus({workflowStatus:'cancelado',status:'Pago'}),'Cancelado');
 });
+
+test('saldo geral do mês inclui SATs e DGSCI, exclui cancelados e outras competências',()=>{
+ const budget={competencia:'2026-07-01',unidade:'GERAL',saldo_inicial:600000};
+ const rows=[{category:'sat',unidade:'1º GBM',competencia:'2026-07-01',valorDespesa:1000,valorArrecadado:200,workflowStatus:'autorizado'}, {category:'dgsci',unidade:'DGSCI',competencia:'2026-07-01',valorDespesa:500,valorArrecadado:100,workflowStatus:'pago'}, {category:'sat',unidade:'2º GBM',competencia:'2026-07-01',valorDespesa:800,valorArrecadado:0,workflowStatus:'aguardando'}, {category:'dgsci',competencia:'2026-07-01',valorDespesa:9000,valorArrecadado:0,workflowStatus:'cancelado'}, {category:'sat',competencia:'2026-08-01',valorDespesa:9000,valorArrecadado:0,workflowStatus:'pago'}];
+ assert.equal(scopedBalance(rows,budget),598000);
+ assert.equal(scopedBalance([...rows,{category:'dgsci',competencia:'2026-07-01',valorDespesa:null,valorArrecadado:0}],budget),null);
+ assert.equal(scopedBalance([],budget),600000);
+});

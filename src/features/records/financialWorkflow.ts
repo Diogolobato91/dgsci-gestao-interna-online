@@ -11,7 +11,7 @@ export function financialTotals(rows:{valorDespesa:number|null;valorArrecadado:n
 }
 export function scopedBalance(rows:Authorization[],budget:Budget|undefined) {
  if(!budget)return null;
- const selected=rows.filter(r=>r.competencia===budget.competencia&&unitKey(r.unidade||(r.category==='dgsci'?'DGSCI':''))===unitKey(budget.unidade));
+ const selected=rows.filter(r=>r.competencia===budget.competencia&&(unitKey(budget.unidade)==='GERAL'||unitKey(r.unidade||(r.category==='dgsci'?'DGSCI':''))===unitKey(budget.unidade)));
  if(selected.some(r=>(r.workflowStatus||normalizeWorkflow(r.status))!=='cancelado'&&(r.valorDespesa==null||r.valorArrecadado==null)))return null;
  const totals=financialTotals(selected);
  return Math.round((budget.saldo_inicial+totals.revenue-totals.expense)*100)/100;
