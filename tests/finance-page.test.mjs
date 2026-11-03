@@ -1,13 +1,13 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {build} from 'esbuild';import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 test('controle carregado apresenta filtros, saldo e ações conforme o setor',async()=>{
- for(const sector of ['Subdiretoria','Secretaria']){
+ for(const sector of ['Subdiretoria','Secretaria']){for(const hasBudget of [false,true]){
   const result=await build({stdin:{contents:`import React from 'react';import {renderToString} from 'react-dom/server';import Page from './src/features/records/DiariasPage';export default renderToString(<Page/>);`,resolveDir:root,loader:'tsx'},bundle:true,jsx:'automatic',platform:'node',format:'esm',write:false,define:{'import.meta.env':'{}','process.env.NODE_ENV':'"production"'},banner:{js:`import {createRequire} from 'node:module';const require=createRequire(${JSON.stringify(root+'package.json')});`},plugins:[{name:'finance-state',setup(build){
    build.onLoad({filter:/AuthContext\.tsx$/},()=>({loader:'tsx',contents:`export const useAuth=()=>({user:{id:'fixture',role:'editor',allowedProfiles:[${JSON.stringify(sector)}]}});`}));
-   build.onLoad({filter:/usePrivateSnapshot\.ts$/},()=>({loader:'ts',contents:`export const usePrivateSnapshot=()=>({reload:()=>{},error:'',data:{importadoEm:null,budgets:[],saldos:[],dgsci:[],sat:[{id:'fixture',category:'sat',protocolo:'PROTOCOLO TESTE',unidade:'CAT',valorDespesa:120.5,valorArrecadado:200,workflowStatus:'aguardando',status:'Aguardando',competencia:null}]}});`}));
+   build.onLoad({filter:/usePrivateSnapshot\.ts$/},()=>({loader:'ts',contents:`export const usePrivateSnapshot=()=>({reload:()=>{},error:'',data:{importadoEm:null,budgets:${JSON.stringify(hasBudget?[{id:'budget-fixture',unidade:'GERAL',saldo_inicial:12345,data_inicio:'2026-07-01',data_fim:'2026-07-31',competencia:'2026-07-01',version:1}]:[])},saldos:[],dgsci:[],sat:[{id:'fixture',category:'sat',protocolo:'PROTOCOLO TESTE',unidade:'CAT',valorDespesa:120.5,valorArrecadado:200,workflowStatus:'aguardando',status:'Aguardando',competencia:null}]}});`}));
   }}]});
   const html=(await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'))).default.replace(/<!--[\s\S]*?-->/g,'');
-  assert.match(html,/PROTOCOLO TESTE/);assert.match(html,/Datas completas pendentes/);assert.match(html,/Todas as unidades/);assert.match(html,/Saldo ainda não definido/);
-  if(sector==='Subdiretoria'){assert.match(html,/Novo processo/);assert.match(html,/Definir saldo inicial/);}else{assert.doesNotMatch(html,/Novo processo/);assert.doesNotMatch(html,/Definir saldo inicial/);}
- }
+  assert.match(html,/PROTOCOLO TESTE/);assert.match(html,/Datas completas pendentes/);assert.match(html,/Todas as unidades/);if(hasBudget){assert.match(html,/Saldo inicial: R\$[\s\u00a0]*12\.345,00/);assert.match(html,/01\/07\/2026 a 31\/07\/2026/);assert.match(html,/O saldo inicial está salvo/);assert.doesNotMatch(html,/Saldo ainda não definido/);}else assert.match(html,/Selecione um período/);
+  if(sector==='Subdiretoria'){assert.match(html,/Novo processo/);assert.match(html,hasBudget?/Editar saldo inicial/:/Definir saldo inicial/);}else{assert.doesNotMatch(html,/Novo processo/);assert.doesNotMatch(html,/Definir saldo inicial|Editar saldo inicial/);}
+ }}
 });

@@ -21,6 +21,8 @@ Registros antigos sem datas estruturadas continuam visíveis quando não há fil
 
 A série mensal agrupa automaticamente pelos últimos 12 meses de início dos serviços encontrados na consulta; não exige cadastro de mês separado.
 
+Sem filtro de datas, o cartão de saldo mostra o último período geral cadastrado e seu saldo inicial, sem limitar a lista de processos. Pendências de cálculo não escondem o saldo inicial salvo. O botão Editar saldo inicial recupera as datas e o valor desse período.
+
 ## Preservação e banco
 
 `supabase/authorization_date_ranges.sql` adiciona `data_inicio` e `data_fim` às autorizações e aos saldos. Saldos mensais anteriores conservam seu intervalo do primeiro ao último dia do mês. Protocolos e valores históricos não são apagados. `competencia` continua apenas como compatibilidade interna derivada do início para novos dados estruturados; não orienta os filtros atuais.
