@@ -17,11 +17,12 @@ export default function StaffEditor({person,onClose,onSaved}:{person:Partial<Sta
       if(cpf&&cpf!==previous&&!validateCpf(cpf))throw new Error('Informe um CPF válido ou deixe o campo em branco.');
       if(contact&&!/^\d{10,11}$/.test(contact))throw new Error('Informe o contato com DDD (10 ou 11 dígitos).');
       if(draft.dataNascimento&&(!validateBirthDate(draft.dataNascimento).valid||!validPeriod(draft.dataNascimento,draft.dataNascimento)))throw new Error('Confira a data de nascimento.');
-      const result=await supabase.rpc('save_staff_member',{p_id:person.id||null,p_version:person.version??null,p_nome:draft.nome?.trim(),p_rank:draft.postoGraduacao,p_mf:draft.mf?.trim()||null,p_cpf:cpf||null,p_birth:draft.dataNascimento||null,p_contact:contact||null});
+      const result=await supabase.rpc('save_staff_member',{p_id:person.id||null,p_version:person.version??null,p_nome:draft.nome?.trim(),p_rank:draft.postoGraduacao,p_mf:draft.mf?.trim()||null,p_cpf:cpf||null,p_birth:draft.dataNascimento||null,p_contact:contact||null,p_nome_guerra:draft.nomeGuerra?.trim()||null});
       if(result.error)throw new Error(staffOperationError(result.error));onSaved();
     }catch(reason){setError(reason instanceof Error?reason.message:'Não foi possível salvar.');}finally{setBusy(false);}
   }}><section className="editor-section"><div className="form-grid">
     <div className="form-field form-field-wide"><label htmlFor="staff-name">Nome completo *</label><input id="staff-name" required minLength={2} maxLength={160} autoComplete="name" value={draft.nome||''} onChange={e=>setDraft({...draft,nome:e.target.value})}/></div>
+    <div className="form-field"><label htmlFor="staff-war-name">Nome de guerra</label><input id="staff-war-name" minLength={2} maxLength={80} value={draft.nomeGuerra||''} onChange={e=>setDraft({...draft,nomeGuerra:e.target.value})}/></div>
     <div className="form-field"><label htmlFor="staff-rank">Posto / graduação *</label><select id="staff-rank" required value={draft.postoGraduacao} onChange={e=>setDraft({...draft,postoGraduacao:e.target.value})}>{!MILITARY_RANKS.some(r=>r===draft.postoGraduacao)&&<option value="">Selecione uma graduação</option>}{MILITARY_RANKS.map(rank=><option key={rank}>{rank}</option>)}</select></div>
     <div className="form-field"><label htmlFor="staff-mf">Matrícula</label><input id="staff-mf" minLength={2} maxLength={50} value={draft.mf||''} onChange={e=>setDraft({...draft,mf:e.target.value})}/></div>
     <div className="form-field"><label htmlFor="staff-cpf">CPF</label><input id="staff-cpf" inputMode="numeric" maxLength={14} value={maskCpf(draft.cpf)} onChange={e=>setDraft({...draft,cpf:maskCpf(e.target.value)})}/></div>

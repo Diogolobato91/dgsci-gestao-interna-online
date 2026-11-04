@@ -172,6 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           matricula: data.matricula.trim(),
           cpf: data.cpf.replace(/\D/g, ''),
           data_nascimento: data.dataNascimento.trim(),
+          nome_guerra: data.nomeGuerra?.trim().toLocaleUpperCase('pt-BR')||null,
           contato: data.contato.replace(/\D/g, ''),
         },
       },

@@ -1,5 +1,5 @@
 export type Staff = {
-  id: string; postoGraduacao: string; nome: string; mf: string | null; cpf: string | null;
+  nomeGuerra?:string|null; id: string; postoGraduacao: string; nome: string; mf: string | null; cpf: string | null;
   dataNascimento: string | null; categoria: string; contato: string | null; version: number;
 };
 export const ABSENCE_KINDS = ['Férias', 'Licença', 'Afastamento'] as const;

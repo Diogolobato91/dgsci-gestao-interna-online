@@ -105,13 +105,13 @@ export default function UserManagementPage() {
   const [editingUser, setEditingUser] = useState<{
     user: ManagedUser;
     name: string;
-    rank: string; mf: string; cpf: string; birth: string; phone: string;
+    warName:string; rank: string; mf: string; cpf: string; birth: string; phone: string;
     sectors: UserProfile[];
     superadmin: boolean;
     enabled: boolean;
   } | null>(null);
   function openEdit(account:ManagedUser){
-    setFormError('');setEditingUser({user:account,name:account.display_name,rank:account.posto_graduacao||'',mf:account.matricula||'',cpf:maskCpf(account.cpf),birth:account.data_nascimento||'',phone:account.contato||'',sectors:account.sectors||[],superadmin:isManagedSuperadmin(account),enabled:account.enabled});
+    setFormError('');setEditingUser({user:account,name:account.display_name,warName:account.nome_guerra||'',rank:account.posto_graduacao||'',mf:account.matricula||'',cpf:maskCpf(account.cpf),birth:account.data_nascimento||'',phone:account.contato||'',sectors:account.sectors||[],superadmin:isManagedSuperadmin(account),enabled:account.enabled});
   }
   const [resettingUser,setResettingUser]=useState<ManagedUser|null>(null);
   const [deletingUser, setDeletingUser] = useState<ManagedUser | null>(null);
@@ -179,7 +179,7 @@ export default function UserManagementPage() {
   // Filtragem de dados
   const rows = accounts.filter(account => {
     const textMatch = normalizeSearch(
-      `${account.display_name} ${account.email} ${account.matricula || ''} ${account.cpf || ''} ${account.posto_graduacao || ''}`
+      `${account.nome_guerra||''} ${account.display_name} ${account.email} ${account.matricula || ''} ${account.cpf || ''} ${account.posto_graduacao || ''}`
     ).includes(normalizeSearch(query));
 
     const statusMatch =
@@ -309,7 +309,7 @@ export default function UserManagementPage() {
     setFormError('');
     try {
       const { error: problem } = editingUser.user.user_id ? await supabase.rpc('admin_save_user_full', {
-        p_user_id:editingUser.user.user_id,p_version:editingUser.user.version,p_details:{nome:editingUser.name.trim(),posto:editingUser.rank||null,matricula:editingUser.mf.trim()||null,cpf:editingUser.cpf.replace(/\D/g,'')||null,nascimento:editingUser.birth||null,contato:editingUser.phone.replace(/\D/g,'')||null},p_sectors:selected,p_enabled:editingUser.enabled,p_superadmin:editingUser.superadmin,
+        p_user_id:editingUser.user.user_id,p_version:editingUser.user.version,p_details:{nome_guerra:editingUser.warName.trim()||null,nome:editingUser.name.trim(),posto:editingUser.rank||null,matricula:editingUser.mf.trim()||null,cpf:editingUser.cpf.replace(/\D/g,'')||null,nascimento:editingUser.birth||null,contato:editingUser.phone.replace(/\D/g,'')||null},p_sectors:selected,p_enabled:editingUser.enabled,p_superadmin:editingUser.superadmin,
       }) : await supabase.rpc('admin_save_user', {
         p_email: editingUser.user.email.trim().toLowerCase(),
         p_display_name: editingUser.name.trim(),
@@ -673,6 +673,7 @@ export default function UserManagementPage() {
                 <div>
                   <span className="table-overline">NOME COMPLETO</span>
                   <strong>{viewingUser.display_name}</strong>
+                </div><div><span className="table-overline">NOME DE GUERRA</span><strong>{viewingUser.nome_guerra||'Pendente de complementação'}</strong>
                 </div>
                 <div>
                   <span className="table-overline">POSTO / GRADUAÇÃO</span>
@@ -961,6 +962,7 @@ export default function UserManagementPage() {
               </section>
 
               {editingUser.user.user_id&&<section className="editor-section"><h3>Dados pessoais</h3>
+                <div className="form-field"><label htmlFor="user-war-name">Nome de guerra</label><input id="user-war-name" minLength={2} maxLength={80} value={editingUser.warName} onChange={e=>setEditingUser({...editingUser,warName:e.target.value})}/></div>
                 <div className="form-field"><label htmlFor="user-rank">Posto / graduação</label><select id="user-rank" value={editingUser.rank} onChange={e=>setEditingUser({...editingUser,rank:e.target.value})}><option value="">Não informado</option>{MILITARY_RANKS.map(r=><option key={r}>{r}</option>)}</select></div>
                 <div className="form-field"><label htmlFor="user-mf">Matrícula</label><input id="user-mf" maxLength={50} value={editingUser.mf} onChange={e=>setEditingUser({...editingUser,mf:e.target.value})}/></div>
                 <div className="form-field"><label htmlFor="user-cpf">CPF</label><input id="user-cpf" inputMode="numeric" maxLength={14} value={editingUser.cpf} onChange={e=>setEditingUser({...editingUser,cpf:maskCpf(e.target.value)})}/></div>

@@ -82,6 +82,7 @@ export function validateBirthDate(rawDate: string | null | undefined): { valid: 
  * Valida o formulário completo de solicitação de cadastro antes de enviar.
  */
 export interface UserRegistrationPayload {
+  nomeGuerra?: string;
   contato: string;
   nome: string;
   postoGraduacao: string;
@@ -102,6 +103,8 @@ export function validateRegistrationForm(payload: UserRegistrationPayload): Reco
   } else if (cleanName.length > 160) {
     errors.nome = 'O nome não pode exceder 160 caracteres.';
   }
+
+  if (payload.postoGraduacao!=='VC'&&(!payload.nomeGuerra?.trim()||payload.nomeGuerra.trim().length<2||payload.nomeGuerra.trim().length>80||/[<>\x00-\x1f]/.test(payload.nomeGuerra))) errors.nomeGuerra='Informe seu nome de guerra (2 a 80 caracteres).';
 
   if (!payload.postoGraduacao) {
     errors.postoGraduacao = 'Selecione seu posto ou graduação.';

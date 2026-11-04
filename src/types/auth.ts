@@ -22,6 +22,7 @@ export interface User {
 }
 
 export interface RegisterData {
+  nomeGuerra?: string;
   contato: string;
   nome: string;
   postoGraduacao: string;

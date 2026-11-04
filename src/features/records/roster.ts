@@ -13,7 +13,7 @@ export const PLANNING_STATUS = {
 } as const;
 export type PlanningStatus = keyof typeof PLANNING_STATUS;
 export type PlanCell = { value: string; status: PlanningStatus; bg?: string; fg?: string };
-export type RosterPerson = { id: string; nome: string; posto_graduacao: string; contato: string | null; resolved_contact: string | null; contact_source: string; version: number; staff_id: string | null };
+export type RosterPerson = { nome_guerra?:string|null; id: string; nome: string; posto_graduacao: string; contato: string | null; resolved_contact: string | null; contact_source: string; version: number; staff_id: string | null };
 export type Plantao = { id: string; service_date: string; chief_id: string; assistant_id: string; expert_id: string; notes: string; version: number };
 export type Plan = { month: string; notes: string; source_label: string; source_updated: string; version: number };
 export type PlanRow = { id: string; month: string; section: string; nome: string; posto_graduacao: string; source_order: number; name_color: string; cells: Record<string, PlanCell>; version: number };
@@ -34,4 +34,13 @@ export function whatsappContactUrl(phone:string|null|undefined){
  const digits=(phone||'').replace(/\D/g,'');
  const national=digits.length===12||digits.length===13?digits.startsWith('55')?digits.slice(2):'':digits;
  return /^[1-9]\d{9,10}$/.test(national)?'https://wa.me/55'+national:null;
+}
+
+export function dutyPersonLabel(p:{posto_graduacao:string;nome:string;nome_guerra?:string|null}) {
+ return `${p.posto_graduacao.replace(/(?<=\dº)\s+/g,'')} ${(p.nome_guerra?.trim()||p.nome).toLocaleUpperCase('pt-BR')}`;
+}
+export function searchDutyPeople<T extends {nome:string;nome_guerra?:string|null;posto_graduacao:string}>(people:T[],query:string) {
+ const clean=(v:string)=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();
+ const tokens=clean(query).split(/\s+/).filter(Boolean);
+ return people.filter(p=>tokens.every(q=>clean(`${p.posto_graduacao} ${p.nome_guerra||''} ${p.nome}`).includes(q)));
 }

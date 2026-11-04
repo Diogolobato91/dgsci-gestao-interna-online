@@ -23,6 +23,7 @@ export type ManagedUser = {
   created_at?: string;
   user_id: string | null;
   last_sign_in_at: string | null;
+  nome_guerra?: string | null;
   posto_graduacao?: string | null;
   matricula?: string | null;
   cpf?: string | null;

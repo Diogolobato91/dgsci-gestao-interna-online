@@ -64,6 +64,7 @@ test('validação do formulário de cadastro checa todos os campos obrigatórios
   });
   assert(emptyResult.contato);
   assert(emptyResult.nome);
+  assert(emptyResult.nomeGuerra);
   assert(emptyResult.postoGraduacao);
   assert(emptyResult.matricula);
   assert(emptyResult.cpf);
@@ -73,6 +74,7 @@ test('validação do formulário de cadastro checa todos os campos obrigatórios
 
   const mismatchResult = validateRegistrationForm({
     contato: '(91) 99999-1234',
+    nomeGuerra:'SILVA',
     nome: 'Tenente Silva',
     postoGraduacao: '1º TEN',
     matricula: '123456',

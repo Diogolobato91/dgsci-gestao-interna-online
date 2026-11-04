@@ -21,6 +21,7 @@ export default function LoginForm() {
   const [matricula, setMatricula] = useState('');
   const [cpf, setCpf] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
+  const [nomeGuerra,setNomeGuerra]=useState('');
   const [contato, setContato] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -132,6 +133,7 @@ export default function LoginForm() {
               const validation = validateRegistrationForm({
                 nome,
                 postoGraduacao,
+                nomeGuerra,
                 matricula,
                 cpf,
                 dataNascimento,
@@ -152,6 +154,7 @@ export default function LoginForm() {
                 await register({
                   nome,
                   postoGraduacao,
+                  nomeGuerra,
                   matricula,
                   cpf: cleanDigits(cpf),
                   dataNascimento,
@@ -192,6 +195,7 @@ export default function LoginForm() {
               {fieldErrors.nome && <p className="field-error">{fieldErrors.nome}</p>}
             </div>
 
+            <div className="field-block"><label htmlFor="reg-war-name">Nome de guerra {postoGraduacao!=='VC'?'*':'(opcional)'}</label><input id="reg-war-name" required={postoGraduacao!=='VC'} minLength={2} maxLength={80} placeholder="Ex.: TEIXEIRA" value={nomeGuerra} onChange={e=>{setNomeGuerra(e.target.value);setFieldErrors({...fieldErrors,nomeGuerra:''});}}/><small>Identificação utilizada no plantão. Mantenha seu nome completo no campo acima.</small>{fieldErrors.nomeGuerra&&<p className="field-error">{fieldErrors.nomeGuerra}</p>}</div>
             <div className="form-row-2">
               <div className="field-block">
                 <label htmlFor="reg-posto">Posto / Graduação *</label>
