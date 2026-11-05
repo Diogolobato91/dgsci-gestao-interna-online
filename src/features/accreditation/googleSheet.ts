@@ -41,17 +41,12 @@ export function gvizToAccreditations(payload:Gviz,kind:SheetKind,loadedAt:string
   return {id:stableId(kind,index,row),kind,modality:row[modality]?.trim()||'Não informada',name:row[name].trim(),contact:contact>=0?row[contact].trim():'',region:region>=0?row[region].trim():'',protocol:protocol>=0?row[protocol].trim():'',valid_until,version:1,updated_at:loadedAt,updated_by_name:'Planilha oficial'};
  }).filter((row):row is Accreditation=>row!==null);
 }
-function loadSheet(kind:SheetKind):Promise<Gviz>{
- return new Promise((resolve,reject)=>{
-  const script=document.createElement('script');const target=window as typeof window&{google?:{visualization?:{Query?:{setResponse?:((value:Gviz)=>void)}}}};
-  const prior=target.google?.visualization?.Query?.setResponse;
-  const timer=window.setTimeout(()=>finish(new Error('A planilha oficial não respondeu.')),15000);
-  const finish=(error?:Error,payload?:Gviz)=>{window.clearTimeout(timer);script.remove();if(target.google?.visualization?.Query)target.google.visualization.Query.setResponse=prior;if(error)reject(error);else resolve(payload!);};
-  target.google??={};target.google.visualization??={};target.google.visualization.Query??={};target.google.visualization.Query.setResponse=(payload:Gviz)=>finish(undefined,payload);
-  script.async=true;script.src=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEETS[kind]}&headers=0`;
-  script.onerror=()=>finish(new Error('Não foi possível consultar a planilha oficial.'));
-  document.head.append(script);
- });
+async function loadSheet(kind:SheetKind):Promise<Gviz>{
+ const {supabase}=await import('@/lib/supabase');
+ if(!supabase)throw new Error('Conexão indisponível.');
+ const result=await supabase.functions.invoke('accreditation-sheet',{body:{kind}});
+ if(result.error||!result.data)throw new Error('Não foi possível consultar a planilha oficial.');
+ return result.data as Gviz;
 }
 export async function loadAccreditationsFromGoogle(){
  const loadedAt=new Date().toISOString();const companies=await loadSheet('company');const professionals=await loadSheet('professional');
