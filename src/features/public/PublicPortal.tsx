@@ -57,6 +57,7 @@ import {
 } from './supportChat';
 import './public-portal.css';
 import './public-chat-fixes.css';
+import './public-home-refinement.css';
 
 const queueIcons = {
   inspection: ClipboardCheck,
@@ -81,9 +82,10 @@ function PublicHeader() {
           <span className="sr-only">{menuOpen ? 'Fechar menu' : 'Abrir menu'}</span>
         </button>
         <nav id="public-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Navegação pública">
-          <a href="/#servicos" onClick={() => setMenuOpen(false)}>Serviços</a><Link to="/instrucoes-tecnicas" onClick={() => setMenuOpen(false)}>Instruções Técnicas</Link><Link to="/cartilhas" onClick={() => setMenuOpen(false)}>Cartilhas</Link>
+          <a href="/#servicos" onClick={() => setMenuOpen(false)}>Serviços</a>
+          <Link to="/instrucoes-tecnicas" onClick={() => setMenuOpen(false)}>Instruções Técnicas</Link>
+          <Link to="/cartilhas" onClick={() => setMenuOpen(false)}>Cartilhas</Link>
           <Link to="/credenciados" onClick={() => setMenuOpen(false)}>Credenciados</Link>
-          <a href="/#instrucoes" onClick={() => setMenuOpen(false)}>Instruções Técnicas</a>
           <a href="/#duvidas" onClick={() => setMenuOpen(false)}>Dúvidas</a>
         </nav>
         <div className="public-header-actions">
@@ -101,7 +103,7 @@ function PublicFooter() {
       <div>
         <Link className="public-brand public-brand-footer" to="/">
           <img src="/portal/assets/dgsci-logo.png" alt="" width="38" height="48" />
-          <span><strong>DGSCI</strong><small>Diretoria de Serviços Técnicos</small></span>
+          <span><strong>DGSCI</strong><small>Departamento-Geral de Segurança Contra Incêndios e Emergências</small></span>
         </Link>
         <p>Informação e atendimento técnico em um único lugar.</p>
       </div>
@@ -124,7 +126,7 @@ export function PublicHomePage() {
           <div className="public-hero-copy">
             <p className="public-kicker"><span /> PORTAL DE SERVIÇOS DA DGSCI</p>
             <h1>Departamento-Geral de Segurança Contra Incêndios e Emergências</h1>
-            <p className="public-hero-lead">Consulte informações públicas, escolha o serviço necessário e converse com a seção responsável.</p>
+            <p className="public-hero-lead">Acesse serviços, orientações técnicas e consultas públicas. Quando precisar, abra um atendimento diretamente com a seção responsável.</p>
             <div className="public-hero-actions">
               <Link className="public-button public-button-primary" to="/atendimento"><MessageSquareText size={19} /> Iniciar atendimento <ArrowRight size={18} /></Link>
               <Link className="public-button public-button-secondary" to="/consultar-protocolo"><FileSearch size={18} /> Consultar protocolo</Link>
