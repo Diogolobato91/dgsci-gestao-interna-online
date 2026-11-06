@@ -449,6 +449,20 @@ export function PublicCustomerChatPage() {
     return () => window.clearInterval(timer);
   }, [credentials, closed, refresh]);
   useEffect(() => { if ((conversation?.messages.length || 0) >= messageCount.current) messagesEnd.current?.scrollIntoView({ behavior: messageCount.current ? 'smooth' : 'auto', block: 'nearest' }); messageCount.current = conversation?.messages.length || 0; }, [conversation?.messages.length]);
+  useEffect(() => {
+    const slot = messagesEnd.current;
+    if (!slot) return;
+    slot.replaceChildren();
+    for (const attachment of conversation?.attachments || []) {
+      if (!attachment.url) continue;
+      const link = document.createElement('a');
+      link.className = 'public-chat-file'; link.href = attachment.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+      link.setAttribute('aria-label', `Baixar arquivo ${attachment.file_name}`);
+      const name = document.createElement('strong'); name.textContent = attachment.file_name;
+      const meta = document.createElement('small'); meta.textContent = `${Math.ceil(attachment.size_bytes / 1024)} KB · clique para baixar`;
+      link.append(name, meta); slot.append(link);
+    }
+  }, [conversation?.attachments]);
   const loadOlder = async () => {
     if (!credentials || !conversation?.messages[0] || loadingOlder) return;
     setLoadingOlder(true);
