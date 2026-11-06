@@ -123,7 +123,7 @@ export function PublicHomePage() {
         <section className="public-hero">
           <div className="public-hero-copy">
             <p className="public-kicker"><span /> PORTAL DE SERVIÇOS DA DGSCI</p>
-            <h1>Serviços e atendimento da DGSCI</h1>
+            <h1>Departamento-Geral de Segurança Contra Incêndios e Emergências</h1>
             <p className="public-hero-lead">Consulte informações públicas, escolha o serviço necessário e converse com a seção responsável.</p>
             <div className="public-hero-actions">
               <Link className="public-button public-button-primary" to="/atendimento"><MessageSquareText size={19} /> Iniciar atendimento <ArrowRight size={18} /></Link>
