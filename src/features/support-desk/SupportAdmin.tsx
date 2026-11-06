@@ -3,6 +3,7 @@ import { BarChart3, Check, Clock3, Headphones, LoaderCircle, RefreshCw, Settings
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import './support-desk.css';
+import './support-desk-typography.css';
 
 type Agent={user_id:string;display_name:string;sectors:string[];queue_ids:string[];available:boolean;capacity:number;version:number;active_count:number;completed_today:number;average_first_response_minutes:number};
 type Queue={id:string;label:string;waiting:number;active:number;completed_today:number;average_wait_minutes:number};

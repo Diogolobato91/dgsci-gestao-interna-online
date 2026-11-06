@@ -6,6 +6,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import './support-desk.css';
+import './support-desk-typography.css';
 
 type TicketStatus='queued'|'assigned'|'in_progress'|'waiting_customer'|'completed'|'cancelled';
 type Ticket={id:string;protocol:string;queue_id:string;service_id:string;cnpj:string;requester_name:string;phone?:string;email?:string;summary?:string;assigned_to?:string|null;city:string;status:TicketStatus;version:number;created_at:string;updated_at:string};
