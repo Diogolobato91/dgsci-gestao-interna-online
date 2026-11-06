@@ -33,6 +33,15 @@ do $$declare result jsonb;i integer;begin
 end$$;
 reset role;
 
+set local role authenticated;
+select set_config('request.jwt.claim.sub','97000000-0000-4000-8000-000000000001',true);
+do $$declare ticket_id uuid;result jsonb;begin
+ select id into ticket_id from public.support_tickets where protocol=current_setting('dgsci.test_fine_protocol');
+ result:=public.support_send_message(ticket_id,'Orientação administrativa enquanto o cliente aguarda na fila.');
+ if result->>'author_kind'<>'agent' or (select status from public.support_tickets where id=ticket_id)<>'queued' then raise exception 'Administração não respondeu chamado na fila corretamente';end if;
+end$$;
+reset role;
+
 do $$begin
  if exists(select 1 from public.support_agents a where private.support_active_count(a.user_id)>5)then raise exception 'Atendente recebeu mais de cinco ativos';end if;
  if (select max(n)-min(n) from(select count(*) n from public.support_tickets where status in('assigned','in_progress','waiting_customer')group by assigned_to)s)>1 then raise exception 'Distribuição desigual';end if;
