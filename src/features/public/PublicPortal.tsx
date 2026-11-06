@@ -453,16 +453,26 @@ export function PublicCustomerChatPage() {
     const slot = messagesEnd.current;
     if (!slot) return;
     slot.replaceChildren();
-    for (const attachment of conversation?.attachments || []) {
-      if (!attachment.url) continue;
-      const link = document.createElement('a');
-      link.className = 'public-chat-file'; link.href = attachment.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
-      link.setAttribute('aria-label', `Baixar arquivo ${attachment.file_name}`);
+    const attachments = conversation?.attachments || [], matched = new Set<string>();
+    const articles = document.querySelectorAll<HTMLElement>('.public-chat-messages article');
+    conversation?.messages.forEach((message, index) => {
+      const match = message.body.match(/^Arquivo (?:enviado|anexado):\s*(.+)$/i);
+      const attachment = match ? attachments.find(item => item.file_name === match[1] && item.url) : null;
+      const paragraph = articles[index]?.querySelector('p');
+      if (!attachment?.url || !paragraph) return;
+      matched.add(attachment.id); paragraph.replaceChildren();
+      const link = document.createElement('a'); link.className = 'public-chat-file'; link.href = attachment.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+      const name = document.createElement('strong'); name.textContent = attachment.file_name;
+      const meta = document.createElement('small'); meta.textContent = `${Math.ceil(attachment.size_bytes / 1024)} KB · clique para baixar`;
+      link.append(name, meta); paragraph.append(link);
+    });
+    for (const attachment of attachments.filter(item => item.url && !matched.has(item.id))) {
+      const link = document.createElement('a'); link.className = 'public-chat-file'; link.href = attachment.url!; link.target = '_blank'; link.rel = 'noopener noreferrer';
       const name = document.createElement('strong'); name.textContent = attachment.file_name;
       const meta = document.createElement('small'); meta.textContent = `${Math.ceil(attachment.size_bytes / 1024)} KB · clique para baixar`;
       link.append(name, meta); slot.append(link);
     }
-  }, [conversation?.attachments]);
+  }, [conversation?.attachments, conversation?.messages]);
   const loadOlder = async () => {
     if (!credentials || !conversation?.messages[0] || loadingOlder) return;
     setLoadingOlder(true);
