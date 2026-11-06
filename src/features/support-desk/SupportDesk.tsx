@@ -9,6 +9,7 @@ import './support-desk.css';
 import './support-desk-typography.css';
 import './support-admin-reply.css';
 import './support-ui-fixes.css';
+import './support-layout-fix.css';
 
 type TicketStatus='queued'|'assigned'|'in_progress'|'waiting_customer'|'completed'|'cancelled';
 type Ticket={id:string;protocol:string;queue_id:string;service_id:string;cnpj:string;requester_name:string;phone?:string;email?:string;summary?:string;internal_notes?:string;assigned_to?:string|null;assigned_name?:string|null;city:string;status:TicketStatus;version:number;created_at:string;updated_at:string};
