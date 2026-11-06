@@ -5,6 +5,7 @@ export type SupportChatServices={
  open:(input:OpenTicketInput,accessHash:string)=>Promise<Record<string,unknown>|null>;
  conversation:(input:ConversationInput,accessHash:string)=>Promise<Record<string,unknown>|null>;
  message:(input:ConversationInput&{message:string},accessHash:string)=>Promise<Record<string,unknown>|null>;
+ satisfaction:(input:ConversationInput&{score:number;comment:string},accessHash:string)=>Promise<boolean>;
 };
 
 const json=(status:number,body:unknown,origin:string)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin','Cache-Control':'no-store'}});
@@ -20,8 +21,8 @@ export async function handleSupportChat(request:Request,services:SupportChatServ
  if(Number(request.headers.get('content-length')||0)>20000)return json(413,{message:'Solicitação muito grande.'},origin);
  let body:Record<string,unknown>;try{body=await request.json();}catch{return json(400,{message:'Solicitação inválida.'},origin);}
  const action=body.action;
- if(!['open','conversation','message'].includes(String(action)))return json(400,{message:'Operação inválida.'},origin);
- const scope=action as 'open'|'conversation'|'message';
+ if(!['open','conversation','message','satisfaction'].includes(String(action)))return json(400,{message:'Operação inválida.'},origin);
+ const scope=(action==='satisfaction'?'conversation':action) as 'open'|'conversation'|'message';
  if(!await services.allow(scope,request))return json(429,{message:'Muitas tentativas. Aguarde alguns minutos e tente novamente.'},origin);
  try{
   if(action==='open'){
@@ -36,6 +37,12 @@ export async function handleSupportChat(request:Request,services:SupportChatServ
   if(action==='conversation'){
    const conversation=await services.conversation(input,accessHash);
    return conversation?json(200,conversation,origin):json(404,{message:'Atendimento não encontrado. Confira os dados informados.'},origin);
+  }
+  if(action==='satisfaction'){
+   const score=Number(body.score),comment=String(body.comment??'');
+   if(!Number.isInteger(score)||score<1||score>5||comment.length>1000)return json(400,{message:'Informe uma nota de 1 a 5.'},origin);
+   const saved=await services.satisfaction({...input,score,comment},accessHash);
+   return saved?json(201,{saved:true},origin):json(404,{message:'Atendimento concluído não encontrado.'},origin);
   }
   if(!validText(body.message,1,4000))return json(400,{message:'Escreva uma mensagem de até 4.000 caracteres.'},origin);
   const message=await services.message({...input,message:String(body.message)},accessHash);

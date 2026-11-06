@@ -19,6 +19,7 @@ async function invoke<T>(body:Record<string,unknown>):Promise<T>{
 export const openSupportTicket=(input:{service:string;cnpj:string;requester:string;phone:string;email:string;city:string;reference:string;summary:string})=>invoke<OpenSupportResult>({action:'open',...input});
 export const getSupportConversation=(credentials:SupportCredentials)=>invoke<SupportConversation>({action:'conversation',...credentials});
 export const sendSupportMessage=(credentials:SupportCredentials,message:string)=>invoke<SupportMessage>({action:'message',...credentials,message});
+export const submitSupportSatisfaction=(credentials:SupportCredentials,score:number,comment:string)=>invoke<{saved:boolean}>({action:'satisfaction',...credentials,score,comment});
 
 const storageKey=(protocol:string)=>`dgsci-support:${protocol.toUpperCase()}`;
 export function saveSupportCredentials(credentials:SupportCredentials){localStorage.setItem(storageKey(credentials.protocol),JSON.stringify(credentials));}

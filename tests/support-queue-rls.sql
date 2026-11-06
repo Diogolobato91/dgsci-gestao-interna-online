@@ -14,6 +14,8 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub','97000000-0000-4000-8000-000000000001',true);
 select public.admin_set_support_agent('97000000-0000-4000-8000-000000000002',array['inspection','fines'],true,null);
 select public.admin_set_support_agent('97000000-0000-4000-8000-000000000003',array['inspection','fines'],true,null);
+select public.admin_update_support_schedule('97000000-0000-4000-8000-000000000002','00:00','23:59',array[0,1,2,3,4,5,6]::smallint[],'America/Belem',(select version from public.support_agents where user_id='97000000-0000-4000-8000-000000000002'));
+select public.admin_update_support_schedule('97000000-0000-4000-8000-000000000003','00:00','23:59',array[0,1,2,3,4,5,6]::smallint[],'America/Belem',(select version from public.support_agents where user_id='97000000-0000-4000-8000-000000000003'));
 do $$declare dashboard jsonb;history jsonb;begin dashboard:=public.get_support_admin_dashboard();history:=public.get_support_admin_history();if jsonb_array_length(dashboard->'agents')<2 or jsonb_array_length(dashboard->'queues')<>5 then raise exception 'Painel administrativo não retornou agentes e filas';end if;if history is null then raise exception 'Histórico administrativo indisponível';end if;end$$;
 reset role;
 

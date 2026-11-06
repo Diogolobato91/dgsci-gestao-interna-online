@@ -47,6 +47,7 @@ import {
   openSupportTicket,
   saveSupportCredentials,
   sendSupportMessage,
+  submitSupportSatisfaction,
   type OpenSupportResult,
   type SupportConversation,
   type SupportCredentials,
@@ -350,6 +351,9 @@ export function PublicCustomerChatPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [score, setScore] = useState(0);
+  const [ratingComment, setRatingComment] = useState('');
+  const [ratingSent, setRatingSent] = useState(false);
   const messagesEnd = useRef<HTMLDivElement>(null);
   const closed = conversation?.status === 'completed' || conversation?.status === 'cancelled';
 
@@ -389,9 +393,23 @@ export function PublicCustomerChatPage() {
       setSending(false);
     }
   };
+  const rate = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!credentials || !score || sending) return;
+    setSending(true);
+    setError('');
+    try {
+      await submitSupportSatisfaction(credentials, score, ratingComment.trim());
+      setRatingSent(true);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Não foi possível registrar sua avaliação.');
+    } finally {
+      setSending(false);
+    }
+  };
 
   if (!credentials) return <PublicShell><main id="public-main" className="public-simple-page"><section><span className="public-simple-icon"><KeyRound size={27}/></span><h1>Acesse seu atendimento</h1><p>Por segurança, informe novamente o CNPJ, o protocolo e a chave de acesso.</p><Link className="public-button public-button-primary" to="/consultar-protocolo">Informar dados de acesso</Link></section></main></PublicShell>;
-  return <PublicShell><main id="public-main" className="public-chat-page"><div className="public-chat-heading"><Link className="public-back-link" to="/"><ArrowLeft size={16}/> Voltar ao portal</Link><p className="public-kicker"><span/> ATENDIMENTO ON-LINE</p><h1>Conversa do protocolo {protocol}</h1></div>{loading && !conversation ? <div className="public-chat-state" role="status">Carregando atendimento…</div> : conversation ? <section className="public-chat-shell"><header><div><small>{conversation.queue_label}</small><strong>{conversation.service_label}</strong></div><span className={`public-chat-status is-${conversation.status}`}><Clock3 size={15}/>{statusLabel[conversation.status]}</span></header><div className="public-queue-position" aria-live="polite">{conversation.status === 'queued' ? <><strong>{conversation.people_ahead}</strong><span>{conversation.people_ahead === 1 ? 'pessoa à sua frente nesta fila' : 'pessoas à sua frente nesta fila'}</span></> : <><MessageSquareText size={22}/><span>{statusLabel[conversation.status]}</span></>}</div><div className="public-chat-messages" aria-live="polite" aria-label="Mensagens do atendimento">{conversation.messages.map(item => <article key={item.id} className={`is-${item.author}`}><small>{item.author === 'customer' ? 'Você' : item.actor_label || (item.author === 'agent' ? 'Atendimento DGSCI' : 'Sistema')}</small><p>{item.body}</p><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('pt-BR', { timeZone: 'America/Belem', dateStyle: 'short', timeStyle: 'short' })}</time></article>)}<div ref={messagesEnd}/></div>{error && <p className="public-submit-error" role="alert">{error}</p>}<form className="public-chat-composer" onSubmit={send}><label htmlFor="customer-message">Escreva sua mensagem</label><div><textarea id="customer-message" rows={3} maxLength={4000} value={message} onChange={event => setMessage(event.target.value)} disabled={closed} placeholder={closed ? 'Este atendimento foi encerrado.' : 'Digite sua mensagem para a DGSCI…'}/><button className="public-button public-button-primary" type="submit" disabled={closed || sending || !message.trim()}><Send size={18}/>{sending ? 'Enviando…' : 'Enviar'}</button></div></form></section> : <div className="public-chat-state is-error"><p>{error || 'Atendimento não encontrado.'}</p><Link to="/consultar-protocolo">Revisar dados de acesso</Link></div>}</main></PublicShell>;
+  return <PublicShell><main id="public-main" className="public-chat-page"><div className="public-chat-heading"><Link className="public-back-link" to="/"><ArrowLeft size={16}/> Voltar ao portal</Link><p className="public-kicker"><span/> ATENDIMENTO ON-LINE</p><h1>Conversa do protocolo {protocol}</h1></div>{loading && !conversation ? <div className="public-chat-state" role="status">Carregando atendimento…</div> : conversation ? <section className="public-chat-shell"><header><div><small>{conversation.queue_label}</small><strong>{conversation.service_label}</strong></div><span className={`public-chat-status is-${conversation.status}`}><Clock3 size={15}/>{statusLabel[conversation.status]}</span></header><div className="public-queue-position" aria-live="polite">{conversation.status === 'queued' ? <><strong>{conversation.people_ahead}</strong><span>{conversation.people_ahead === 1 ? 'pessoa à sua frente nesta fila' : 'pessoas à sua frente nesta fila'}</span></> : <><MessageSquareText size={22}/><span>{statusLabel[conversation.status]}</span></>}</div><div className="public-chat-messages" aria-live="polite" aria-label="Mensagens do atendimento">{conversation.messages.map(item => <article key={item.id} className={`is-${item.author}`}><small>{item.author === 'customer' ? 'Você' : item.actor_label || (item.author === 'agent' ? 'Atendimento DGSCI' : 'Sistema')}</small><p>{item.body}</p><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('pt-BR', { timeZone: 'America/Belem', dateStyle: 'short', timeStyle: 'short' })}</time></article>)}<div ref={messagesEnd}/></div>{error && <p className="public-submit-error" role="alert">{error}</p>}{conversation.status === 'completed' && (ratingSent ? <div className="public-rating-success"><Check size={18}/><strong>Obrigado pela sua avaliação.</strong></div> : <form className="public-rating" onSubmit={rate}><strong>Como foi seu atendimento?</strong><div className="public-rating-stars" role="group" aria-label="Nota do atendimento">{[1,2,3,4,5].map(value=><button key={value} type="button" className={score>=value?'is-active':''} onClick={()=>setScore(value)} aria-label={`${value} estrela${value>1?'s':''}`}>★</button>)}</div><textarea maxLength={1000} rows={2} value={ratingComment} onChange={event=>setRatingComment(event.target.value)} placeholder="Comentário opcional"/><button className="public-button public-button-primary" type="submit" disabled={!score||sending}>{sending?'Enviando…':'Enviar avaliação'}</button></form>)}<form className="public-chat-composer" onSubmit={send}><label htmlFor="customer-message">Escreva sua mensagem</label><div><textarea id="customer-message" rows={3} maxLength={4000} value={message} onChange={event => setMessage(event.target.value)} disabled={closed} placeholder={closed ? 'Este atendimento foi encerrado.' : 'Digite sua mensagem para a DGSCI…'}/><button className="public-button public-button-primary" type="submit" disabled={closed || sending || !message.trim()}><Send size={18}/>{sending ? 'Enviando…' : 'Enviar'}</button></div></form></section> : <div className="public-chat-state is-error"><p>{error || 'Atendimento não encontrado.'}</p><Link to="/consultar-protocolo">Revisar dados de acesso</Link></div>}</main></PublicShell>;
 }
 
 export function PublicAccreditationDirectory() {
