@@ -119,14 +119,14 @@ export function PublicHomePage() {
       <main id="public-main">
         <section className="public-hero">
           <div className="public-hero-copy">
-            <p className="public-kicker"><span /> ATENDIMENTO DIGITAL · DGSCI / CBMPA</p>
-            <h1>Orientação técnica com o caminho <em>certo desde o início.</em></h1>
-            <p className="public-hero-lead">Encontre serviços, consulte informações públicas e abra um atendimento direcionado automaticamente para a equipe responsável.</p>
+            <p className="public-kicker"><span /> PORTAL DE SERVIÇOS DA DGSCI</p>
+            <h1>Serviços e atendimento da DGSCI</h1>
+            <p className="public-hero-lead">Consulte informações públicas, escolha o serviço necessário e converse com a seção responsável.</p>
             <div className="public-hero-actions">
               <Link className="public-button public-button-primary" to="/atendimento"><MessageSquareText size={19} /> Iniciar atendimento <ArrowRight size={18} /></Link>
               <Link className="public-button public-button-secondary" to="/consultar-protocolo"><FileSearch size={18} /> Consultar protocolo</Link>
             </div>
-            <p className="public-trust-line"><ShieldCheck size={16} /> Seu atendimento recebe um protocolo e permanece na fila específica do serviço escolhido.</p>
+            <p className="public-trust-line"><ShieldCheck size={16} /> Cada solicitação recebe um protocolo e entra somente na fila da seção escolhida.</p>
           </div>
           <aside className="public-hero-panel" aria-label="Como funciona o atendimento">
             <div className="public-panel-top"><span>ATENDIMENTO GUIADO</span><strong>3 passos</strong></div>
@@ -146,7 +146,7 @@ export function PublicHomePage() {
         </section>
 
         <section className="public-section" id="servicos">
-          <div className="public-section-heading"><div><p className="public-kicker"><span /> SERVIÇOS</p><h2>Qual assunto você precisa resolver?</h2><p>Selecione o serviço e siga diretamente para a fila responsável.</p></div><Link to="/atendimento">Ver todos os serviços <ArrowRight size={16} /></Link></div>
+          <div className="public-section-heading"><div><p className="public-kicker"><span /> SERVIÇOS</p><h2>Serviços disponíveis</h2><p>Escolha o assunto para acessar as orientações e a seção responsável.</p></div><Link to="/atendimento">Ver todos os serviços <ArrowRight size={16} /></Link></div>
           <div className="public-service-grid">
             {PUBLIC_QUEUES.map(queue => {
               const Icon = queueIcons[queue.id];
@@ -165,7 +165,7 @@ export function PublicHomePage() {
         </section>
 
         <section className="public-section public-instructions" id="instrucoes">
-          <div className="public-section-heading"><div><p className="public-kicker"><span /> BIBLIOTECA TÉCNICA</p><h2>Instruções e documentos em linguagem simples</h2><p>A biblioteca será organizada por assunto para facilitar a localização da norma aplicável.</p></div></div>
+          <div className="public-section-heading"><div><p className="public-kicker"><span /> BIBLIOTECA TÉCNICA</p><h2>Instruções Técnicas e documentos</h2><p>Consulte normas, requisitos e orientações técnicas organizadas por assunto.</p></div></div>
           <div className="public-instruction-grid">
             <article><BookOpenText /><span><small>CONSULTA TÉCNICA</small><h3>Instruções Técnicas</h3><p>Normas organizadas por número, tema e atualização.</p></span></article>
             <article><ClipboardCheck /><span><small>ORIENTAÇÃO</small><h3>Vistoria e licenciamento</h3><p>Requisitos, documentos e etapas do serviço.</p></span></article>
@@ -183,7 +183,7 @@ export function PublicHomePage() {
           </div>
         </section>
 
-        <section className="public-final-cta"><div><p className="public-kicker"><span /> CENTRAL DE ATENDIMENTO</p><h2>Vamos direcionar sua solicitação?</h2><p>Identifique a empresa, escolha o assunto e revise os dados antes de entrar na fila.</p></div><Link className="public-button public-button-primary" to="/atendimento">Iniciar atendimento <ArrowRight size={18} /></Link></section>
+        <section className="public-final-cta"><div><p className="public-kicker"><span /> CENTRAL DE ATENDIMENTO</p><h2>Precisa falar com a DGSCI?</h2><p>Informe o CNPJ e o assunto para entrar na fila da seção responsável.</p></div><Link className="public-button public-button-primary" to="/atendimento">Iniciar atendimento <ArrowRight size={18} /></Link></section>
       </main>
     </PublicShell>
   );
