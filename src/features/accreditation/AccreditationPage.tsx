@@ -10,7 +10,7 @@ import type {Accreditation}from'./model';
 import {ACCREDITATION_SHEET_URL}from'./googleSheet';
 function ModalityTick({x=0,y=0,payload}:{x?:number;y?:number;payload?:{value:string}}){const text=payload?.value||'',lines:string[]=[];let line='';for(const word of text.split(' ')){if((line+' '+word).trim().length>29&&line){lines.push(line);line=word;}else line=(line+' '+word).trim();}if(line)lines.push(line);return <g transform={`translate(${x},${y})`}><title>{text}</title><text textAnchor="end" fill="#555" fontSize={10}>{lines.map((l,i)=><tspan x={-8} y={(i-(lines.length-1)/2)*11+3} key={i}>{l}</tspan>)}</text></g>;}
 export default function AccreditationPage(){
- const {user}=useAuth();const {data,loading,error,reload,loadedAt}=useAccreditations(user?.id);
+ const {user}=useAuth();const {data,loading,error,reload,loadedAt}=useAccreditations(Boolean(user?.id));
  const [kind,setKind]=useState<Accreditation['kind']>('company'),[query,setQuery]=useState(''),[modality,setModality]=useState(''),[state,setState]=useState('valid');const [today,setToday]=useState(institutionalToday);
  useEffect(()=>{const refresh=()=>setToday(institutionalToday());window.addEventListener('focus',refresh);const timer=window.setInterval(refresh,60000);return()=>{window.removeEventListener('focus',refresh);window.clearInterval(timer);};},[]);
  const scope=data.filter(r=>r.kind===kind);const modalities=[...new Set(scope.map(r=>r.modality))].sort((a,b)=>a.localeCompare(b,'pt-BR'));const rows=filterAccreditations(data,kind,query,modality,state,today).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));const counts=modalityCounts(rows),pagination=usePagination(rows,[kind,query,modality,state].join('|'),20);

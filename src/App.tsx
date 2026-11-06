@@ -13,6 +13,8 @@ const AuditPage=lazy(()=>import('@/features/audit/AuditHistory'));
 const MyAccount = lazy(() => import('@/features/users/MyAccountPage'));
 const UserManagement = lazy(() => import('@/features/users/UserManagementPage'));
 const SatCommands = lazy(() => import('@/features/records/SatCommandsPage'));
+const SupportDesk = lazy(() => import('@/features/support-desk/SupportDesk'));
+const SupportAdmin = lazy(() => import('@/features/support-desk/SupportAdmin'));
 
 const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
 const DashboardGeral = lazy(() => import("@/pages/DashboardGeral"));
@@ -26,6 +28,7 @@ import NotFound from "./pages/NotFound";
 import SupportLibrary from '@/features/support/SupportLibrary';
 import EstablishmentsWorkspace from '@/features/establishments/EstablishmentsWorkspace';
 import PendingModule from '@/features/support/PendingModule';
+import {PublicAccreditationDirectory,PublicCustomerChatPage,PublicHomePage,PublicIntakePage,PublicProtocolLookupPage} from '@/features/public/PublicPortal';
 import '@/features/support/portal.css';
 import '@/features/support/workspace.css';
 
@@ -56,6 +59,11 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
+      <Route path="/" element={<PublicHomePage />} />
+      <Route path="/atendimento" element={<PublicIntakePage />} />
+      <Route path="/atendimento/:protocol" element={<PublicCustomerChatPage />} />
+      <Route path="/consultar-protocolo" element={<PublicProtocolLookupPage />} />
+      <Route path="/credenciados" element={<PublicAccreditationDirectory />} />
       {/* Rota pública - Login */}
       <Route 
         path="/login" 
@@ -68,26 +76,25 @@ const AppRoutes = () => (
       
       {/* Rotas protegidas */}
       <Route 
-        path="/" 
         element={
           <ProtectedRoute>
             <MainLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="credenciamento" element={<AccreditationPage/>}/>
         <Route path="auditoria" element={<AuditPage/>}/>
         <Route path="minha-conta" element={<MyAccount/>}/>
         <Route path="gestao-usuarios" element={<UserManagement />} />
         <Route path="dashboard" element={<SupportLibrary />} />
+        <Route path="atendimentos" element={<SupportDesk />} />
+        <Route path="atendimentos/administracao" element={<SupportAdmin />} />
         <Route path="biblioteca" element={<SupportLibrary />} />
         <Route path="comunicados" element={<SupportLibrary />} />
         <Route path="favoritos" element={<SupportLibrary />} />
         <Route path="estabelecimentos" element={<EstablishmentsWorkspace />} />
         <Route path="mapa" element={<Navigate to="/estabelecimentos" replace />} />
         <Route path="cmt-sub-sats" element={<SatCommands />} />
-        <Route path="vistoria" element={<Navigate to="/dashboard" replace />} />
         <Route path="sat-regionais" element={<SATRegionais />} />
         <Route path="ajuda-vistoriador" element={<Navigate to="/modelos-padronizados" replace />} />
         <Route path="modelos-padronizados" element={<SupportLibrary />} />

@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const result=await build({entryPoints:['supabase/functions/support-chat/handler.ts'],absWorkingDir:root,bundle:true,platform:'node',format:'esm',write:false});
+const {handleSupportChat}=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
+const origin='https://dgsci.netlify.app';
+const request=body=>new Request('https://example.invalid/support-chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+const base={service:'debt-query',cnpj:'11.222.333/0001-81',requester:'Cliente Teste',phone:'91999999999',email:'cliente@example.invalid',city:'Belém',summary:'Preciso consultar os débitos do estabelecimento.'};
+test('abertura gera chave local e envia somente o hash ao banco',async()=>{let hash='';const response=await handleSupportChat(request({action:'open',...base}),{allow:async()=>true,open:async(_input,value)=>{hash=value;return{protocol:'DGSCI-20261105-000001',status:'queued'};},conversation:async()=>null,message:async()=>null},origin);const body=await response.json();assert.equal(response.status,201);assert.match(body.accessKey,/^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/);assert.match(hash,/^[a-f0-9]{64}$/);assert.ok(!JSON.stringify(body).includes(hash));});
+test('consulta exige CNPJ, protocolo e chave corretos',async()=>{const response=await handleSupportChat(request({action:'conversation',cnpj:base.cnpj,protocol:'DGSCI-20261105-000001',accessKey:'ABCD-EFGH-JKLM'}),{allow:async()=>true,open:async()=>null,conversation:async()=>({status:'queued',people_ahead:5,messages:[]}),message:async()=>null},origin);assert.equal(response.status,200);assert.equal((await response.json()).people_ahead,5);});
+test('limite bloqueia abuso antes de acessar os serviços',async()=>{let called=false;const response=await handleSupportChat(request({action:'open',...base}),{allow:async()=>false,open:async()=>{called=true;return null;},conversation:async()=>null,message:async()=>null},origin);assert.equal(response.status,429);assert.equal(called,false);});

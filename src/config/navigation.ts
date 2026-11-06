@@ -20,6 +20,7 @@ import {
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
 const integratedItems: MenuItem[] = [
+  {id:'atendimentos',title:'Central de Atendimento',icon:MessageSquare,path:'/atendimentos',section:'Atendimento on-line'},
   {id:'credenciamento',title:'Credenciamento',icon:FileCheck,path:'/credenciamento'},
   { id: 'estabelecimentos', title: 'Estabelecimentos', icon: Building2, path: '/estabelecimentos' },
   { id: 'sat-command', title: "CMT e SUB SAT'S", icon: Users, path: '/cmt-sub-sats' },
@@ -130,6 +131,7 @@ export const navigationConfig: MenuConfig = {
   
   'Subdiretoria': [
     ...commonItemsComplete,
+    {id:'admin-atendimentos',title:'Gestão do Atendimento',icon:BarChart3,path:'/atendimentos/administracao',section:'Atendimento on-line'},
     { id: 'escala-mensal', title: 'Escala Mensal', icon: Calendar, path: '/escala-mensal', section: 'Administração' },
     {
       id: 'controle-portarias',
@@ -160,6 +162,7 @@ export const navigationConfig: MenuConfig = {
   
   'Diretoria': [
     ...commonItemsComplete,
+    {id:'admin-atendimentos',title:'Gestão do Atendimento',icon:BarChart3,path:'/atendimentos/administracao',section:'Atendimento on-line'},
     // Seção Operacional Análise
     {
       id: 'dir-projetos',
