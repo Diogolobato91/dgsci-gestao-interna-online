@@ -23,6 +23,7 @@ import {
   LockKeyhole,
   Menu,
   MessageSquareText,
+  Paperclip,
   ReceiptText,
   Search,
   Send,
@@ -52,6 +53,7 @@ import {
   saveSupportCredentials,
   sendSupportMessage,
   submitSupportSatisfaction,
+  uploadSupportAttachment,
   type OpenSupportResult,
   type SupportConversation,
   type SupportCredentials,
@@ -59,6 +61,7 @@ import {
 import './public-portal.css';
 import './public-chat-fixes.css';
 import './public-home-refinement.css';
+import './public-chat-layout.css';
 
 const queueIcons = {
   inspection: ClipboardCheck,
@@ -420,7 +423,10 @@ export function PublicCustomerChatPage() {
   const [score, setScore] = useState(0);
   const [ratingComment, setRatingComment] = useState('');
   const [ratingSent, setRatingSent] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const messagesEnd = useRef<HTMLDivElement>(null);
+  const messageCount = useRef(0);
   const closed = conversation?.status === 'completed' || conversation?.status === 'cancelled';
 
   const refresh = useCallback(async (quiet = false) => {
@@ -428,7 +434,7 @@ export function PublicCustomerChatPage() {
     if (!quiet) setLoading(true);
     try {
       const next = await getSupportConversation(credentials);
-      setConversation(next);
+      setConversation(current => quiet && current ? { ...next, messages: [...current.messages, ...next.messages.filter(item => !current.messages.some(existing => existing.id === item.id))], has_more: current.has_more } : next);
       setError('');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Não foi possível atualizar a conversa.');
@@ -442,7 +448,21 @@ export function PublicCustomerChatPage() {
     const timer = window.setInterval(() => { void refresh(true); }, 5000);
     return () => window.clearInterval(timer);
   }, [credentials, closed, refresh]);
-  useEffect(() => { messagesEnd.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, [conversation?.messages.length]);
+  useEffect(() => { if ((conversation?.messages.length || 0) >= messageCount.current) messagesEnd.current?.scrollIntoView({ behavior: messageCount.current ? 'smooth' : 'auto', block: 'nearest' }); messageCount.current = conversation?.messages.length || 0; }, [conversation?.messages.length]);
+  const loadOlder = async () => {
+    if (!credentials || !conversation?.messages[0] || loadingOlder) return;
+    setLoadingOlder(true);
+    try { const older = await getSupportConversation(credentials, conversation.messages[0].created_at); setConversation(current => current ? { ...current, messages: [...older.messages, ...current.messages], has_more: older.has_more } : older); }
+    catch (caught) { setError(caught instanceof Error ? caught.message : 'Não foi possível carregar mensagens anteriores.'); }
+    finally { setLoadingOlder(false); }
+  };
+  const upload = async (file: File) => {
+    if (!credentials || uploading) return;
+    setUploading(true); setError('');
+    try { await uploadSupportAttachment(credentials, file); await sendSupportMessage(credentials, `Arquivo anexado: ${file.name}`); await refresh(true); }
+    catch (caught) { setError(caught instanceof Error ? caught.message : 'Não foi possível anexar o arquivo.'); }
+    finally { setUploading(false); }
+  };
   const send = async (event: FormEvent) => {
     event.preventDefault();
     const body = message.trim();
@@ -475,7 +495,7 @@ export function PublicCustomerChatPage() {
   };
 
   if (!credentials) return <PublicShell><main id="public-main" className="public-simple-page"><section><span className="public-simple-icon"><MessageSquareText size={27}/></span><h1>Inicie um novo atendimento</h1><p>Esta conversa não está mais disponível neste dispositivo.</p><Link className="public-button public-button-primary" to="/atendimento">Iniciar atendimento</Link></section></main></PublicShell>;
-  return <PublicShell><main id="public-main" className="public-chat-page"><div className="public-chat-heading"><Link className="public-back-link" to="/"><ArrowLeft size={16}/> Voltar ao portal</Link><p className="public-kicker"><span/> ATENDIMENTO ON-LINE</p><h1>Conversa com a DGSCI</h1></div>{loading && !conversation ? <div className="public-chat-state" role="status">Carregando atendimento…</div> : conversation ? <section className="public-chat-shell"><header><div><small>{conversation.queue_label}</small><strong>{conversation.service_label}</strong></div><span className={`public-chat-status is-${conversation.status}`}><Clock3 size={15}/>{statusLabel[conversation.status]}</span></header><div className="public-queue-position" aria-live="polite">{conversation.status === 'queued' ? <><strong>{conversation.people_ahead}</strong><span>{conversation.people_ahead === 1 ? 'pessoa à sua frente nesta fila' : 'pessoas à sua frente nesta fila'}</span></> : <><MessageSquareText size={22}/><span>{statusLabel[conversation.status]}</span></>}</div><div className="public-chat-messages" aria-live="polite" aria-label="Mensagens do atendimento">{conversation.messages.map(item => <article key={item.id} className={`is-${item.author}`}><small>{item.author === 'customer' ? 'Você' : item.actor_label || (item.author === 'agent' ? 'Atendimento DGSCI' : 'Sistema')}</small><p>{item.body}</p><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('pt-BR', { timeZone: 'America/Belem', dateStyle: 'short', timeStyle: 'short' })}</time></article>)}<div ref={messagesEnd}/></div>{error && <p className="public-submit-error" role="alert">{error}</p>}{conversation.status === 'completed' && (ratingSent ? <div className="public-rating-success"><Check size={18}/><strong>Obrigado pela sua avaliação.</strong></div> : <form className="public-rating" onSubmit={rate}><strong>Como foi seu atendimento?</strong><div className="public-rating-stars" role="group" aria-label="Nota do atendimento">{[1,2,3,4,5].map(value=><button key={value} type="button" className={score>=value?'is-active':''} onClick={()=>setScore(value)} aria-label={`${value} estrela${value>1?'s':''}`}>★</button>)}</div><textarea maxLength={1000} rows={2} value={ratingComment} onChange={event=>setRatingComment(event.target.value)} placeholder="Comentário opcional"/><button className="public-button public-button-primary" type="submit" disabled={!score||sending}>{sending?'Enviando…':'Enviar avaliação'}</button></form>)}<form className="public-chat-composer" onSubmit={send}><label htmlFor="customer-message">Escreva sua mensagem</label><div><textarea id="customer-message" rows={3} maxLength={4000} value={message} onChange={event => setMessage(event.target.value)} disabled={closed} placeholder={closed ? 'Este atendimento foi encerrado.' : 'Digite sua mensagem para a DGSCI…'}/><button className="public-button public-button-primary" type="submit" disabled={closed || sending || !message.trim()}><Send size={18}/>{sending ? 'Enviando…' : 'Enviar'}</button></div></form></section> : <div className="public-chat-state is-error"><p>{error || 'Não foi possível abrir a conversa.'}</p><Link to="/atendimento">Iniciar novo atendimento</Link></div>}</main></PublicShell>;
+  return <PublicShell><main id="public-main" className="public-chat-page"><div className="public-chat-heading"><Link className="public-back-link" to="/"><ArrowLeft size={16}/> Voltar ao portal</Link><p className="public-kicker"><span/> ATENDIMENTO ON-LINE</p><h1>Conversa com a DGSCI</h1></div>{loading && !conversation ? <div className="public-chat-state" role="status">Carregando atendimento…</div> : conversation ? <section className="public-chat-shell"><header><div><small>{conversation.queue_label}</small><strong>{conversation.service_label}</strong></div><span className={`public-chat-status is-${conversation.status}`}><Clock3 size={15}/>{statusLabel[conversation.status]}</span></header><div className="public-queue-position" aria-live="polite">{conversation.status === 'queued' ? <><strong>{conversation.people_ahead}</strong><span>{conversation.people_ahead === 1 ? 'pessoa à sua frente nesta fila' : 'pessoas à sua frente nesta fila'}</span></> : <><MessageSquareText size={22}/><span>{statusLabel[conversation.status]}</span></>}</div><div className="public-chat-messages" aria-live="polite" aria-label="Mensagens do atendimento">{conversation.has_more&&<button className="public-chat-load-more" type="button" disabled={loadingOlder} onClick={()=>void loadOlder()}>{loadingOlder?'Carregando…':'Carregar 10 mensagens anteriores'}</button>}{conversation.messages.map(item => <article key={item.id} className={`is-${item.author}`}><small>{item.author === 'customer' ? 'Você' : item.actor_label || (item.author === 'agent' ? 'Atendimento DGSCI' : 'Sistema')}</small><p>{item.body}</p><time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('pt-BR', { timeZone: 'America/Belem', dateStyle: 'short', timeStyle: 'short' })}</time></article>)}<div ref={messagesEnd}/></div>{error && <p className="public-submit-error" role="alert">{error}</p>}{conversation.status === 'completed' && (ratingSent ? <div className="public-rating-success"><Check size={18}/><strong>Obrigado pela sua avaliação.</strong></div> : <form className="public-rating" onSubmit={rate}><strong>Como foi seu atendimento?</strong><div className="public-rating-stars" role="group" aria-label="Nota do atendimento">{[1,2,3,4,5].map(value=><button key={value} type="button" className={score>=value?'is-active':''} onClick={()=>setScore(value)} aria-label={`${value} estrela${value>1?'s':''}`}>★</button>)}</div><textarea maxLength={1000} rows={2} value={ratingComment} onChange={event=>setRatingComment(event.target.value)} placeholder="Comentário opcional"/><button className="public-button public-button-primary" type="submit" disabled={!score||sending}>{sending?'Enviando…':'Enviar avaliação'}</button></form>)}<form className="public-chat-composer" onSubmit={send}><label htmlFor="customer-message">Escreva sua mensagem</label><div><label className="public-chat-attach" title="Anexar imagem ou PDF"><Paperclip size={19}/><span className="sr-only">Anexar arquivo</span><input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" disabled={closed||uploading} onChange={event=>{const file=event.target.files?.[0];if(file)void upload(file);event.target.value='';}}/></label><textarea id="customer-message" rows={3} maxLength={4000} value={message} onChange={event => setMessage(event.target.value)} disabled={closed} placeholder={closed ? 'Este atendimento foi encerrado.' : 'Digite sua mensagem para a DGSCI…'}/><button className="public-button public-button-primary" type="submit" disabled={closed || sending || !message.trim()}><Send size={18}/>{uploading?'Anexando…':sending ? 'Enviando…' : 'Enviar'}</button></div></form></section> : <div className="public-chat-state is-error"><p>{error || 'Não foi possível abrir a conversa.'}</p><Link to="/atendimento">Iniciar novo atendimento</Link></div>}</main></PublicShell>;
 }
 
 export function PublicAccreditationDirectory() {

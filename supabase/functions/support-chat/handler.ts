@@ -3,9 +3,11 @@ export type ConversationInput={protocol:string;cnpj:string;accessKey:string};
 export type SupportChatServices={
  allow:(scope:'open'|'conversation'|'message',request:Request)=>Promise<boolean>;
  open:(input:OpenTicketInput,accessHash:string)=>Promise<Record<string,unknown>|null>;
- conversation:(input:ConversationInput,accessHash:string)=>Promise<Record<string,unknown>|null>;
+ conversation:(input:ConversationInput&{before?:string},accessHash:string)=>Promise<Record<string,unknown>|null>;
  message:(input:ConversationInput&{message:string},accessHash:string)=>Promise<Record<string,unknown>|null>;
  satisfaction:(input:ConversationInput&{score:number;comment:string},accessHash:string)=>Promise<boolean>;
+ prepareAttachment:(input:ConversationInput&{fileName:string;mimeType:string;size:number},accessHash:string)=>Promise<Record<string,unknown>|null>;
+ registerAttachment:(input:ConversationInput&{fileName:string;filePath:string;mimeType:string;size:number},accessHash:string)=>Promise<Record<string,unknown>|null>;
 };
 
 const json=(status:number,body:unknown,origin:string)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin','Cache-Control':'no-store'}});
@@ -21,8 +23,8 @@ export async function handleSupportChat(request:Request,services:SupportChatServ
  if(Number(request.headers.get('content-length')||0)>20000)return json(413,{message:'Solicitação muito grande.'},origin);
  let body:Record<string,unknown>;try{body=await request.json();}catch{return json(400,{message:'Solicitação inválida.'},origin);}
  const action=body.action;
- if(!['open','conversation','message','satisfaction'].includes(String(action)))return json(400,{message:'Operação inválida.'},origin);
- const scope=(action==='satisfaction'?'conversation':action) as 'open'|'conversation'|'message';
+ if(!['open','conversation','message','satisfaction','prepare_attachment','register_attachment'].includes(String(action)))return json(400,{message:'Operação inválida.'},origin);
+ const scope=(action==='message'?'message':action==='open'?'open':'conversation') as 'open'|'conversation'|'message';
  if(!await services.allow(scope,request))return json(429,{message:'Muitas tentativas. Aguarde alguns minutos e tente novamente.'},origin);
  try{
   if(action==='open'){
@@ -35,8 +37,20 @@ export async function handleSupportChat(request:Request,services:SupportChatServ
   if(!validText(body.protocol,8,40)||!validText(body.cnpj,14,18)||cleanKey(body.accessKey).length!==12)return json(400,{message:'Confira o CNPJ, o protocolo e a chave de acesso.'},origin);
   const input={protocol:String(body.protocol),cnpj:String(body.cnpj),accessKey:formatAccessKey(String(body.accessKey))},accessHash=await sha256(cleanKey(body.accessKey));
   if(action==='conversation'){
-   const conversation=await services.conversation(input,accessHash);
+   const conversation=await services.conversation({...input,before:typeof body.before==='string'?body.before:undefined},accessHash);
    return conversation?json(200,conversation,origin):json(404,{message:'Atendimento não encontrado. Confira os dados informados.'},origin);
+  }
+  if(action==='prepare_attachment'){
+   const fileName=String(body.fileName??''),mimeType=String(body.mimeType??''),size=Number(body.size);
+   if(!validText(fileName,1,200)||!['image/jpeg','image/png','image/webp','application/pdf'].includes(mimeType)||!Number.isInteger(size)||size<1||size>10485760)return json(400,{message:'Envie imagem ou PDF de até 10 MB.'},origin);
+   const prepared=await services.prepareAttachment({...input,fileName,mimeType,size},accessHash);
+   return prepared?json(200,prepared,origin):json(404,{message:'Atendimento não encontrado.'},origin);
+  }
+  if(action==='register_attachment'){
+   const fileName=String(body.fileName??''),filePath=String(body.filePath??''),mimeType=String(body.mimeType??''),size=Number(body.size);
+   if(!validText(fileName,1,200)||!validText(filePath,10,500)||!['image/jpeg','image/png','image/webp','application/pdf'].includes(mimeType)||!Number.isInteger(size)||size<1||size>10485760)return json(400,{message:'Arquivo inválido.'},origin);
+   const registered=await services.registerAttachment({...input,fileName,filePath,mimeType,size},accessHash);
+   return registered?json(201,registered,origin):json(404,{message:'Atendimento não encontrado.'},origin);
   }
   if(action==='satisfaction'){
    const score=Number(body.score),comment=String(body.comment??'');

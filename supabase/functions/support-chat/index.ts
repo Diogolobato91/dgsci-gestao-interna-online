@@ -1,4 +1,4 @@
-import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
+import {createClient} from 'npm:@supabase/supabase-js@2';
 import {handleSupportChat,sha256,type ConversationInput,type OpenTicketInput} from './handler.ts';
 
 const configuredOrigin=Deno.env.get('PUBLIC_SITE_ORIGIN')||'https://dgsci.netlify.app';
@@ -15,7 +15,9 @@ Deno.serve(async request=>handleSupportChat(request,{
   return !error&&data===true;
  },
  open:async(input:OpenTicketInput,accessHash:string)=>{const {data,error}=await supabase.rpc('create_support_ticket',{p_service:input.service,p_cnpj:input.cnpj,p_requester:input.requester,p_phone:input.phone,p_email:input.email,p_city:input.city,p_reference:input.reference||'',p_summary:input.summary,p_access_hash:accessHash});if(error)throw error;return data;},
- conversation:async(input:ConversationInput,accessHash:string)=>{const {data,error}=await supabase.rpc('get_support_conversation_public',{p_protocol:input.protocol,p_cnpj:input.cnpj,p_access_hash:accessHash});if(error)throw error;return data;},
+ conversation:async(input:ConversationInput&{before?:string},accessHash:string)=>{const {data,error}=await supabase.rpc('get_support_conversation_page_public',{p_protocol:input.protocol,p_cnpj:input.cnpj,p_access_hash:accessHash,p_before:input.before||null,p_limit:10});if(error)throw error;return data;},
  message:async(input:ConversationInput&{message:string},accessHash:string)=>{const {data,error}=await supabase.rpc('append_support_customer_message',{p_protocol:input.protocol,p_cnpj:input.cnpj,p_access_hash:accessHash,p_body:input.message});if(error)throw error;return data;},
  satisfaction:async(input:ConversationInput&{score:number;comment:string},accessHash:string)=>{const {data,error}=await supabase.rpc('submit_support_satisfaction',{p_protocol:input.protocol,p_cnpj:input.cnpj,p_access_hash:accessHash,p_score:input.score,p_comment:input.comment});if(error)throw error;return data===true;},
+ prepareAttachment:async(input,accessHash)=>{const {data:ticketId,error}=await supabase.rpc('prepare_support_attachment_public',{p_protocol:input.protocol,p_cnpj:input.cnpj,p_access_hash:accessHash});if(error)throw error;if(!ticketId)return null;const safe=input.fileName.replace(/[^a-zA-Z0-9._-]/g,'_'),path=`${ticketId}/${crypto.randomUUID()}-${safe}`;const {data,error:signError}=await supabase.storage.from('support-attachments').createSignedUploadUrl(path);if(signError)throw signError;return{path,token:data.token};},
+ registerAttachment:async(input,accessHash)=>{const {data,error}=await supabase.rpc('register_support_attachment_public',{p_protocol:input.protocol,p_cnpj:input.cnpj,p_access_hash:accessHash,p_file_name:input.fileName,p_file_path:input.filePath,p_mime_type:input.mimeType,p_size:input.size});if(error)throw error;return data;},
 },requestOrigin(request)));

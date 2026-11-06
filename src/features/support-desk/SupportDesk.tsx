@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Building2, ChevronDown, Clock3, Copy, Inbox, LoaderCircle,
   MessageSquareText, Pause, RefreshCw, Search, Send, UserRound, UsersRound,
@@ -12,6 +12,7 @@ import './support-ui-fixes.css';
 import './support-layout-fix.css';
 import './support-crm-flow.css';
 import './support-productivity.css';
+import './support-fixed-layout.css';
 
 type TicketStatus='queued'|'assigned'|'in_progress'|'waiting_customer'|'completed'|'cancelled';
 type Ticket={id:string;protocol:string;queue_id:string;service_id:string;cnpj:string;requester_name:string;phone?:string;email?:string;summary?:string;internal_notes?:string;unread?:boolean;last_customer_message?:string|null;last_customer_message_at?:string|null;assigned_to?:string|null;assigned_name?:string|null;city:string;status:TicketStatus;version:number;created_at:string;updated_at:string};
@@ -43,6 +44,7 @@ export default function SupportDesk(){
  const [notificationsEnabled,setNotificationsEnabled]=useState(()=>typeof Notification!=='undefined'&&Notification.permission==='granted');
  const [query,setQuery]=useState(''),[filter,setFilter]=useState<'active'|'queued'|'waiting'|'completed'>('active');
  const [draft,setDraft]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ const lastMessageId=useRef<string|null>(null);
  const selected=inbox.tickets.find(ticket=>ticket.id===selectedId)||null;
  const queueLabel=(id:string)=>queues.find(item=>item.id===id)?.label||id;
  const serviceLabel=(id:string)=>services.find(item=>item.id===id)?.label||id;
@@ -77,6 +79,7 @@ export default function SupportDesk(){
  useEffect(()=>{void loadInbox();const timer=window.setInterval(()=>void loadInbox(true),10000);return()=>window.clearInterval(timer);},[loadInbox]);
  useEffect(()=>{void loadMessages(selectedId);void loadCustomerHistory(selectedId);void loadAttachments(selectedId);if(supabase&&selectedId)void supabase.rpc('support_mark_read',{p_ticket:selectedId});},[selectedId,loadMessages,loadCustomerHistory,loadAttachments]);
  useEffect(()=>{setNotes(selected?.internal_notes||'');setAssignAgent('');},[selected?.id,selected?.internal_notes]);
+ useEffect(()=>{const last=messages[messages.length-1]?.item_key||null;if(last&&last!==lastMessageId.current){const pane=document.querySelector<HTMLElement>('.support-messages');pane?.scrollTo({top:pane.scrollHeight,behavior:lastMessageId.current?'smooth':'auto'});}lastMessageId.current=last;},[messages]);
  useEffect(()=>{
   if(!supabase)return;
   const channel=supabase.channel(`support-desk-${user?.id||'user'}`).on('postgres_changes',{event:'*',schema:'public',table:'support_tickets'},()=>void loadInbox(true)).on('postgres_changes',{event:'INSERT',schema:'public',table:'support_messages'},payload=>{const row=payload.new as Message;if(row.ticket_id===selectedId)void loadMessages(selectedId);if(row.author_kind==='customer'&&typeof Notification!=='undefined'&&Notification.permission==='granted')new Notification('Nova mensagem no atendimento DGSCI',{body:'Um cliente enviou uma nova mensagem.'});void loadInbox(true);}).subscribe();
