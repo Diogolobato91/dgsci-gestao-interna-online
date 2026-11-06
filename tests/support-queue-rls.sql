@@ -78,6 +78,10 @@ do $$declare ticket_row public.support_tickets%rowtype;result jsonb;begin
  result:=public.support_send_message(ticket_row.id,'Mensagem inicial de atendimento.');
  select * into ticket_row from public.support_tickets where id=ticket_row.id;
  if ticket_row.status<>'in_progress' or ticket_row.first_response_at is null then raise exception 'Mensagem não iniciou atendimento';end if;
+ if public.get_support_ticket_messages(ticket_row.id)->1->>'actor_label' not like 'VC %' then raise exception 'Identificação do atendente não foi exibida';end if;
+ result:=public.support_set_internal_notes(ticket_row.id,'Cliente orientado sobre a documentação.',ticket_row.version);
+ select * into ticket_row from public.support_tickets where id=ticket_row.id;
+ if ticket_row.internal_notes='' then raise exception 'Observação interna não foi salva';end if;
  result:=public.support_set_ticket_status(ticket_row.id,'completed',ticket_row.version);
  if (select count(*)from public.support_tickets where assigned_to=auth.uid() and status in('assigned','in_progress','waiting_customer'))<>5 then raise exception 'Vaga liberada não recebeu próximo cliente';end if;
  if not exists(select 1 from public.support_tickets where assigned_to=auth.uid() and status='assigned' and queue_id='inspection')then raise exception 'Próximo da fila não foi distribuído';end if;
