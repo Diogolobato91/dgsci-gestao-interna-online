@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  Bot,
   BookOpenText,
   Building2,
   Check,
@@ -119,6 +120,14 @@ export function PublicShell({ children }: { children: ReactNode }) {
 }
 
 export function PublicHomePage() {
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const faqItem = (id: string, question: string, answer: string) => {
+    const open = openFaq === id;
+    return <div className={`public-faq-item${open ? ' is-open' : ''}`}>
+      <button type="button" aria-expanded={open} onClick={() => setOpenFaq(open ? null : id)}><span>{question}</span><CircleHelp size={18}/></button>
+      <div className="public-faq-answer" aria-hidden={!open}><div><p>{answer}</p></div></div>
+    </div>;
+  };
   return (
     <PublicShell>
       <main id="public-main">
@@ -159,7 +168,11 @@ export function PublicHomePage() {
 
         <section className="public-section public-instructions" id="instrucoes"><div className="public-section-heading"><div><p className="public-kicker"><span /> CONTEÚDO TÉCNICO</p><h2>Normas e materiais de orientação</h2><p>Consulte os documentos publicados pela DGSCI.</p></div></div><div className="public-content-links"><Link to="/instrucoes-tecnicas"><BookOpenText/><span><small>NORMAS E PROCEDIMENTOS</small><strong>Instruções Técnicas</strong><p>Acesse as ITs vigentes para projetos, instalações e medidas de segurança.</p></span><ArrowRight/></Link><Link to="/cartilhas"><FileText/><span><small>MATERIAL EDUCATIVO</small><strong>Cartilhas</strong><p>Baixe orientações ilustradas produzidas pela DGSCI.</p></span><ArrowRight/></Link></div></section>
 
-        <section className="public-section public-faq" id="duvidas"><div className="public-section-heading"><div><p className="public-kicker"><span /> DÚVIDAS FREQUENTES</p><h2>Orientações por seção</h2></div></div><div className="public-faq-groups"><article><h3>Vistoria</h3><details><summary>Como faço meu primeiro licenciamento?<CircleHelp size={18}/></summary><p>Verifique se o estabelecimento se enquadra nas condições do Decreto nº 2.247, de 23 de março de 2022. Quando não houver dispensa de licenciamento nem necessidade de projeto técnico, apresente CNPJ, documento que comprove a área construída e documento de identificação com foto. Caso o solicitante não seja o proprietário, apresente também procuração.</p></details><details><summary>Como solicitar a renovação da vistoria?<CircleHelp size={18}/></summary><p>Tenha em mãos o CNPJ e o último protocolo de requerimento do ano anterior e abra um atendimento nesta plataforma.</p></details></article><article><h3>Análise de Projetos</h3><details><summary>Quais documentos são necessários para solicitar a análise?<CircleHelp size={18}/></summary><p>Apresente presencialmente ou pelo atendimento da plataforma o memorial descritivo para dar entrada no serviço.</p></details><details><summary>Como solicitar a reanálise do projeto?<CircleHelp size={18}/></summary><p>Apresente presencialmente ou pelo atendimento da plataforma o memorial descritivo para dar entrada no serviço.</p></details><details><summary>Como falar com o analista responsável ou com o chefe da seção?<CircleHelp size={18}/></summary><p>Solicite pelo e-mail analisecat.cbmpa@gmail.com. Para atendimento da chefia, também é possível preencher um Formulário de Atendimento (FAT) e protocolá-lo presencialmente no quartel mais próximo.</p></details></article><article><h3>Multa e Interdição</h3><details><summary>Como faço para recorrer ou regularizar pendências?<CircleHelp size={18}/></summary><p>No primeiro licenciamento, após a vistoria, corrija as exigências e informe o cumprimento pelo SISGAT ou presencialmente no CAT ou SAT. O prazo indicado é de 60 dias, prorrogável por mais 90 dias. Após a autuação, podem ser aplicáveis a declaração de saneamento, com pagamento de 10% da multa, ou o TAACB, com pagamento de 35%, conforme a situação. Na renovação, corrija as pendências e solicite o saneamento ou o TAACB pelos canais oficiais.</p></details><details><summary>Como falar com o chefe da seção?<CircleHelp size={18}/></summary><p>Abra um atendimento nesta plataforma ou solicite reunião por meio de FAT protocolado presencialmente no quartel mais próximo.</p></details></article></div></section>
+        <section className="public-section public-faq" id="duvidas"><div className="public-section-heading"><div><p className="public-kicker"><span /> DÚVIDAS FREQUENTES</p><h2>Orientações por seção</h2></div></div><div className="public-faq-groups">
+          <article><h3>Vistoria</h3>{faqItem('inspection-license','Como faço meu primeiro licenciamento?','Verifique se o estabelecimento se enquadra nas condições do Decreto nº 2.247, de 23 de março de 2022. Quando não houver dispensa de licenciamento nem necessidade de projeto técnico, apresente CNPJ, documento que comprove a área construída e documento de identificação com foto. Caso o solicitante não seja o proprietário, apresente também procuração.')}{faqItem('inspection-renew','Como solicitar a renovação da vistoria?','Tenha em mãos o CNPJ e o último protocolo de requerimento do ano anterior e abra um atendimento nesta plataforma.')}</article>
+          <article><h3>Análise de Projetos</h3>{faqItem('project-documents','Quais documentos são necessários para solicitar a análise?','Apresente presencialmente ou pelo atendimento da plataforma o memorial descritivo para dar entrada no serviço.')}{faqItem('project-review','Como solicitar a reanálise do projeto?','Apresente presencialmente ou pelo atendimento da plataforma o memorial descritivo para dar entrada no serviço.')}{faqItem('project-contact','Como falar com o analista responsável ou com o chefe da seção?','Solicite pelo e-mail analisecat.cbmpa@gmail.com. Para atendimento da chefia, também é possível preencher um Formulário de Atendimento (FAT) e protocolá-lo presencialmente no quartel mais próximo.')}</article>
+          <article><h3>Multa e Interdição</h3>{faqItem('fines-regularize','Como faço para recorrer ou regularizar pendências?','No primeiro licenciamento, após a vistoria, corrija as exigências e informe o cumprimento pelo SISGAT ou presencialmente no CAT ou SAT. O prazo indicado é de 60 dias, prorrogável por mais 90 dias. Após a autuação, podem ser aplicáveis a declaração de saneamento, com pagamento de 10% da multa, ou o TAACB, com pagamento de 35%, conforme a situação. Na renovação, corrija as pendências e solicite o saneamento ou o TAACB pelos canais oficiais.')}{faqItem('fines-contact','Como falar com o chefe da seção?','Abra um atendimento nesta plataforma ou solicite reunião por meio de FAT protocolado presencialmente no quartel mais próximo.')}</article>
+        </div></section>
 
         <section className="public-final-cta"><div><p className="public-kicker"><span /> CENTRAL DE ATENDIMENTO</p><h2>Precisa falar com a DGSCI?</h2><p>Informe o CNPJ e o assunto para entrar na fila da seção responsável.</p></div><Link className="public-button public-button-primary" to="/atendimento">Iniciar atendimento <ArrowRight size={18} /></Link></section>
       </main>
@@ -171,6 +184,86 @@ type IntakeData = { cnpj: string; requester: string; phone: string; email: strin
 const emptyIntake: IntakeData = { cnpj: '', requester: '', phone: '', email: '', service: '', city: '', process: '', message: '', consent: false };
 
 export function PublicIntakePage() {
+  return <PublicGuidedIntakePage/>;
+}
+
+function PublicGuidedIntakePage() {
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const initialQueue = PUBLIC_QUEUES.some(queue => queue.id === params.get('fila')) ? params.get('fila') as PublicQueueId : null;
+  const [step, setStep] = useState(0);
+  const [data, setData] = useState<IntakeData>(emptyIntake);
+  const [error, setError] = useState('');
+  const [opening, setOpening] = useState(false);
+  const [opened, setOpened] = useState<OpenSupportResult | null>(null);
+  const selectedService = serviceById(data.service);
+  const selectedQueue = selectedService ? queueById(selectedService.queue) : null;
+  const services = useMemo(() => PUBLIC_SERVICES.filter(service => !initialQueue || service.queue === initialQueue), [initialQueue]);
+  const questions = [
+    'Para começar, informe o CNPJ da empresa.',
+    'Qual é o nome da pessoa responsável por este atendimento?',
+    'Qual telefone com DDD podemos registrar?',
+    'Qual é o e-mail de contato?',
+    'Em qual município fica o estabelecimento?',
+    'Agora escolha o serviço que você precisa.',
+    'Já existe algum processo ou protocolo relacionado?',
+    'Por último, conte brevemente o que precisa resolver.',
+    'Tudo certo. Confira os dados e abra seu atendimento.',
+  ];
+  const answers = [data.cnpj, data.requester, data.phone, data.email, data.city, selectedService?.label || '', data.process || 'Não tenho processo ou protocolo', data.message];
+  const continueText = (event: FormEvent) => {
+    event.preventDefault();
+    setError('');
+    if (step === 0 && !isValidCnpj(data.cnpj)) return setError('Digite um CNPJ válido para continuar.');
+    if (step === 1 && data.requester.trim().length < 3) return setError('Digite o nome do responsável.');
+    if (step === 2 && onlyDigits(data.phone).length < 10) return setError('Digite um telefone com DDD.');
+    if (step === 3 && !/^\S+@\S+\.\S+$/.test(data.email)) return setError('Digite um e-mail válido.');
+    if (step === 4 && data.city.trim().length < 2) return setError('Digite o município.');
+    if (step === 7 && data.message.trim().length < 20) return setError('Explique a solicitação com pelo menos 20 caracteres.');
+    setStep(current => current + 1);
+  };
+  const submitTicket = async () => {
+    if (!selectedService || opening) return;
+    setOpening(true); setError('');
+    try {
+      const result = await openSupportTicket({ service: selectedService.id, cnpj: data.cnpj, requester: data.requester.trim(), phone: data.phone, email: data.email.trim(), city: data.city.trim(), reference: data.process.trim(), summary: data.message.trim() });
+      saveSupportCredentials({ protocol: result.protocol, cnpj: data.cnpj, accessKey: result.accessKey });
+      setOpened(result);
+    } catch (caught) { setError(caught instanceof Error ? caught.message : 'Não foi possível abrir o atendimento. Tente novamente.'); }
+    finally { setOpening(false); }
+  };
+  const chooseService = (service: string) => { setData(current => ({ ...current, service })); setError(''); setStep(6); };
+  const copyValue = (value: string) => navigator.clipboard?.writeText(value).catch(() => undefined);
+
+  return <PublicShell><main id="public-main" className="public-guided-page">
+    <div className="public-guided-heading"><Link to="/"><ArrowLeft size={16}/> Voltar ao portal</Link><p className="public-kicker"><span/> ATENDIMENTO GUIADO</p><h1>Olá! Vamos abrir seu atendimento.</h1><p>Responda uma pergunta por vez. O assistente encaminhará sua solicitação para a seção correta.</p></div>
+    <section className="public-guided-chat" aria-label="Abertura guiada do atendimento">
+      <header><span><Bot size={22}/></span><div><strong>Assistente virtual DGSCI</strong><small><i/> On-line para orientar o cadastro</small></div><em>{Math.min(step + 1, 9)} de 9</em></header>
+      <div className="public-guided-transcript" aria-live="polite">
+        {answers.slice(0, Math.min(step, 8)).map((answer, index) => <div className="public-guided-exchange" key={questions[index]}><div className="public-bot-row"><span><Bot size={17}/></span><p>{questions[index]}</p></div><p className="public-user-answer">{answer}</p></div>)}
+        {!opened && <div className="public-bot-row is-current"><span><Bot size={17}/></span><p>{questions[step]}</p></div>}
+        {opened && <div className="public-bot-row is-current"><span><Bot size={17}/></span><p>Pronto! Seu protocolo foi criado. Guarde os dados abaixo e entre no chat.</p></div>}
+
+        {!opened && step <= 4 && <form className="public-guided-reply" onSubmit={continueText}>
+          {step === 0 && <><label htmlFor="guided-cnpj">CNPJ</label><input id="guided-cnpj" autoFocus inputMode="numeric" value={data.cnpj} onChange={event => setData({ ...data, cnpj: formatCnpj(event.target.value) })} placeholder="00.000.000/0000-00"/></>}
+          {step === 1 && <><label htmlFor="guided-name">Nome do responsável</label><input id="guided-name" autoFocus autoComplete="name" value={data.requester} onChange={event => setData({ ...data, requester: event.target.value })}/></>}
+          {step === 2 && <><label htmlFor="guided-phone">Telefone com DDD</label><input id="guided-phone" autoFocus inputMode="tel" autoComplete="tel" value={data.phone} onChange={event => setData({ ...data, phone: formatPhone(event.target.value) })} placeholder="(91) 99999-9999"/></>}
+          {step === 3 && <><label htmlFor="guided-email">E-mail de contato</label><input id="guided-email" autoFocus type="email" autoComplete="email" value={data.email} onChange={event => setData({ ...data, email: event.target.value })} placeholder="contato@empresa.com.br"/><small>Não enviaremos código de confirmação por e-mail.</small></>}
+          {step === 4 && <><label htmlFor="guided-city">Município</label><input id="guided-city" autoFocus value={data.city} onChange={event => setData({ ...data, city: event.target.value })}/></>}
+          {error && <p className="public-guided-error" role="alert">{error}</p>}<button className="public-button public-button-primary" type="submit">Responder <ArrowRight size={17}/></button>
+        </form>}
+        {!opened && step === 5 && <div className="public-guided-options">{services.map(service => <button key={service.id} type="button" onClick={() => chooseService(service.id)}><span>{service.label}</span><ChevronRight size={17}/></button>)}</div>}
+        {!opened && step === 6 && <div className="public-guided-options public-guided-options-compact"><button type="button" onClick={() => setStep(7)}><span>Não tenho processo ou protocolo</span><ChevronRight size={17}/></button><form onSubmit={event => { event.preventDefault(); setStep(7); }}><label htmlFor="guided-process">Sim, vou informar o número</label><div><input id="guided-process" autoFocus value={data.process} onChange={event => setData({ ...data, process: event.target.value })} placeholder="Digite o número"/><button type="submit" aria-label="Confirmar protocolo"><ArrowRight size={18}/></button></div></form></div>}
+        {!opened && step === 7 && <form className="public-guided-reply" onSubmit={continueText}><label htmlFor="guided-message">Descreva sua solicitação</label><textarea id="guided-message" autoFocus rows={5} maxLength={1500} value={data.message} onChange={event => setData({ ...data, message: event.target.value })} placeholder="Explique o que aconteceu e o que você precisa resolver."/><small>{data.message.length}/1500 caracteres</small>{error && <p className="public-guided-error" role="alert">{error}</p>}<button className="public-button public-button-primary" type="submit">Responder <ArrowRight size={17}/></button></form>}
+        {!opened && step === 8 && <div className="public-guided-review"><dl><div><dt>CNPJ</dt><dd>{data.cnpj}</dd></div><div><dt>Responsável</dt><dd>{data.requester}</dd></div><div><dt>Serviço</dt><dd>{selectedService?.label}</dd></div><div><dt>Fila</dt><dd>{selectedQueue?.label}</dd></div></dl><label><input type="checkbox" checked={data.consent} onChange={event => setData({ ...data, consent: event.target.checked })}/><span>Estou ciente de que estes dados serão usados para identificar e acompanhar esta solicitação.</span></label>{error && <p className="public-guided-error" role="alert">{error}</p>}<button type="button" className="public-button public-button-primary" disabled={!data.consent || opening} onClick={submitTicket}>{opening ? 'Abrindo atendimento…' : 'Abrir atendimento'} {!opening && <ArrowRight size={17}/>}</button></div>}
+        {opened && <div className="public-guided-created"><div><span>PROTOCOLO</span><strong>{opened.protocol}</strong><button type="button" onClick={() => copyValue(opened.protocol)} aria-label="Copiar protocolo"><Copy size={16}/></button></div><div><span>CHAVE DE ACESSO</span><strong>{opened.accessKey}</strong><button type="button" onClick={() => copyValue(opened.accessKey)} aria-label="Copiar chave"><Copy size={16}/></button></div><p><KeyRound size={18}/> Guarde a chave para acessar a conversa em outro dispositivo.</p><button className="public-button public-button-primary" type="button" onClick={() => navigate(`/atendimento/${encodeURIComponent(opened.protocol)}`)}>Entrar no chat <ArrowRight size={17}/></button></div>}
+      </div>
+      {step > 0 && !opened && <footer><button type="button" onClick={() => { setError(''); setStep(current => current - 1); }}><ArrowLeft size={16}/> Voltar uma pergunta</button></footer>}
+    </section>
+  </main></PublicShell>;
+}
+
+export function LegacyPublicIntakePage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initialQueue = PUBLIC_QUEUES.some(queue => queue.id === params.get('fila')) ? params.get('fila') as PublicQueueId : null;
