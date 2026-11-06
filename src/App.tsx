@@ -29,7 +29,7 @@ import NotFound from "./pages/NotFound";
 import SupportLibrary from '@/features/support/SupportLibrary';
 import EstablishmentsWorkspace from '@/features/establishments/EstablishmentsWorkspace';
 import PendingModule from '@/features/support/PendingModule';
-import {PublicAccreditationDirectory,PublicCustomerChatPage,PublicHomePage,PublicIntakePage,PublicProtocolLookupPage,PublicPublicationsPage} from '@/features/public/PublicPortal';
+import {PublicAccreditationDirectory,PublicCustomerChatPage,PublicHomePage,PublicIntakePage,PublicPublicationsPage} from '@/features/public/PublicPortal';
 import '@/features/support/portal.css';
 import '@/features/support/workspace.css';
 
@@ -63,7 +63,7 @@ const AppRoutes = () => (
       <Route path="/" element={<PublicHomePage />} />
       <Route path="/atendimento" element={<PublicIntakePage />} />
       <Route path="/atendimento/:protocol" element={<PublicCustomerChatPage />} />
-      <Route path="/consultar-protocolo" element={<PublicProtocolLookupPage />} />
+      <Route path="/consultar-protocolo" element={<Navigate to="/atendimento" replace />} />
       <Route path="/credenciados" element={<PublicAccreditationDirectory />} />
       <Route path="/cartilhas" element={<PublicPublicationsPage kind="booklet" />} />
       <Route path="/instrucoes-tecnicas" element={<PublicPublicationsPage kind="technical_instruction" />} />

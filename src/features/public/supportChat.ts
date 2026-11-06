@@ -22,5 +22,6 @@ export const sendSupportMessage=(credentials:SupportCredentials,message:string)=
 export const submitSupportSatisfaction=(credentials:SupportCredentials,score:number,comment:string)=>invoke<{saved:boolean}>({action:'satisfaction',...credentials,score,comment});
 
 const storageKey=(protocol:string)=>`dgsci-support:${protocol.toUpperCase()}`;
-export function saveSupportCredentials(credentials:SupportCredentials){localStorage.setItem(storageKey(credentials.protocol),JSON.stringify(credentials));}
-export function loadSupportCredentials(protocol:string):SupportCredentials|null{try{const value=localStorage.getItem(storageKey(protocol));if(!value)return null;const parsed=JSON.parse(value);return parsed?.protocol&&parsed?.cnpj&&parsed?.accessKey?parsed:null;}catch{return null;}}
+const latestStorageKey='dgsci-support:current';
+export function saveSupportCredentials(credentials:SupportCredentials){const value=JSON.stringify(credentials);localStorage.setItem(storageKey(credentials.protocol),value);localStorage.setItem(latestStorageKey,value);}
+export function loadSupportCredentials(protocol?:string):SupportCredentials|null{try{const value=protocol&&protocol!=='chat'?localStorage.getItem(storageKey(protocol)):localStorage.getItem(latestStorageKey);if(!value)return null;const parsed=JSON.parse(value);return parsed?.protocol&&parsed?.cnpj&&parsed?.accessKey?parsed:null;}catch{return null;}}
