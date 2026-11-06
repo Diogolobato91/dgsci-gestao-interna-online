@@ -119,6 +119,7 @@ export default function LoginForm() {
           <span>Gestão Interna</span>
         </h1>
         <p>Acesso aos registros administrativos, controles e documentos da DGSCI / CBMPA.</p>
+        <a className="login-home-link" href="/">← Voltar ao site da DGSCI</a>
 
         {creating ? (
           /* FORMULÁRIO DE CADASTRO COM APROVAÇÃO */

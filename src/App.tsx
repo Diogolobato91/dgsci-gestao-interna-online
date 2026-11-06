@@ -15,6 +15,7 @@ const UserManagement = lazy(() => import('@/features/users/UserManagementPage'))
 const SatCommands = lazy(() => import('@/features/records/SatCommandsPage'));
 const SupportDesk = lazy(() => import('@/features/support-desk/SupportDesk'));
 const SupportAdmin = lazy(() => import('@/features/support-desk/SupportAdmin'));
+const PublicationsAdmin = lazy(() => import('@/features/publications/PublicationsAdmin'));
 
 const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
 const DashboardGeral = lazy(() => import("@/pages/DashboardGeral"));
@@ -28,7 +29,7 @@ import NotFound from "./pages/NotFound";
 import SupportLibrary from '@/features/support/SupportLibrary';
 import EstablishmentsWorkspace from '@/features/establishments/EstablishmentsWorkspace';
 import PendingModule from '@/features/support/PendingModule';
-import {PublicAccreditationDirectory,PublicCustomerChatPage,PublicHomePage,PublicIntakePage,PublicProtocolLookupPage} from '@/features/public/PublicPortal';
+import {PublicAccreditationDirectory,PublicCustomerChatPage,PublicHomePage,PublicIntakePage,PublicProtocolLookupPage,PublicPublicationsPage} from '@/features/public/PublicPortal';
 import '@/features/support/portal.css';
 import '@/features/support/workspace.css';
 
@@ -64,6 +65,8 @@ const AppRoutes = () => (
       <Route path="/atendimento/:protocol" element={<PublicCustomerChatPage />} />
       <Route path="/consultar-protocolo" element={<PublicProtocolLookupPage />} />
       <Route path="/credenciados" element={<PublicAccreditationDirectory />} />
+      <Route path="/cartilhas" element={<PublicPublicationsPage kind="booklet" />} />
+      <Route path="/instrucoes-tecnicas" element={<PublicPublicationsPage kind="technical_instruction" />} />
       {/* Rota pública - Login */}
       <Route 
         path="/login" 
@@ -89,6 +92,7 @@ const AppRoutes = () => (
         <Route path="dashboard" element={<SupportLibrary />} />
         <Route path="atendimentos" element={<SupportDesk />} />
         <Route path="atendimentos/administracao" element={<SupportAdmin />} />
+        <Route path="gestao-publicacoes" element={<PublicationsAdmin />} />
         <Route path="biblioteca" element={<SupportLibrary />} />
         <Route path="comunicados" element={<SupportLibrary />} />
         <Route path="favoritos" element={<SupportLibrary />} />

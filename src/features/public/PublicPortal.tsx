@@ -9,11 +9,13 @@ import {
   Check,
   Clock3,
   Copy,
+  Download,
   ChevronRight,
   CircleHelp,
   ClipboardCheck,
   FileKey,
   FileSearch,
+  FileText,
   FolderSearch2,
   KeyRound,
   Landmark,
@@ -30,6 +32,7 @@ import {
 } from 'lucide-react';
 import { useAccreditations } from '@/features/accreditation/useAccreditations';
 import { institutionalToday, shortDate } from '@/features/records/staffAvailability';
+import {listPublications,publicationUrl,type Publication} from './publications';
 import {
   PUBLIC_QUEUES,
   PUBLIC_SERVICES,
@@ -78,7 +81,7 @@ function PublicHeader() {
           <span className="sr-only">{menuOpen ? 'Fechar menu' : 'Abrir menu'}</span>
         </button>
         <nav id="public-navigation" className={menuOpen ? 'is-open' : ''} aria-label="Navegação pública">
-          <a href="/#servicos" onClick={() => setMenuOpen(false)}>Serviços</a>
+          <a href="/#servicos" onClick={() => setMenuOpen(false)}>Serviços</a><Link to="/instrucoes-tecnicas" onClick={() => setMenuOpen(false)}>Instruções Técnicas</Link><Link to="/cartilhas" onClick={() => setMenuOpen(false)}>Cartilhas</Link>
           <Link to="/credenciados" onClick={() => setMenuOpen(false)}>Credenciados</Link>
           <a href="/#instrucoes" onClick={() => setMenuOpen(false)}>Instruções Técnicas</a>
           <a href="/#duvidas" onClick={() => setMenuOpen(false)}>Dúvidas</a>
@@ -109,7 +112,7 @@ function PublicFooter() {
   );
 }
 
-function PublicShell({ children }: { children: ReactNode }) {
+export function PublicShell({ children }: { children: ReactNode }) {
   return <div className="public-portal"><PublicHeader />{children}<PublicFooter /></div>;
 }
 
@@ -128,22 +131,10 @@ export function PublicHomePage() {
             </div>
             <p className="public-trust-line"><ShieldCheck size={16} /> Cada solicitação recebe um protocolo e entra somente na fila da seção escolhida.</p>
           </div>
-          <aside className="public-hero-panel" aria-label="Como funciona o atendimento">
-            <div className="public-panel-top"><span>ATENDIMENTO GUIADO</span><strong>3 passos</strong></div>
-            <ol>
-              <li><span>01</span><div><strong>Identifique a empresa</strong><p>Informe o CNPJ e um contato responsável.</p></div></li>
-              <li><span>02</span><div><strong>Escolha o serviço</strong><p>O sistema encontra a seção correta.</p></div></li>
-              <li><span>03</span><div><strong>Acompanhe a fila</strong><p>Veja somente as pessoas à frente na sua seção.</p></div></li>
-            </ol>
-            <Link to="/atendimento">Começar agora <ChevronRight size={16} /></Link>
-          </aside>
+          <figure className="public-hero-media"><img src="/portal/assets/home/seguranca-incendio.jpg" alt="Extintor de incêndio, sinalização de saída de emergência e análise de planta técnica"/><figcaption>Prevenção, análise técnica e segurança nas edificações.</figcaption></figure>
         </section>
 
-        <section className="public-quick-access" aria-label="Acessos rápidos">
-          <Link to="/atendimento"><MessageSquareText /><span><strong>Abrir atendimento</strong><small>Triagem rápida por serviço</small></span><ChevronRight /></Link>
-          <Link to="/consultar-protocolo"><FileSearch /><span><strong>Consultar protocolo</strong><small>Acompanhe sua solicitação</small></span><ChevronRight /></Link>
-          <Link to="/credenciados"><UserRoundCheck /><span><strong>Consultar credenciados</strong><small>Empresas e profissionais</small></span><ChevronRight /></Link>
-        </section>
+
 
         <section className="public-section" id="servicos">
           <div className="public-section-heading"><div><p className="public-kicker"><span /> SERVIÇOS</p><h2>Serviços disponíveis</h2><p>Escolha o assunto para acessar as orientações e a seção responsável.</p></div><Link to="/atendimento">Ver todos os serviços <ArrowRight size={16} /></Link></div>
@@ -164,24 +155,9 @@ export function PublicHomePage() {
           <div><p className="public-kicker"><span /> CONSULTA PÚBLICA</p><h2>Empresas e profissionais credenciados</h2><p>Consulte a relação oficial por nome, modalidade e região. A página apresenta a validade informada na fonte institucional.</p><Link className="public-button public-button-light" to="/credenciados"><Search size={18} /> Consultar credenciados</Link></div>
         </section>
 
-        <section className="public-section public-instructions" id="instrucoes">
-          <div className="public-section-heading"><div><p className="public-kicker"><span /> BIBLIOTECA TÉCNICA</p><h2>Instruções Técnicas e documentos</h2><p>Consulte normas, requisitos e orientações técnicas organizadas por assunto.</p></div></div>
-          <div className="public-instruction-grid">
-            <article><BookOpenText /><span><small>CONSULTA TÉCNICA</small><h3>Instruções Técnicas</h3><p>Normas organizadas por número, tema e atualização.</p></span></article>
-            <article><ClipboardCheck /><span><small>ORIENTAÇÃO</small><h3>Vistoria e licenciamento</h3><p>Requisitos, documentos e etapas do serviço.</p></span></article>
-            <article><FolderSearch2 /><span><small>PROJETOS</small><h3>Análise de Projeto</h3><p>Orientações para apresentação e correção.</p></span></article>
-          </div>
-        </section>
+        <section className="public-section public-instructions" id="instrucoes"><div className="public-section-heading"><div><p className="public-kicker"><span /> CONTEÚDO TÉCNICO</p><h2>Normas e materiais de orientação</h2><p>Consulte os documentos publicados pela DGSCI.</p></div></div><div className="public-content-links"><Link to="/instrucoes-tecnicas"><BookOpenText/><span><small>NORMAS E PROCEDIMENTOS</small><strong>Instruções Técnicas</strong><p>Acesse as ITs vigentes para projetos, instalações e medidas de segurança.</p></span><ArrowRight/></Link><Link to="/cartilhas"><FileText/><span><small>MATERIAL EDUCATIVO</small><strong>Cartilhas</strong><p>Baixe orientações ilustradas produzidas pela DGSCI.</p></span><ArrowRight/></Link><img src="/portal/assets/home/personagem-vistoriador.png" alt="Ilustração institucional de vistoriador do Corpo de Bombeiros"/></div></section>
 
-        <section className="public-section public-faq" id="duvidas">
-          <div className="public-section-heading"><div><p className="public-kicker"><span /> DÚVIDAS FREQUENTES</p><h2>Antes de abrir um atendimento</h2></div></div>
-          <div className="public-faq-grid">
-            <details><summary>Como o sistema escolhe a fila?<CircleHelp size={18} /></summary><p>Cada serviço possui uma seção responsável. Atendimentos de outras seções não alteram sua posição.</p></details>
-            <details><summary>Quem pode atender reset de senha?<CircleHelp size={18} /></summary><p>Todos os VCs disponíveis podem receber solicitações de acesso e senha.</p></details>
-            <details><summary>Quantos clientes cada atendente recebe?<CircleHelp size={18} /></summary><p>Cada VC terá até cinco atendimentos ativos. Os demais permanecem na fila até surgir uma vaga.</p></details>
-            <details><summary>O CNPJ funciona como senha?<CircleHelp size={18} /></summary><p>Não. Ele identifica a empresa. Para voltar ao chat, também serão exigidos o protocolo e a chave de acesso gerada na abertura.</p></details>
-          </div>
-        </section>
+        <section className="public-section public-faq" id="duvidas"><div className="public-section-heading"><div><p className="public-kicker"><span /> DÚVIDAS FREQUENTES</p><h2>Orientações por seção</h2></div></div><div className="public-faq-groups"><article><h3>Vistoria</h3><details><summary>Como faço meu primeiro licenciamento?<CircleHelp size={18}/></summary><p>Verifique se o estabelecimento se enquadra nas condições do Decreto nº 2.247, de 23 de março de 2022. Quando não houver dispensa de licenciamento nem necessidade de projeto técnico, apresente CNPJ, documento que comprove a área construída e documento de identificação com foto. Caso o solicitante não seja o proprietário, apresente também procuração.</p></details><details><summary>Como solicitar a renovação da vistoria?<CircleHelp size={18}/></summary><p>Tenha em mãos o CNPJ e o último protocolo de requerimento do ano anterior e abra um atendimento nesta plataforma.</p></details></article><article><h3>Análise de Projetos</h3><details><summary>Quais documentos são necessários para solicitar a análise?<CircleHelp size={18}/></summary><p>Apresente presencialmente ou pelo atendimento da plataforma o memorial descritivo para dar entrada no serviço.</p></details><details><summary>Como solicitar a reanálise do projeto?<CircleHelp size={18}/></summary><p>Apresente presencialmente ou pelo atendimento da plataforma o memorial descritivo para dar entrada no serviço.</p></details><details><summary>Como falar com o analista responsável ou com o chefe da seção?<CircleHelp size={18}/></summary><p>Solicite pelo e-mail analisecat.cbmpa@gmail.com. Para atendimento da chefia, também é possível preencher um Formulário de Atendimento (FAT) e protocolá-lo presencialmente no quartel mais próximo.</p></details></article><article><h3>Multa e Interdição</h3><details><summary>Como faço para recorrer ou regularizar pendências?<CircleHelp size={18}/></summary><p>No primeiro licenciamento, após a vistoria, corrija as exigências e informe o cumprimento pelo SISGAT ou presencialmente no CAT ou SAT. O prazo indicado é de 60 dias, prorrogável por mais 90 dias. Após a autuação, podem ser aplicáveis a declaração de saneamento, com pagamento de 10% da multa, ou o TAACB, com pagamento de 35%, conforme a situação. Na renovação, corrija as pendências e solicite o saneamento ou o TAACB pelos canais oficiais.</p></details><details><summary>Como falar com o chefe da seção?<CircleHelp size={18}/></summary><p>Abra um atendimento nesta plataforma ou solicite reunião por meio de FAT protocolado presencialmente no quartel mais próximo.</p></details></article></div></section>
 
         <section className="public-final-cta"><div><p className="public-kicker"><span /> CENTRAL DE ATENDIMENTO</p><h2>Precisa falar com a DGSCI?</h2><p>Informe o CNPJ e o assunto para entrar na fila da seção responsável.</p></div><Link className="public-button public-button-primary" to="/atendimento">Iniciar atendimento <ArrowRight size={18} /></Link></section>
       </main>
@@ -421,3 +397,5 @@ export function PublicAccreditationDirectory() {
   const rows = data.filter(row => row.kind === kind && row.valid_until >= today && (!normalized || `${row.name} ${row.modality} ${row.region}`.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(normalized))).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   return <PublicShell><main id="public-main" className="public-directory-page"><div className="public-directory-heading"><Link className="public-back-link" to="/"><ArrowLeft size={16}/> Voltar ao portal</Link><p className="public-kicker"><span/> CONSULTA PÚBLICA</p><h1>Empresas e profissionais credenciados</h1><p>Relação vigente disponibilizada pela fonte institucional de credenciamento.</p></div><section className="public-directory-card"><div className="public-directory-tabs" role="group" aria-label="Tipo de credenciado"><button type="button" className={kind === 'company' ? 'is-active' : ''} onClick={() => setKind('company')}><Building2 size={19}/> Empresas</button><button type="button" className={kind === 'professional' ? 'is-active' : ''} onClick={() => setKind('professional')}><UsersRound size={19}/> Profissionais</button></div><label className="public-directory-search" htmlFor="directory-search"><Search size={18}/><input id="directory-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Buscar por nome, modalidade ou região"/>{query && <button type="button" onClick={() => setQuery('')} aria-label="Limpar busca"><X size={16}/></button>}</label>{loading ? <div className="public-directory-state" role="status">Consultando a relação oficial…</div> : error ? <div className="public-directory-state is-error"><p>{error}</p><button type="button" onClick={reload}>Tentar novamente</button></div> : <><div className="public-directory-meta"><strong>{rows.length} {rows.length === 1 ? 'registro vigente' : 'registros vigentes'}</strong>{loadedAt && <span>Atualizado em {new Date(loadedAt).toLocaleString('pt-BR', { timeZone: 'America/Belem', dateStyle: 'short', timeStyle: 'short' })}</span>}</div><div className="public-directory-table" role="region" tabIndex={0} aria-label="Relação de credenciados"><table><thead><tr><th>Nome</th><th>Modalidade</th><th>Região</th><th>Validade</th></tr></thead><tbody>{rows.map(row => <tr key={row.id}><td><strong>{row.name}</strong></td><td>{row.modality}</td><td>{row.region || '—'}</td><td><span>{shortDate(row.valid_until)}</span></td></tr>)}</tbody></table>{rows.length === 0 && <div className="public-directory-empty"><Search size={24}/><strong>Nenhum registro encontrado</strong><p>Revise os termos da busca.</p></div>}</div></>}</section></main></PublicShell>;
 }
+
+export function PublicPublicationsPage({kind}:{kind:Publication['kind']}){const[rows,setRows]=useState<Publication[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState('');useEffect(()=>{setLoading(true);listPublications(kind).then(setRows).catch(()=>setError('Não foi possível carregar os documentos.')).finally(()=>setLoading(false))},[kind]);const booklet=kind==='booklet';return <PublicShell><main id="public-main" className="public-publications-page"><header><Link className="public-back-link"to="/"><ArrowLeft size={16}/>Voltar ao portal</Link><p className="public-kicker"><span/>{booklet?'MATERIAL EDUCATIVO':'NORMAS E PROCEDIMENTOS'}</p><h1>{booklet?'Cartilhas':'Instruções Técnicas'}</h1><p>{booklet?'Materiais de orientação produzidos pela DGSCI para consulta e download.':'Consulte e baixe as Instruções Técnicas vigentes publicadas pela DGSCI.'}</p></header>{loading?<div className="public-publications-state">Carregando documentos…</div>:error?<div className="public-publications-state">{error}</div>:<section className="public-publications-grid">{rows.map(row=><a key={row.id}href={publicationUrl(row.file_path)}download target="_blank"rel="noreferrer"><img src={publicationUrl(row.cover_path)}alt={`Capa de ${row.title}`}/><div><small>{booklet?'CARTILHA':'INSTRUÇÃO TÉCNICA'}</small><h2>{row.title}</h2><p>{row.description}</p><span><Download size={16}/>Baixar PDF</span></div></a>)}{!rows.length&&<div className="public-publications-state">Nenhum documento publicado nesta categoria.</div>}</section>}</main></PublicShell>}

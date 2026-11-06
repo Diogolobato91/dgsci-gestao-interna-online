@@ -15,7 +15,8 @@ import {
   Building2,
   MapPin,
   UserCheck,
-  MessageSquare
+  MessageSquare,
+  BookOpen
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
@@ -132,6 +133,7 @@ export const navigationConfig: MenuConfig = {
   'Subdiretoria': [
     ...commonItemsComplete,
     {id:'admin-atendimentos',title:'Gestão do Atendimento',icon:BarChart3,path:'/atendimentos/administracao',section:'Atendimento on-line'},
+    {id:'gestao-publicacoes',title:'Cartilhas e ITs',icon:BookOpen,path:'/gestao-publicacoes',section:'Subdiretoria'},
     { id: 'escala-mensal', title: 'Escala Mensal', icon: Calendar, path: '/escala-mensal', section: 'Administração' },
     {
       id: 'controle-portarias',

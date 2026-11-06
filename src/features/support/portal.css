@@ -1281,3 +1281,4 @@
 .command-table thead tr:first-child th.command-cmt{background:#a80d26;color:white;text-align:center}
 .command-table thead tr:first-child th.command-sub{background:#293744;color:white;text-align:center}
 .support-section-editor{padding:12px;border:1px solid #ddd;border-radius:6px;display:grid;gap:7px}.record-form .record-check input,.record-form input[type=checkbox]{width:auto;margin-right:8px}
+.login-home-link{display:inline-flex;margin:6px 0 18px;color:#a71927;font-size:12px;font-weight:800;text-decoration:none}.login-home-link:hover{text-decoration:underline}
