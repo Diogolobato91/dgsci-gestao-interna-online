@@ -450,28 +450,30 @@ export function PublicCustomerChatPage() {
   }, [credentials, closed, refresh]);
   useEffect(() => { if ((conversation?.messages.length || 0) >= messageCount.current) messagesEnd.current?.scrollIntoView({ behavior: messageCount.current ? 'smooth' : 'auto', block: 'nearest' }); messageCount.current = conversation?.messages.length || 0; }, [conversation?.messages.length]);
   useEffect(() => {
-    const slot = messagesEnd.current;
-    if (!slot) return;
-    slot.replaceChildren();
-    const attachments = conversation?.attachments || [], matched = new Set<string>();
+    const attachments = conversation?.attachments || [];
     const articles = document.querySelectorAll<HTMLElement>('.public-chat-messages article');
     conversation?.messages.forEach((message, index) => {
       const match = message.body.match(/^Arquivo (?:enviado|anexado):\s*(.+)$/i);
       const attachment = match ? attachments.find(item => item.file_name === match[1] && item.url) : null;
       const paragraph = articles[index]?.querySelector('p');
       if (!attachment?.url || !paragraph) return;
-      matched.add(attachment.id); paragraph.replaceChildren();
-      const link = document.createElement('a'); link.className = 'public-chat-file'; link.href = attachment.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+      paragraph.replaceChildren();
+      const link = document.createElement('button'); link.type = 'button'; link.className = 'public-chat-file';
       const name = document.createElement('strong'); name.textContent = attachment.file_name;
       const meta = document.createElement('small'); meta.textContent = `${Math.ceil(attachment.size_bytes / 1024)} KB · clique para baixar`;
+      link.onclick = async () => {
+        try {
+          const response = await fetch(attachment.url!);
+          if (!response.ok) throw new Error('download');
+          const objectUrl = URL.createObjectURL(await response.blob());
+          const download = document.createElement('a');
+          download.href = objectUrl; download.download = attachment.file_name;
+          document.body.append(download); download.click(); download.remove();
+          window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        } catch { setError('Não foi possível baixar o arquivo. Atualize a conversa e tente novamente.'); }
+      };
       link.append(name, meta); paragraph.append(link);
     });
-    for (const attachment of attachments.filter(item => item.url && !matched.has(item.id))) {
-      const link = document.createElement('a'); link.className = 'public-chat-file'; link.href = attachment.url!; link.target = '_blank'; link.rel = 'noopener noreferrer';
-      const name = document.createElement('strong'); name.textContent = attachment.file_name;
-      const meta = document.createElement('small'); meta.textContent = `${Math.ceil(attachment.size_bytes / 1024)} KB · clique para baixar`;
-      link.append(name, meta); slot.append(link);
-    }
   }, [conversation?.attachments, conversation?.messages]);
   const loadOlder = async () => {
     if (!credentials || !conversation?.messages[0] || loadingOlder) return;
