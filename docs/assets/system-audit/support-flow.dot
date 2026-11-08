@@ -1,0 +1,35 @@
+digraph G {
+  graph [rankdir=TB, bgcolor="transparent", pad="0.25", nodesep="0.35", ranksep="0.42", fontname="Arial"];
+  node [shape=rect, style="rounded,filled", fontname="Arial", fontsize=9.5, color="#d7dadd", fillcolor="#ffffff", fontcolor="#171b22", margin="0.16,0.09"];
+  edge [color="#8d949d", penwidth=1.3, arrowsize=0.65, fontname="Arial", fontsize=8, fontcolor="#626973"];
+
+  start [label="Cliente inicia o atendimento", fillcolor="#20252c", fontcolor="#ffffff", color="#20252c"];
+  bot [label="Assistente guiado coleta\nCNPJ, contato, município,\nserviço e resumo"];
+  resume [shape=diamond, label="Há chamado aberto\npara o CNPJ?", fillcolor="#fff4f4", color="#b2172b"];
+  open [label="Cria protocolo interno\ne entra na fila da seção"];
+  reopen [label="Retoma o chamado aberto\ne carrega as 10 últimas mensagens"];
+  queue [label="Fila por seção\nordem de criação"];
+  assign [label="Distribuição automática\nagente disponível · horário\nmenor carga · capacidade 5", fillcolor="#fff4f4", color="#b2172b"];
+  chat [label="Conversa\ntexto · anexos · respostas rápidas\neventos internos"];
+  transfer [shape=diamond, label="Precisa de\noutra seção?"];
+  priority [label="Transfere para a seção\ncom prioridade sobre chamados\nainda não iniciados"];
+  status [shape=diamond, label="Situação"];
+  wait [label="Aguardando cliente\nmantém vaga ocupada"];
+  resolved [label="Resolvido\nregistra evento, libera vaga\ne chama o próximo", fillcolor="#20252c", fontcolor="#ffffff", color="#20252c"];
+  rating [label="Avaliação de satisfação\ne histórico por CNPJ"];
+
+  start -> bot -> resume;
+  resume -> reopen [label="sim"];
+  resume -> open [label="não"];
+  open -> queue -> assign;
+  reopen -> chat;
+  assign -> chat;
+  chat -> transfer;
+  transfer -> priority [label="sim"];
+  priority -> queue;
+  transfer -> status [label="não"];
+  status -> wait [label="aguardando"];
+  wait -> chat [label="nova mensagem"];
+  status -> resolved [label="resolver"];
+  resolved -> rating;
+}

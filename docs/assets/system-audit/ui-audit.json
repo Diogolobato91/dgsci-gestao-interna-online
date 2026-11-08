@@ -1,0 +1,802 @@
+[
+  {
+    "route": "/",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Departamento-Geral de Segurança Contra Incêndios e Emergências"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 1440,
+    "viewportWidth": 1440,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Iniciar atendimento",
+        "width": 145,
+        "height": 40
+      },
+      {
+        "tag": "a",
+        "name": "Ver todos os serviços",
+        "width": 151,
+        "height": 18
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 230,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 6,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Departamento-Geral de Segurança Contra Incêndios e Emergências"
+      },
+      {
+        "level": 2,
+        "text": "Serviços disponíveis"
+      },
+      {
+        "level": 3,
+        "text": "Vistoria"
+      },
+      {
+        "level": 3,
+        "text": "Multa"
+      },
+      {
+        "level": 3,
+        "text": "Análise de Projeto"
+      },
+      {
+        "level": 3,
+        "text": "Credenciamento"
+      },
+      {
+        "level": 3,
+        "text": "Acesso e Senha"
+      },
+      {
+        "level": 2,
+        "text": "Empresas e profissionais credenciados"
+      },
+      {
+        "level": 2,
+        "text": "Normas e materiais de orientação"
+      },
+      {
+        "level": 2,
+        "text": "Orientações por seção"
+      },
+      {
+        "level": 3,
+        "text": "Vistoria"
+      },
+      {
+        "level": 3,
+        "text": "Análise de Projetos"
+      },
+      {
+        "level": 3,
+        "text": "Multa e Interdição"
+      },
+      {
+        "level": 2,
+        "text": "Precisa falar com a DGSCI?"
+      }
+    ]
+  },
+  {
+    "route": "/atendimento",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Olá! Vamos abrir seu atendimento."
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 1440,
+    "viewportWidth": 1440,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Iniciar atendimento",
+        "width": 145,
+        "height": 40
+      },
+      {
+        "tag": "a",
+        "name": "Voltar ao portal",
+        "width": 120,
+        "height": 20
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 230,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 6,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Olá! Vamos abrir seu atendimento."
+      }
+    ]
+  },
+  {
+    "route": "/credenciados",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": [
+      "Access to fetch at 'https://prozusgomipgwzbyoagj.supabase.co/functions/v1/accreditation-sheet' from origin 'http://127.0.0.1:8080' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: The 'Access-Control-Allow-Origin' header has a value 'https://dgsci.netlify.app' that is not equal to the supplied origin. Have the server send the header with a valid value.",
+      "Failed to load resource: net::ERR_FAILED"
+    ],
+    "failedRequests": [
+      "POST https://prozusgomipgwzbyoagj.supabase.co/functions/v1/accreditation-sheet — net::ERR_FAILED"
+    ],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Empresas e profissionais credenciados"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 1440,
+    "viewportWidth": 1440,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Iniciar atendimento",
+        "width": 145,
+        "height": 40
+      },
+      {
+        "tag": "a",
+        "name": "Voltar ao portal",
+        "width": 113,
+        "height": 18
+      },
+      {
+        "tag": "button",
+        "name": "Tentar novamente",
+        "width": 107,
+        "height": 18
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 230,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 7,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Empresas e profissionais credenciados"
+      }
+    ]
+  },
+  {
+    "route": "/cartilhas",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 ()"
+    ],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Cartilhas"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 1440,
+    "viewportWidth": 1440,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Iniciar atendimento",
+        "width": 145,
+        "height": 40
+      },
+      {
+        "tag": "a",
+        "name": "Voltar ao portal",
+        "width": 113,
+        "height": 18
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 230,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 6,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Cartilhas"
+      }
+    ]
+  },
+  {
+    "route": "/instrucoes-tecnicas",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 ()"
+    ],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Instruções Técnicas"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 1440,
+    "viewportWidth": 1440,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Iniciar atendimento",
+        "width": 145,
+        "height": 40
+      },
+      {
+        "tag": "a",
+        "name": "Voltar ao portal",
+        "width": 113,
+        "height": 18
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 230,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 230,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 6,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Instruções Técnicas"
+      }
+    ]
+  },
+  {
+    "route": "/login",
+    "viewport": "desktop",
+    "status": 200,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Sistema deGestão Interna"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 1440,
+    "viewportWidth": 1440,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "← Voltar ao site da DGSCI",
+        "width": 148,
+        "height": 18
+      },
+      {
+        "tag": "button",
+        "name": "Não possui acesso? Solicitar cadastro",
+        "width": 203,
+        "height": 32
+      }
+    ],
+    "smallTargetCount": 2,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Sistema deGestão Interna"
+      }
+    ]
+  },
+  {
+    "route": "/",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Departamento-Geral de Segurança Contra Incêndios e Emergências"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Ver todos os serviços",
+        "width": 151,
+        "height": 18
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 163,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 5,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Departamento-Geral de Segurança Contra Incêndios e Emergências"
+      },
+      {
+        "level": 2,
+        "text": "Serviços disponíveis"
+      },
+      {
+        "level": 3,
+        "text": "Vistoria"
+      },
+      {
+        "level": 3,
+        "text": "Multa"
+      },
+      {
+        "level": 3,
+        "text": "Análise de Projeto"
+      },
+      {
+        "level": 3,
+        "text": "Credenciamento"
+      },
+      {
+        "level": 3,
+        "text": "Acesso e Senha"
+      },
+      {
+        "level": 2,
+        "text": "Empresas e profissionais credenciados"
+      },
+      {
+        "level": 2,
+        "text": "Normas e materiais de orientação"
+      },
+      {
+        "level": 2,
+        "text": "Orientações por seção"
+      },
+      {
+        "level": 3,
+        "text": "Vistoria"
+      },
+      {
+        "level": 3,
+        "text": "Análise de Projetos"
+      },
+      {
+        "level": 3,
+        "text": "Multa e Interdição"
+      },
+      {
+        "level": 2,
+        "text": "Precisa falar com a DGSCI?"
+      }
+    ]
+  },
+  {
+    "route": "/atendimento",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Olá! Vamos abrir seu atendimento."
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Voltar ao portal",
+        "width": 120,
+        "height": 20
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 163,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 5,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Olá! Vamos abrir seu atendimento."
+      }
+    ]
+  },
+  {
+    "route": "/credenciados",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": [
+      "Access to fetch at 'https://prozusgomipgwzbyoagj.supabase.co/functions/v1/accreditation-sheet' from origin 'http://127.0.0.1:8080' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: The 'Access-Control-Allow-Origin' header has a value 'https://dgsci.netlify.app' that is not equal to the supplied origin. Have the server send the header with a valid value.",
+      "Failed to load resource: net::ERR_FAILED"
+    ],
+    "failedRequests": [
+      "POST https://prozusgomipgwzbyoagj.supabase.co/functions/v1/accreditation-sheet — net::ERR_FAILED"
+    ],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Empresas e profissionais credenciados"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Voltar ao portal",
+        "width": 113,
+        "height": 18
+      },
+      {
+        "tag": "button",
+        "name": "Tentar novamente",
+        "width": 107,
+        "height": 18
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 163,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 6,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Empresas e profissionais credenciados"
+      }
+    ]
+  },
+  {
+    "route": "/cartilhas",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 ()"
+    ],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Cartilhas"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Voltar ao portal",
+        "width": 113,
+        "height": 18
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 163,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 5,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Cartilhas"
+      }
+    ]
+  },
+  {
+    "route": "/instrucoes-tecnicas",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": [
+      "Failed to load resource: the server responded with a status of 401 ()"
+    ],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Instruções Técnicas"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "Voltar ao portal",
+        "width": 113,
+        "height": 18
+      },
+      {
+        "tag": "a",
+        "name": "Abrir atendimento",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Empresas e profissionais",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Instruções Técnicas",
+        "width": 163,
+        "height": 17
+      },
+      {
+        "tag": "a",
+        "name": "Acesso interno",
+        "width": 163,
+        "height": 17
+      }
+    ],
+    "smallTargetCount": 5,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Instruções Técnicas"
+      }
+    ]
+  },
+  {
+    "route": "/login",
+    "viewport": "mobile",
+    "status": 200,
+    "consoleErrors": [],
+    "failedRequests": [],
+    "title": "DGSCI · Gestão e Apoio Operacional",
+    "h1": [
+      "Sistema deGestão Interna"
+    ],
+    "horizontalOverflow": false,
+    "documentWidth": 390,
+    "viewportWidth": 390,
+    "missingAlt": [],
+    "unlabeled": [],
+    "emptyNames": [],
+    "smallTargets": [
+      {
+        "tag": "a",
+        "name": "← Voltar ao site da DGSCI",
+        "width": 148,
+        "height": 18
+      },
+      {
+        "tag": "button",
+        "name": "Não possui acesso? Solicitar cadastro",
+        "width": 203,
+        "height": 32
+      }
+    ],
+    "smallTargetCount": 2,
+    "headings": [
+      {
+        "level": 1,
+        "text": "Sistema deGestão Interna"
+      }
+    ]
+  }
+]

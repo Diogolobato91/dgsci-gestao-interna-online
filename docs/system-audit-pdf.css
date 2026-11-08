@@ -1,0 +1,64 @@
+@page {
+  size: A4;
+  margin: 18mm 16mm 18mm 16mm;
+  @bottom-right { content: "DGSCI · Auditoria 2026  |  " counter(page); color: #717780; font-size: 8pt; }
+}
+
+:root { --red:#b2172b; --ink:#171b22; --muted:#626973; --line:#dfe2e5; --soft:#f4f3f1; --dark:#20252c; }
+* { box-sizing: border-box; }
+html { font-size: 10.5pt; }
+body { margin:0; color:var(--ink); font-family: Inter, Arial, sans-serif; line-height:1.52; }
+h1,h2,h3,h4 { color:var(--ink); line-height:1.15; page-break-after:avoid; }
+h1 { font-size:25pt; margin:0 0 10pt; }
+h2 { font-size:18pt; margin:24pt 0 9pt; padding-top:4pt; border-top:2px solid var(--red); }
+h3 { font-size:13.5pt; margin:18pt 0 6pt; }
+h4 { font-size:11pt; margin:13pt 0 4pt; }
+p { margin:0 0 8pt; }
+ul,ol { margin:5pt 0 9pt 18pt; padding:0; }
+li { margin:2.5pt 0; }
+a { color:var(--red); text-decoration:none; }
+strong { color:#101319; }
+code { background:#f1f2f3; padding:1pt 3pt; border-radius:3px; font-family:"DejaVu Sans Mono",monospace; font-size:8.5pt; }
+pre { white-space:pre-wrap; background:#20252c; color:white; padding:10pt; border-radius:7px; font-size:8pt; }
+table { width:100%; border-collapse:collapse; margin:8pt 0 14pt; font-size:8.8pt; page-break-inside:auto; }
+thead { display:table-header-group; }
+tr { page-break-inside:avoid; }
+th { background:var(--dark); color:#fff; font-weight:700; text-align:left; }
+th,td { padding:6pt; border:1px solid var(--line); vertical-align:top; }
+tbody tr:nth-child(even) { background:#fafafa; }
+blockquote { margin:10pt 0; padding:8pt 10pt; border-left:4px solid var(--red); background:#fff4f4; }
+img { max-width:100%; height:auto; }
+figure { margin:10pt 0 16pt; page-break-inside:avoid; }
+figcaption { margin-top:4pt; color:var(--muted); font-size:8.5pt; text-align:center; }
+.cover { min-height:245mm; padding:21mm 12mm 8mm; display:flex; flex-direction:column; justify-content:space-between; page-break-after:always; background:linear-gradient(145deg,#fff 0%,#fff 64%,#f7e8ea 64%,#f7e8ea 100%); border-left:9px solid var(--red); }
+.cover-kicker { color:var(--red); font-size:9pt; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; }
+.cover h1 { max-width:145mm; margin-top:15mm; font-size:31pt; }
+.cover .subtitle { max-width:145mm; color:var(--muted); font-size:14pt; }
+.cover-meta { display:grid; grid-template-columns:1fr 1fr; gap:8mm; font-size:9pt; color:var(--muted); }
+.cover-mark { width:48mm; border-top:5px solid var(--red); margin-bottom:8mm; }
+.page-break { page-break-before:always; }
+.no-break { page-break-inside:avoid; }
+.lead { font-size:12pt; color:#3f4650; }
+.callout { padding:10pt 12pt; border:1px solid #ecc5ca; background:#fff5f6; border-radius:7px; margin:9pt 0 13pt; page-break-inside:avoid; }
+.callout.dark { color:#fff; background:var(--dark); border-color:var(--dark); }
+.callout.dark strong { color:#fff; }
+.metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8pt; margin:10pt 0 15pt; }
+.metric { border:1px solid var(--line); border-top:3px solid var(--red); border-radius:6px; padding:9pt; page-break-inside:avoid; }
+.metric b { display:block; font-size:17pt; line-height:1; margin-bottom:4pt; }
+.metric span { color:var(--muted); font-size:8pt; }
+.status { display:inline-block; border-radius:12px; padding:2pt 6pt; font-size:7.5pt; font-weight:700; }
+.status.critical { color:#fff; background:#9b1022; }
+.status.high { color:#7e111e; background:#f6dadd; }
+.status.medium { color:#6b4b00; background:#fff0c2; }
+.status.ok { color:#185c37; background:#dcf3e5; }
+.small { font-size:8.5pt; color:var(--muted); }
+.diagram { display:block; width:100%; height:auto; max-height:185mm; margin:8pt auto; }
+.screenshot { border:1px solid var(--line); border-radius:7px; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+.toc a { color:var(--ink); }
+.toc li { margin:4pt 0; }
+.source-list { font-size:8.5pt; overflow-wrap:anywhere; }
+@media print {
+  a { color:inherit; }
+  .cover { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  th,.callout,.metric,.status { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}

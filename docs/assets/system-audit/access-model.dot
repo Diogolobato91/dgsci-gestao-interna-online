@@ -1,0 +1,25 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad="0.25", nodesep="0.45", ranksep="0.75", fontname="Arial"];
+  node [shape=rect, style="rounded,filled", fontname="Arial", fontsize=9.5, color="#d7dadd", fillcolor="#ffffff", fontcolor="#171b22", margin="0.15,0.09"];
+  edge [color="#8d949d", penwidth=1.25, arrowsize=0.65];
+
+  anon [label="Público\nnão autenticado", fillcolor="#f5f6f7"];
+  member [label="Conta aprovada\nsetor(es) + função"];
+  agent [label="Atendente\nfilas autorizadas"];
+  manager [label="Subdiretoria / Diretoria\ngestão operacional"];
+  super [label="Superadministrador\ntodos os setores", fillcolor="#fff4f4", color="#b2172b"];
+
+  pub [label="Portal, catálogo,\nchat mediado por Edge Function"];
+  common [label="Consultas internas,\nbiblioteca, comunicados, modelos"];
+  inbox [label="Caixa do atendente\nchamados atribuídos"];
+  admin [label="Usuários, filas, equipe,\npublicações e operação"];
+  audit [label="Auditoria geral\nconsulta exclusiva", fillcolor="#20252c", fontcolor="#ffffff", color="#20252c"];
+
+  anon -> pub;
+  member -> common;
+  agent -> inbox;
+  manager -> admin;
+  super -> common;
+  super -> admin;
+  super -> audit;
+}

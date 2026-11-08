@@ -1,0 +1,12 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad="0.25", nodesep="0.4", ranksep="0.6", fontname="Arial"];
+  node [shape=rect, style="rounded,filled", fontname="Arial", fontsize=9.5, color="#d7dadd", fillcolor="#ffffff", fontcolor="#171b22", margin="0.16,0.10", width=2.35];
+  edge [color="#b2172b", penwidth=2, arrowsize=0.75];
+
+  p0 [label="0–15 dias · estabilizar\nPublicações públicas\nDependências críticas\nHeaders + CSP\nCI com RLS", fillcolor="#fff4f4", color="#b2172b"];
+  p1 [label="16–45 dias · proteger\nUploads verificados\nPermissão por rota\nLGPD e retenção\nMonitoramento + restore"];
+  p2 [label="46–90 dias · simplificar\nRefatorar CRM/CSS\nSessão pública multidispositivo\nTempo real com backoff\nAcessibilidade WCAG"];
+  p3 [label="Após 90 dias · evoluir\nMódulos pendentes\nIndicadores operacionais\nBusca e exportação\nBase de conhecimento", fillcolor="#20252c", fontcolor="#ffffff", color="#20252c"];
+
+  p0 -> p1 -> p2 -> p3;
+}

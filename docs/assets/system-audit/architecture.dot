@@ -1,0 +1,38 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad="0.25", nodesep="0.48", ranksep="0.8", fontname="Arial"];
+  node [shape=rect, style="rounded,filled", fontname="Arial", fontsize=10, color="#d7dadd", fillcolor="#ffffff", fontcolor="#171b22", margin="0.16,0.10"];
+  edge [color="#8d949d", penwidth=1.4, arrowsize=0.7, fontname="Arial", fontsize=8, fontcolor="#626973"];
+
+  public [label="Portal público\nserviços · atendimento\ncartilhas · ITs · credenciados", fillcolor="#fff4f4", color="#b2172b"];
+  staff [label="Portal interno\nconsulta · operação\ngestão · auditoria", fillcolor="#f5f6f7"];
+  react [label="Aplicação React + Vite\nrotas, componentes e validações", fillcolor="#20252c", fontcolor="#ffffff", color="#20252c"];
+  netlify [label="Netlify\nhospedagem SPA", fillcolor="#f5f6f7"];
+
+  subgraph cluster_supabase {
+    label="Supabase";
+    color="#e1e3e5";
+    style="rounded";
+    fontname="Arial";
+    fontsize=10;
+    auth [label="Auth\ncontas e sessão"];
+    api [label="PostgREST / RPC\nregras de negócio"];
+    edgef [label="Edge Functions\nchat · senha · planilha\nexclusão de conta"];
+    db [label="PostgreSQL\npublic + private\nRLS e auditoria", fillcolor="#fff4f4", color="#b2172b"];
+    storage [label="Storage\nanexos e publicações"];
+    realtime [label="Realtime / polling\nmensagens e estado"];
+  }
+
+  public -> netlify [label="HTTPS"];
+  staff -> netlify [label="HTTPS"];
+  netlify -> react;
+  react -> auth [label="sessão"];
+  react -> api [label="JWT"];
+  react -> edgef [label="HTTPS"];
+  react -> storage [label="upload/download"];
+  react -> realtime [label="atualizações"];
+  edgef -> db [label="service role"];
+  api -> db;
+  auth -> db;
+  storage -> db [style=dashed];
+  realtime -> db [style=dashed];
+}
