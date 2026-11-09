@@ -40,3 +40,42 @@
 .support-conversation textarea{height:48px;min-height:48px;padding:8px 10px}
 .support-conversation form>button[type="submit"]{min-height:48px}
 @media(max-width:760px){.shell-main:has(.support-desk-page){height:auto;padding:14px 12px!important}.support-desk-title{min-height:0;margin-bottom:10px}.support-conversation textarea{height:66px;min-height:66px}}
+
+/* Alturas finais em border-box: o espaço economizado pertence à conversa. */
+.support-desk-title{
+  height:38px;
+  min-height:38px;
+  box-sizing:border-box;
+  margin-bottom:4px;
+}
+.support-conversation>header{
+  height:56px;
+  min-height:56px;
+  box-sizing:border-box;
+}
+.support-composer-tools select,
+.support-attach-button{
+  height:32px;
+  min-height:32px;
+  box-sizing:border-box;
+}
+.support-conversation textarea{
+  height:48px;
+  min-height:48px;
+  box-sizing:border-box;
+}
+.support-conversation form>button[type="submit"]{
+  height:48px;
+  min-height:48px;
+  box-sizing:border-box;
+}
+
+/* Entre 1101 e 1500 px a ficha é recolhida, mas seu acionador permanece visível. */
+@media (min-width:1101px) and (max-width:1500px){
+  .support-customer-toggle{display:inline-flex!important}
+}
+
+@media(max-width:760px){
+  .support-desk-title{height:auto;min-height:0}
+  .support-conversation textarea{height:66px;min-height:66px}
+}
