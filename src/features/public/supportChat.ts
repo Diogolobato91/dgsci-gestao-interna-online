@@ -2,7 +2,7 @@ import {supabase} from '@/lib/supabase';
 import {validateFileContent} from '@/lib/fileValidation';
 
 export type SupportCredentials={protocol:string;cnpj:string;accessKey:string};
-export type SupportMessage={id:string;author:'customer'|'agent'|'system';actor_label?:string;body:string;created_at:string};
+export type SupportMessage={id:string;author:'customer'|'agent'|'system';actor_label?:string;body:string;created_at:string;attachment_id?:string|null;attachment?:SupportAttachment|null};
 export type SupportAttachment={id:string;file_name:string;mime_type:string;size_bytes:number;created_at:string;url:string|null};
 export type SupportConversation={protocol:string;queue_id:string;queue_label:string;service_id:string;service_label:string;assigned_name?:string|null;status:'queued'|'assigned'|'in_progress'|'waiting_customer'|'completed'|'cancelled';people_ahead:number;created_at:string;updated_at:string;messages:SupportMessage[];attachments?:SupportAttachment[];has_more?:boolean};
 export type OpenSupportResult={protocol:string;queue_id:string;status:SupportConversation['status'];created_at:string;accessKey:string;resumed?:boolean};
@@ -29,7 +29,7 @@ export async function uploadSupportAttachment(credentials:SupportCredentials,fil
  const prepared=await invoke<{path:string;token:string}>({action:'prepare_attachment',...credentials,fileName:file.name,mimeType:file.type,size:file.size});
  const {error}=await supabase.storage.from('support-attachments').uploadToSignedUrl(prepared.path,prepared.token,file,{contentType:file.type});
  if(error)throw new Error('Não foi possível enviar o arquivo.');
- return invoke({action:'register_attachment',...credentials,fileName:file.name,filePath:prepared.path,mimeType:file.type,size:file.size});
+ return invoke<SupportAttachment>({action:'register_attachment',...credentials,fileName:file.name,filePath:prepared.path,mimeType:file.type,size:file.size});
 }
 
 const storageKey=(protocol:string)=>`dgsci-support:${protocol.toUpperCase()}`;
