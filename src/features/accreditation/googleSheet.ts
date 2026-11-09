@@ -1,7 +1,6 @@
 import type {Accreditation} from './model';
 
 export const ACCREDITATION_SHEET_URL='https://docs.google.com/spreadsheets/d/1Z4GC69_lE6z2ubKMqmP3UQrvoOwCjVof6Owyw3YJVzM/edit?usp=sharing';
-const SHEET_ID='1Z4GC69_lE6z2ubKMqmP3UQrvoOwCjVof6Owyw3YJVzM';
 const SHEETS={company:'0',professional:'1179762174'} as const;
 type Cell={v?:unknown;f?:string}|null;
 type Gviz={table?:{cols?:{label?:string}[];rows?:{c?:Cell[]}[]}};
@@ -30,10 +29,18 @@ function stableId(kind:SheetKind,index:number,row:string[]){
 export function gvizToAccreditations(payload:Gviz,kind:SheetKind,loadedAt:string):Accreditation[]{
  const sourceRows=(payload.table?.rows||[]).map(row=>(row.c||[]).map(cellText));
  const labels=(payload.table?.cols||[]).map(column=>normalize(column.label));
- const headerIndex=sourceRows.findIndex(row=>{const normalized=row.map(normalize);return columnFor(normalized,aliases.name)>=0&&columnFor(normalized,aliases.modality)>=0&&columnFor(normalized,aliases.validUntil)>=0;});
+ // O GViz remove o texto do cabeçalho quando a coluna foi inferida como
+ // numérica ou data. Na planilha oficial isso acontece com Protocolo e
+ // Validade, embora os títulos continuem visíveis no Google Planilhas.
+ const headerIndex=sourceRows.findIndex(row=>{const normalized=row.map(normalize);return columnFor(normalized,aliases.name)>=0&&columnFor(normalized,aliases.modality)>=0;});
  const headers=headerIndex>=0?sourceRows[headerIndex].map(normalize):labels;
  const start=headerIndex>=0?headerIndex+1:0;
- const modality=columnFor(headers,aliases.modality),name=columnFor(headers,aliases.name),contact=columnFor(headers,aliases.contact),region=columnFor(headers,aliases.region),protocol=columnFor(headers,aliases.protocol),validUntil=columnFor(headers,aliases.validUntil);
+ const modality=columnFor(headers,aliases.modality),name=columnFor(headers,aliases.name);
+ const inferred=(offset:number)=>name>=0&&name+offset<Math.max(headers.length,sourceRows[0]?.length||0)?name+offset:-1;
+ const contact=columnFor(headers,aliases.contact)>=0?columnFor(headers,aliases.contact):inferred(1);
+ const region=columnFor(headers,aliases.region)>=0?columnFor(headers,aliases.region):inferred(2);
+ const protocol=columnFor(headers,aliases.protocol)>=0?columnFor(headers,aliases.protocol):inferred(3);
+ const validUntil=columnFor(headers,aliases.validUntil)>=0?columnFor(headers,aliases.validUntil):inferred(4);
  if(modality<0||name<0||validUntil<0)throw new Error('A estrutura da planilha oficial foi alterada.');
  return sourceRows.slice(start).map((row,index)=>{
   const valid_until=parseDate(row[validUntil]||'');

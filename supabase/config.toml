@@ -1,0 +1,3 @@
+[functions.accreditation-sheet]
+verify_jwt = false
+
