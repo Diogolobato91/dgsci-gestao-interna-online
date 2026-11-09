@@ -8,24 +8,25 @@ import { useAuth } from '@/contexts/AuthContext';
 type Notice={acknowledged?:boolean;published_at?:string;publication_id:string;title:string;description:string;date:string;attachments:{path:string;name:string}[];sections:{title:string;text?:string;items?:string[]}[]};
 export default function NoticeNotifications(){
  const {user}=useAuth();
+ const userId=user?.id;
  const [notice,setNotice]=useState<Notice|null>(null),[reading,setReading]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const current=useRef<Notice|null>(null);
  const [center,setCenter]=useState(false),[unseen,setUnseen]=useState(false),[offset,setOffset]=useState(0),[items,setItems]=useState<Notice[]>([]),[count,setCount]=useState(0),[total,setTotal]=useState(0),[listLoading,setListLoading]=useState(true),[listError,setListError]=useState(''),[revision,setRevision]=useState(0);
- useEffect(()=>{let active=true;setListLoading(true);setListError('');if(!user){setItems([]);setCount(0);setTotal(0);setListLoading(false);return;}
+ useEffect(()=>{let active=true;setListLoading(true);setListError('');if(!userId){setItems([]);setCount(0);setTotal(0);setListLoading(false);return;}
   (async()=>{try{if(!supabase)throw new Error();const r=await supabase.rpc('get_my_notices',{p_offset:offset,p_unseen:unseen});if(r.error||!r.data)throw new Error();if(active){setItems(r.data.items);setCount(r.data.unseen_count);setTotal(r.data.total);if(offset>0&&offset>=r.data.total)setOffset(Math.max(0,Math.floor((r.data.total-1)/20)*20));}}catch{if(active)setListError('Não foi possível consultar as notificações.');}finally{if(active)setListLoading(false);}})();
   return()=>{active=false;};
- },[user?.id,offset,unseen,revision]);
+ },[userId,offset,unseen,revision]);
  useEffect(()=>{
   let active=true;current.current=null;setNotice(null);setReading(false);setError('');
   setItems([]);setCount(0);setTotal(0);setCenter(false);setOffset(0);setUnseen(false);
-  if(!user)return;
+  if(!userId)return;
   function check(){if(active&&document.visibilityState!=='hidden')setRevision(n=>n+1);}
   const timer=window.setInterval(check,30000);
   const focus=()=>void check();let delayed:number|undefined;
   const published=()=>{window.clearTimeout(delayed);delayed=window.setTimeout(()=>void check(),500);};
   window.addEventListener('focus',focus);document.addEventListener('visibilitychange',focus);window.addEventListener('dgsci:new-notice',published);
   return()=>{active=false;window.clearInterval(timer);window.clearTimeout(delayed);window.removeEventListener('focus',focus);document.removeEventListener('visibilitychange',focus);window.removeEventListener('dgsci:new-notice',published);};
- },[user?.id]);
+ },[userId]);
  async function acknowledge(openFull:boolean){
   if(!notice||!user||!supabase||busy)return;setBusy(true);setError('');
   try{

@@ -20,12 +20,13 @@ export async function fetchStaffAbsences(filters: { staffId?: string; start?: st
 }
 export function useStaffAbsences(day: string, revision: number) {
   const { user } = useAuth();
+  const canRead = !!user?.allowedProfiles?.some(profile => ['Secretaria','Diretoria','Subdiretoria'].includes(profile));
   const [data,setData] = useState<StaffAbsence[]>([]), [error,setError] = useState(''), [loading,setLoading] = useState(true);
   useEffect(() => {
     let alive=true;setLoading(true);setError('');setData([]);
-    if (!user?.allowedProfiles?.some(p=>['Secretaria','Diretoria','Subdiretoria'].includes(p))) {setLoading(false);return;}
+    if (!canRead) {setLoading(false);return;}
     void fetchStaffAbsences({start:day,end:day}).then(rows=>{if(alive)setData(rows);}).catch(e=>{if(alive)setError(e.message);}).finally(()=>{if(alive)setLoading(false);});
     return()=>{alive=false;};
-  },[day,revision,user?.id]);
+  },[day,revision,canRead]);
   return {data,error,loading};
 }

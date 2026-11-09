@@ -2,6 +2,23 @@
   command = "npm run build"
   publish = "dist"
 
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://api.mapbox.com; style-src 'self' 'unsafe-inline' https://api.mapbox.com; font-src 'self' data:; img-src 'self' data: blob: https://*.supabase.co https://api.mapbox.com https://*.mapbox.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://*.mapbox.com https://docs.google.com https://*.googleapis.com; worker-src 'self' blob:; media-src 'self' blob: https://*.supabase.co; upgrade-insecure-requests"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(self), payment=(), usb=(), browsing-topics=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-site"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 # This branch is reviewed on the existing owner-private Sites publication.
 # Do not produce a public Netlify preview from a push or pull request.
 [context.deploy-preview]

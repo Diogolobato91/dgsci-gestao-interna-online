@@ -137,6 +137,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       alive = false;
+      // Invalida respostas assíncronas iniciadas por esta assinatura.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       generation.current++;
       subscription.subscription.unsubscribe();
       window.clearInterval(timer);

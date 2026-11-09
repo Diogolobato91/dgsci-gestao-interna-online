@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,8 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
+import type { UserProfile } from '@/types/auth';
+import { isFullAdministrator } from '@/features/records/recordAccess';
 import LoginForm from "@/components/LoginForm";
 import MainLayout from "@/components/MainLayout";
+import AppErrorBoundary from '@/components/AppErrorBoundary';
 const AccreditationPage=lazy(()=>import('@/features/accreditation/AccreditationPage'));
 const AuditPage=lazy(()=>import('@/features/audit/AuditHistory'));
 const MyAccount = lazy(() => import('@/features/users/MyAccountPage'));
@@ -16,6 +19,8 @@ const SatCommands = lazy(() => import('@/features/records/SatCommandsPage'));
 const SupportDesk = lazy(() => import('@/features/support-desk/SupportDesk'));
 const SupportAdmin = lazy(() => import('@/features/support-desk/SupportAdmin'));
 const PublicationsAdmin = lazy(() => import('@/features/publications/PublicationsAdmin'));
+const OperationalCasesPage = lazy(() => import('@/features/operations/OperationalCasesPage'));
+const OperationalReportsPage = lazy(() => import('@/features/operations/OperationalReportsPage'));
 
 const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
 const DashboardGeral = lazy(() => import("@/pages/DashboardGeral"));
@@ -24,12 +29,16 @@ const RelacaoEfetivo = lazy(() => import("@/pages/RelacaoEfetivo"));
 const Pareceres = lazy(() => import("@/pages/Pareceres"));
 const Autorizacoes = lazy(() => import("@/pages/Autorizacoes"));
 const ControlePortarias = lazy(() => import("@/pages/ControlePortarias"));
-import NotFound from "./pages/NotFound";
-
-import SupportLibrary from '@/features/support/SupportLibrary';
-import EstablishmentsWorkspace from '@/features/establishments/EstablishmentsWorkspace';
-import PendingModule from '@/features/support/PendingModule';
-import {PublicAccreditationDirectory,PublicCustomerChatPage,PublicHomePage,PublicIntakePage,PublicPublicationsPage} from '@/features/public/PublicPortal';
+const NotFound = lazy(() => import('./pages/NotFound'));
+const SupportLibrary = lazy(() => import('@/features/support/SupportLibrary'));
+const EstablishmentsWorkspace = lazy(() => import('@/features/establishments/EstablishmentsWorkspace'));
+const PublicHomePage = lazy(() => import('@/features/public/PublicPortal').then(module => ({ default: module.PublicHomePage })));
+const PublicIntakePage = lazy(() => import('@/features/public/PublicPortal').then(module => ({ default: module.PublicIntakePage })));
+const PublicCustomerChatPage = lazy(() => import('@/features/public/PublicPortal').then(module => ({ default: module.PublicCustomerChatPage })));
+const PublicAccreditationDirectory = lazy(() => import('@/features/public/PublicPortal').then(module => ({ default: module.PublicAccreditationDirectory })));
+const PublicPublicationsPage = lazy(() => import('@/features/public/PublicPortal').then(module => ({ default: module.PublicPublicationsPage })));
+const PublicPrivacyPage = lazy(() => import('@/features/public/PublicPortal').then(module => ({ default: module.PublicPrivacyPage })));
+const PublicAccessibilityPage = lazy(() => import('@/features/public/PublicPortal').then(module => ({ default: module.PublicAccessibilityPage })));
 import '@/features/support/portal.css';
 import '@/features/support/workspace.css';
 
@@ -57,6 +66,13 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AuthorizedRoute = ({ children, profiles, administratorOnly = false }: { children: React.ReactNode; profiles?: UserProfile[]; administratorOnly?: boolean }) => {
+  const { user } = useAuth();
+  const fullAdministrator = isFullAdministrator(user);
+  const allowed = fullAdministrator || (!administratorOnly && (!profiles?.length || profiles.some(profile => user?.allowedProfiles?.includes(profile))));
+  return allowed ? <>{children}</> : <Navigate to="/dashboard" replace />;
+};
+
 const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
@@ -67,6 +83,8 @@ const AppRoutes = () => (
       <Route path="/credenciados" element={<PublicAccreditationDirectory />} />
       <Route path="/cartilhas" element={<PublicPublicationsPage kind="booklet" />} />
       <Route path="/instrucoes-tecnicas" element={<PublicPublicationsPage kind="technical_instruction" />} />
+      <Route path="/privacidade" element={<PublicPrivacyPage />} />
+      <Route path="/acessibilidade" element={<PublicAccessibilityPage />} />
       {/* Rota pública - Login */}
       <Route 
         path="/login" 
@@ -86,13 +104,13 @@ const AppRoutes = () => (
         }
       >
         <Route path="credenciamento" element={<AccreditationPage/>}/>
-        <Route path="auditoria" element={<AuditPage/>}/>
+        <Route path="auditoria" element={<AuthorizedRoute administratorOnly><AuditPage/></AuthorizedRoute>}/>
         <Route path="minha-conta" element={<MyAccount/>}/>
-        <Route path="gestao-usuarios" element={<UserManagement />} />
+        <Route path="gestao-usuarios" element={<AuthorizedRoute administratorOnly><UserManagement /></AuthorizedRoute>} />
         <Route path="dashboard" element={<SupportLibrary />} />
         <Route path="atendimentos" element={<SupportDesk />} />
-        <Route path="atendimentos/administracao" element={<SupportAdmin />} />
-        <Route path="gestao-publicacoes" element={<PublicationsAdmin />} />
+        <Route path="atendimentos/administracao" element={<AuthorizedRoute profiles={['Subdiretoria','Diretoria']}><SupportAdmin /></AuthorizedRoute>} />
+        <Route path="gestao-publicacoes" element={<AuthorizedRoute profiles={['Subdiretoria']}><PublicationsAdmin /></AuthorizedRoute>} />
         <Route path="biblioteca" element={<SupportLibrary />} />
         <Route path="comunicados" element={<SupportLibrary />} />
         <Route path="favoritos" element={<SupportLibrary />} />
@@ -104,17 +122,17 @@ const AppRoutes = () => (
         <Route path="modelos-padronizados" element={<SupportLibrary />} />
         <Route path="modelos-auto-infracao" element={<SupportLibrary />} />
         
-        <Route path="projetos" element={<PendingModule />} />
-        <Route path="pareceres" element={<Pareceres />} />
-        <Route path="gestao-autos" element={<PendingModule />} />
-        <Route path="escala-mensal" element={<EscalaMensal />} />
-        <Route path="relatorios" element={<PendingModule />} />
-        <Route path="controle-portarias" element={<ControlePortarias />} />
-        <Route path="comissao-tecnica" element={<PendingModule />} />
-        <Route path="autorizacoes" element={<Autorizacoes />} />
+        <Route path="projetos" element={<AuthorizedRoute profiles={['Análise','Subdiretoria','Diretoria']}><OperationalCasesPage kind="project" /></AuthorizedRoute>} />
+        <Route path="pareceres" element={<AuthorizedRoute profiles={['Análise','Subdiretoria','Diretoria']}><Pareceres /></AuthorizedRoute>} />
+        <Route path="gestao-autos" element={<AuthorizedRoute profiles={['Multas','Subdiretoria','Diretoria']}><OperationalCasesPage kind="infraction" /></AuthorizedRoute>} />
+        <Route path="escala-mensal" element={<AuthorizedRoute profiles={['Secretaria','Subdiretoria','Diretoria']}><EscalaMensal /></AuthorizedRoute>} />
+        <Route path="relatorios" element={<AuthorizedRoute profiles={['Secretaria','Subdiretoria','Diretoria']}><OperationalReportsPage /></AuthorizedRoute>} />
+        <Route path="controle-portarias" element={<AuthorizedRoute profiles={['Subdiretoria']}><ControlePortarias /></AuthorizedRoute>} />
+        <Route path="comissao-tecnica" element={<AuthorizedRoute profiles={['Subdiretoria','Diretoria']}><OperationalCasesPage kind="technical_committee" /></AuthorizedRoute>} />
+        <Route path="autorizacoes" element={<AuthorizedRoute profiles={['Subdiretoria','Diretoria']}><Autorizacoes /></AuthorizedRoute>} />
         <Route path="dashboard-geral" element={<DashboardGeral />} />
-        <Route path="controle-autorizacoes-diarias" element={<Autorizacoes />} />
-        <Route path="relacao-efetivo" element={<RelacaoEfetivo />} />
+        <Route path="controle-autorizacoes-diarias" element={<AuthorizedRoute profiles={['Subdiretoria','Diretoria']}><Autorizacoes /></AuthorizedRoute>} />
+        <Route path="relacao-efetivo" element={<AuthorizedRoute profiles={['Secretaria','Subdiretoria','Diretoria']}><RelacaoEfetivo /></AuthorizedRoute>} />
       </Route>
 
       
@@ -131,7 +149,9 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <AppRoutes />
+          <AppErrorBoundary>
+            <Suspense fallback={<p className="session-loading" role="status">Carregando página…</p>}><AppRoutes /></Suspense>
+          </AppErrorBoundary>
         </TooltipProvider>
       </DataProvider>
     </AuthProvider>

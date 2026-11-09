@@ -1263,10 +1263,11 @@
 .portal-primary,.portal-search button,.preview-entry form>button{color:#fff}
 .preview-entry input{background:#242a31;color:#fff;border:1px solid #4a4e55;border-radius:6px;padding:13px 14px;font-size:14px;min-width:0}
 .preview-entry input:focus-visible{outline:2px solid #c8102e;outline-offset:3px}
-.login-mode{padding:14px 0 0;color:#f18b9b;font-size:12px}
+.login-mode{min-height:44px;padding:12px 0;color:#f18b9b;font-size:12px}
 .login-error{color:#ffb9c4;font-size:12px;line-height:1.7}
 .login-message{color:#c5e8d1;font-size:12px;line-height:1.7}
 .session-loading{min-height:100vh;display:grid;place-items:center;color:#6f747c;background:#fafaf8;font-size:13px}
+.session-failure{min-height:100vh;display:grid;place-items:center;padding:24px;background:#f6f6f3;color:#20242a}.session-failure section{max-width:520px;padding:36px;border:1px solid #deded8;border-radius:10px;background:#fff;text-align:center}.session-failure h1{margin:0 0 12px;font-size:28px}.session-failure p{color:#676d74;line-height:1.6}.session-failure button{min-height:44px;margin-top:12px;padding:0 18px;border:0;border-radius:6px;background:#a71927;color:#fff;font-weight:750;cursor:pointer}.session-failure button:focus-visible{outline:3px solid rgba(167,25,39,.28);outline-offset:3px}
 
 .records-toolbar select{border:1px solid #ddd;border-radius:6px;background:#fff;color:#25272c;padding:9px 12px;margin-left:10px}
 .ordinances-table td{white-space:pre-wrap;min-width:150px;max-width:420px;overflow-wrap:anywhere}
@@ -1281,4 +1282,4 @@
 .command-table thead tr:first-child th.command-cmt{background:#a80d26;color:white;text-align:center}
 .command-table thead tr:first-child th.command-sub{background:#293744;color:white;text-align:center}
 .support-section-editor{padding:12px;border:1px solid #ddd;border-radius:6px;display:grid;gap:7px}.record-form .record-check input,.record-form input[type=checkbox]{width:auto;margin-right:8px}
-.login-home-link{display:inline-flex;margin:6px 0 18px;color:#a71927;font-size:12px;font-weight:800;text-decoration:none}.login-home-link:hover{text-decoration:underline}
+.login-home-link{display:inline-flex;align-items:center;min-height:44px;margin:0 0 12px;color:#a71927;font-size:12px;font-weight:800;text-decoration:none}.login-home-link:hover{text-decoration:underline}

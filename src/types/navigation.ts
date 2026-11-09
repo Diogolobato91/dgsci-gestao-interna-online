@@ -1,9 +1,10 @@
 import { UserProfile } from './auth';
+import type { LucideIcon } from 'lucide-react';
 
 export interface MenuItem {
   id: string;
   title: string;
-  icon: any;
+  icon: LucideIcon;
   path: string;
   section?: string;
 }

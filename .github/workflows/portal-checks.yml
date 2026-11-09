@@ -1,5 +1,7 @@
 name: Portal checks
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main, feat/portal-dgsci-integrado]
   workflow_dispatch:
@@ -18,6 +20,24 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --no-audit --no-fund
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm audit --audit-level=high
       - run: npm run build
+
+  database-policies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_TEST_DB_URL: ${{ secrets.SUPABASE_TEST_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Executar testes SQL/RLS no banco exclusivo de testes
+        if: ${{ env.SUPABASE_TEST_DB_URL != '' }}
+        run: |
+          for test_file in tests/*-rls.sql; do
+            psql "$SUPABASE_TEST_DB_URL" -v ON_ERROR_STOP=1 -f "$test_file"
+          done

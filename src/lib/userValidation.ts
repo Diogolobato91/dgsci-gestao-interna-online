@@ -104,7 +104,7 @@ export function validateRegistrationForm(payload: UserRegistrationPayload): Reco
     errors.nome = 'O nome não pode exceder 160 caracteres.';
   }
 
-  if (payload.postoGraduacao!=='VC'&&(!payload.nomeGuerra?.trim()||payload.nomeGuerra.trim().length<2||payload.nomeGuerra.trim().length>80||/[<>\x00-\x1f]/.test(payload.nomeGuerra))) errors.nomeGuerra='Informe seu nome de guerra (2 a 80 caracteres).';
+  if (payload.postoGraduacao !== 'VC' && (!payload.nomeGuerra?.trim() || payload.nomeGuerra.trim().length < 2 || payload.nomeGuerra.trim().length > 80 || /[<>]/.test(payload.nomeGuerra) || [...payload.nomeGuerra].some(character => character.charCodeAt(0) < 32))) errors.nomeGuerra = 'Informe seu nome de guerra (2 a 80 caracteres).';
 
   if (!payload.postoGraduacao) {
     errors.postoGraduacao = 'Selecione seu posto ou graduação.';

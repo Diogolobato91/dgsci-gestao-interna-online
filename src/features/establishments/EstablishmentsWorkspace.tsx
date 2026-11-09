@@ -34,7 +34,7 @@ export default function EstablishmentsWorkspace() {
     };
     window.addEventListener('message', listener);
     return () => window.removeEventListener('message', listener);
-  }, [snapshot,canEdit,loading]);
+  }, [snapshot,canEdit,loading,reload]);
   useEffect(()=>{if(ready)iframe.current?.contentWindow?.postMessage({type:'dgsci:database-data',payload:snapshot??{companies:[],vistorias:[],loadedTabs:[],timestamp:null},canEdit},window.location.origin);},[snapshot,ready,canEdit]);
   useEffect(() => {
     if (ready) iframe.current?.contentWindow?.postMessage({ type: 'dgsci:view', view }, window.location.origin);

@@ -1,0 +1,31 @@
+name: Monitoramento de produção
+
+on:
+  schedule:
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-portal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verificar rotas públicas
+        env:
+          SITE_ORIGIN: https://dgsci.netlify.app
+        run: |
+          set -euo pipefail
+          for route in / /atendimento /credenciados /cartilhas /instrucoes-tecnicas /privacidade /acessibilidade /login; do
+            code="$(curl --silent --show-error --location --retry 2 --max-time 20 --output /tmp/portal.html --write-out '%{http_code}' "${SITE_ORIGIN}${route}")"
+            test "$code" = "200"
+            grep -q '<div id="root"></div>' /tmp/portal.html
+          done
+
+      - name: Registrar orientação em caso de falha
+        if: failure()
+        run: |
+          echo 'O portal público falhou na verificação sintética.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Confirme o status da Netlify, do domínio e do Supabase antes de uma nova publicação.' >> "$GITHUB_STEP_SUMMARY"

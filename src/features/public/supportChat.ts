@@ -1,4 +1,5 @@
 import {supabase} from '@/lib/supabase';
+import {validateFileContent} from '@/lib/fileValidation';
 
 export type SupportCredentials={protocol:string;cnpj:string;accessKey:string};
 export type SupportMessage={id:string;author:'customer'|'agent'|'system';actor_label?:string;body:string;created_at:string};
@@ -24,6 +25,7 @@ export const submitSupportSatisfaction=(credentials:SupportCredentials,score:num
 export async function uploadSupportAttachment(credentials:SupportCredentials,file:File){
  if(!supabase)throw new Error('A conexão com o atendimento está indisponível.');
  if(file.size>10485760||!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type))throw new Error('Envie imagem ou PDF de até 10 MB.');
+ if(!await validateFileContent(file))throw new Error('O conteúdo do arquivo não corresponde ao formato informado ou contém recursos não permitidos.');
  const prepared=await invoke<{path:string;token:string}>({action:'prepare_attachment',...credentials,fileName:file.name,mimeType:file.type,size:file.size});
  const {error}=await supabase.storage.from('support-attachments').uploadToSignedUrl(prepared.path,prepared.token,file,{contentType:file.type});
  if(error)throw new Error('Não foi possível enviar o arquivo.');

@@ -56,9 +56,9 @@ interface DataContextType {
   comunicados: Comunicado[];
   
   // Cálculos dinâmicos
-  proximoAniversariante: any;
-  proximosAniversariantes: any[];
-  proximasFerias: any[];
+  proximoAniversariante: Aniversariante | null;
+  proximosAniversariantes: Aniversariante[];
+  proximasFerias: FeriasProgramadas[];
   
   // Indicadores
   indicadores: IndicadorFinanceiro;
@@ -67,6 +67,9 @@ interface DataContextType {
   totalMilitaresAtivos: number;
   totalAutorizacoesEmitidas: number;
 }
+
+type Aniversariante = Servidor & { diasParaAniversario: number; proximoAniversario: Date };
+type FeriasProgramadas = Servidor & { diasParaFerias: number };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 

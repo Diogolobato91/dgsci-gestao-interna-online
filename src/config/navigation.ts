@@ -135,6 +135,7 @@ export const navigationConfig: MenuConfig = {
     {id:'admin-atendimentos',title:'Gestão do Atendimento',icon:BarChart3,path:'/atendimentos/administracao',section:'Atendimento on-line'},
     {id:'gestao-publicacoes',title:'Cartilhas e ITs',icon:BookOpen,path:'/gestao-publicacoes',section:'Subdiretoria'},
     { id: 'escala-mensal', title: 'Escala Mensal', icon: Calendar, path: '/escala-mensal', section: 'Administração' },
+    { id: 'relatorios', title: 'Relatórios', icon: BarChart3, path: '/relatorios', section: 'Administração' },
     {
       id: 'controle-portarias',
       title: 'Controle de Portarias',

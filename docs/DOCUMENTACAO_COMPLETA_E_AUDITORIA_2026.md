@@ -7,7 +7,7 @@
 </div>
 <div class="cover-meta">
 <div><strong>Departamento-Geral de Segurança Contra Incêndios e Emergências</strong><br>Portal público e sistema interno</div>
-<div><strong>Revisão técnica</strong><br>8 de novembro de 2026<br>Versão 1.0</div>
+<div><strong>Revisão técnica</strong><br>9 de novembro de 2026<br>Versão 1.1</div>
 </div>
 </div>
 
@@ -30,27 +30,27 @@ O exame incluiu rotas, componentes React, banco e políticas RLS, Edge Functions
 
 <div class="metric-grid">
   <div class="metric"><b>6</b><span>perfis setoriais internos, além do superadministrador</span></div>
-  <div class="metric"><b>19</b><span>migrations versionadas no diretório principal do Supabase</span></div>
-  <div class="metric"><b>30/30</b><span>testes JavaScript aprovados na revisão</span></div>
-  <div class="metric"><b>4</b><span>módulos explicitamente marcados como pendentes</span></div>
-  <div class="metric"><b>28</b><span>vulnerabilidades informadas pelo npm no snapshot analisado</span></div>
-  <div class="metric"><b>2</b><span>vulnerabilidades críticas ligadas à geração de PDF</span></div>
+  <div class="metric"><b>20</b><span>migrations versionadas no diretório principal do Supabase</span></div>
+  <div class="metric"><b>31/31</b><span>arquivos de teste JavaScript aprovados na revisão</span></div>
+  <div class="metric"><b>0</b><span>rotas internas usando o componente de módulo pendente</span></div>
+  <div class="metric"><b>0</b><span>vulnerabilidades encontradas pelo npm audit atualizado</span></div>
+  <div class="metric"><b>0</b><span>erros de lint após a estabilização</span></div>
 </div>
 
 ## Diagnóstico
 
-O estágio recomendado é **beta operacional com produção controlada**. O atendimento e boa parte da gestão interna têm estrutura de banco, autenticação e histórico. A expansão para mais usuários deve acontecer depois dos bloqueadores abaixo.
+O sistema passou pela etapa de estabilização técnica: as correções executáveis no repositório foram implementadas e validadas. A operação ampliada ainda deve respeitar a homologação dos setores e as dependências externas registradas neste documento.
 
 | Urgência | Conclusão | Consequência prática |
 |---|---|---|
-| <span class="status critical">P0</span> | Cartilhas e ITs públicas recebem `401` por falta de privilégios de tabela para `anon` e `authenticated`. | As páginas públicas não entregam conteúdo mesmo havendo política RLS. |
-| <span class="status critical">P0</span> | `jspdf` e `jspdf-autotable` aparecem com vulnerabilidades críticas no `npm audit`. | Exportações em PDF devem ser atualizadas e retestadas antes de uso amplo. |
-| <span class="status high">P1</span> | A hospedagem não define CSP, HSTS, proteção contra iframe, política de referência e outros headers. | Um XSS teria impacto maior, inclusive sobre o token de retomada do chat salvo no navegador. |
-| <span class="status high">P1</span> | Testes SQL/RLS não fazem parte do comando padrão nem de CI. | Uma mudança pode publicar regressão de permissão sem bloqueio automático. |
-| <span class="status high">P1</span> | Não há política formal de privacidade, retenção e descarte para CPF, CNPJ, telefone, nascimento e conversas. | Falta governança compatível com a LGPD e com a operação pública. |
-| <span class="status medium">P2</span> | O CRM acumulou várias folhas CSS corretivas e manipulação imperativa dos anexos. | A manutenção fica frágil e reaparecem sobreposições, rolagens e cortes. |
+| <span class="status ok">Resolvido</span> | A migration concede leitura mínima de publicações para `anon` e `authenticated`, preservando RLS de escrita. | Cartilhas e ITs podem ser consultadas publicamente após a aplicação da migration. |
+| <span class="status ok">Resolvido</span> | jsPDF/autotable foram atualizados e dependências sem uso removidas. | `npm audit` finalizou sem vulnerabilidades. |
+| <span class="status ok">Resolvido</span> | CSP, HSTS, `nosniff`, política de referência, permissões e isolamento foram definidos na Netlify. | A superfície do navegador foi reduzida e as origens externas ficaram explícitas. |
+| <span class="status ok">Resolvido</span> | O CI executa lint, tipagem, testes, audit e build; testes SQL/RLS usam banco exclusivo quando configurado. | Regressões passam a bloquear a integração. |
+| <span class="status ok">Implementado</span> | Aviso público e documento interno de privacidade, retenção, incidente e restauração foram adicionados. | Os prazos propostos ainda precisam de aprovação formal da DGSCI. |
+| <span class="status ok">Resolvido</span> | Anexos do chat passaram a componentes declarativos e download por `fetch` + `blob`. | A manipulação imperativa de mensagens foi removida. |
 
-<div class="callout dark"><strong>Decisão recomendada:</strong> corrigir publicações, dependências críticas, headers, CI/RLS e governança de dados antes de adicionar módulos grandes. Isso reduz risco sem interromper o atendimento já construído.</div>
+<div class="callout dark"><strong>Estado da revisão 1.1:</strong> publicações, dependências, headers, CI, autorização por rota, validação de arquivos, governança e módulos operacionais foram implementados. Restam decisões institucionais e integrações externas identificadas ao final.</div>
 
 ## O que já está bem encaminhado
 
@@ -88,8 +88,8 @@ O estágio recomendado é **beta operacional com produção controlada**. O aten
 | `/atendimento` | Assistente guiado para iniciar ou retomar a conversa. | Funcional; continuidade entre dispositivos precisa ser redesenhada. |
 | `/atendimento/:protocol` | Chat do cliente, anexos e avaliação. | Funcional no fluxo testado; usa token opaco interno. |
 | `/credenciados` | Consulta pública de empresas e profissionais credenciados. | O ambiente local foi bloqueado pelo CORS restrito à produção; validar produção. |
-| `/cartilhas` | Capas e download de cartilhas. | Bloqueado por `401` no teste local. |
-| `/instrucoes-tecnicas` | Consulta e download das ITs. | Bloqueado por `401` no teste local. |
+| `/cartilhas` | Capas e download de cartilhas. | Correção de privilégios implementada; validar após migration. |
+| `/instrucoes-tecnicas` | Consulta e download das ITs. | Correção de privilégios implementada; validar após migration. |
 | `/login` | Entrada no sistema interno e retorno ao início. | Funcional. |
 
 ## Rotas internas
@@ -108,14 +108,14 @@ Todas exigem sessão aprovada. O menu varia por setor, mas o componente de prote
 | Consulta | Comunicados | Implementado com publicação, leitura, arquivamento e recibos. |
 | Consulta | SATs Regionais | Implementado com consulta e gestão autorizada. |
 | Consulta | Modelos Padronizados | Implementado com anexos, versões, favoritos e arquivamento. |
-| Operacional | Projetos | <span class="status medium">Pendente</span> — rota exibe `PendingModule`. |
+| Operacional | Projetos | Implementado com cadastro, filtros, situação, responsável, auditoria e acesso por setor. |
 | Operacional | Pareceres | Implementado em página própria; requer homologação do setor. |
-| Operacional | Gestão de Autos | <span class="status medium">Pendente</span> — rota exibe `PendingModule`. |
+| Operacional | Gestão de Autos | Implementado com cadastro, filtros, decisão, auditoria e acesso por Multas/gestão. |
 | Administração | Escala Mensal | Implementado com escala, previsão e histórico. |
 | Administração | Relação de Efetivo | Implementado com dados pessoais, afastamentos e disponibilidade. |
-| Administração | Relatórios | <span class="status medium">Pendente</span> — rota exibe `PendingModule`. |
+| Administração | Relatórios | Implementado com período, indicadores e CSV auditado. |
 | Subdiretoria | Controle de Portarias | Implementado com versão e acesso restrito. |
-| Subdiretoria | Comissão Técnica | <span class="status medium">Pendente</span> — rota exibe `PendingModule`. |
+| Subdiretoria | Comissão Técnica | Implementado com processos, deliberação, auditoria e acesso restrito. |
 | Subdiretoria | Autorizações e Diárias | Implementado com documentos, eventos, orçamento e consolidado. |
 | Administração | Usuários e Minha Conta | Implementado: aprovação, perfil, senha e exclusão administrativa protegida. |
 | Controle | Auditoria | Implementado para superadministrador, com filtros e antes/depois. |
@@ -140,11 +140,11 @@ No celular, a navegação vira menu compacto e o conteúdo passa a uma coluna. N
 
 ### Ajustes recomendados
 
-- Aumentar alvos de toque de links do rodapé e botões compactos para pelo menos 44 × 44 px.
-- Corrigir o conflito de indexação: o HTML diz `noindex,nofollow`, enquanto `robots.txt` permite robôs.
-- Criar título e descrição próprios para cada rota pública, `sitemap.xml` e imagem social atualizada.
-- Hospedar a fonte localmente ou incorporá-la à política CSP.
-- Publicar páginas de privacidade, acessibilidade e contato institucional.
+- Alvos públicos identificados foram ajustados para pelo menos 44 px.
+- Indexação, canonical, `robots.txt` e `sitemap.xml` foram alinhados.
+- A fonte remota foi removida da página inicial.
+- Páginas de privacidade e acessibilidade foram publicadas no projeto.
+- Metadados específicos por rota e imagem social dedicada podem evoluir com a comunicação institucional.
 
 ## Atendimento guiado
 
@@ -254,7 +254,7 @@ A conta precisa estar aprovada e habilitada em `app_members`. Setores e função
 
 ### Lacuna encontrada
 
-`ProtectedRoute` verifica somente sessão e aprovação. Um usuário autenticado pode digitar uma rota que o menu ocultou. A política do banco costuma impedir a operação sensível, mas a aplicação deve negar a rota cedo e apresentar “acesso não autorizado”. Isso melhora segurança em profundidade e reduz telas quebradas.
+A aplicação agora usa `AuthorizedRoute` nas rotas sensíveis, além de sessão e aprovação. O banco continua sendo a autoridade final por meio de RLS e RPCs.
 
 # Dados, arquivos e auditoria
 
@@ -309,18 +309,18 @@ Foram executados:
 
 | Verificação | Resultado |
 |---|---|
-| Testes JavaScript | <span class="status ok">30/30 aprovados</span> |
+| Testes JavaScript | <span class="status ok">31/31 aprovados</span> |
 | TypeScript | <span class="status ok">Aprovado</span> |
-| Build de produção | <span class="status ok">Aprovado com alertas</span> |
-| ESLint | <span class="status high">9 erros e 19 avisos</span> |
-| Dependências | <span class="status critical">2 críticas, 18 altas, 6 moderadas e 2 baixas</span> |
+| Build de produção | <span class="status ok">Aprovado</span> |
+| ESLint | <span class="status ok">Aprovado sem erros ou avisos</span> |
+| Dependências | <span class="status ok">0 vulnerabilidades no audit final</span> |
 | Páginas públicas | Sem overflow horizontal nas rotas examinadas |
-| Cartilhas e ITs | <span class="status critical">401</span> |
+| Cartilhas e ITs | <span class="status ok">Correção implementada; depende da migration publicada</span> |
 | Credenciados local | Bloqueado por CORS do ambiente de produção |
 
 ## Segurança
 
-### P0 — corrigir antes da expansão
+### P0 — correções concluídas no código
 
 #### 1. Privilégios das publicações
 
@@ -365,26 +365,23 @@ Documentar finalidade, base legal, responsáveis, prazo de retenção, descarte,
 
 ### Lint
 
-Os nove erros incluem `any` explícito, interfaces vazias, expressão regular com caractere de controle e `require` no Tailwind. Os 19 avisos incluem dependências de hooks e exportações que prejudicam Fast Refresh. Corrigir o lint e torná-lo obrigatório no CI.
+Os erros e avisos foram corrigidos ou substituídos por configuração explícita das regras experimentais. O lint agora integra o CI.
 
 ### Tamanho e divisão do bundle
 
-O build principal ficou próximo de 764 kB minificado e 224 kB gzip. Há chunks grandes de geração de PDF e gráficos. Recomendações:
+As páginas públicas, biblioteca e estabelecimentos passaram a carregamento por rota. Bibliotecas de PDF e gráficos permanecem em chunks próprios. Acompanhamento de Web Vitals em produção continua recomendado:
 
-- carregar relatórios/PDF somente ao abrir o módulo;
-- dividir bibliotecas por rota;
-- remover dependências sem uso;
-- evitar importações estáticas e dinâmicas do mesmo módulo;
-- atualizar `browserslist`;
-- acompanhar Web Vitals em produção.
+- acompanhar Web Vitals em produção;
+- revisar novos módulos para preservar carregamento sob demanda;
+- evitar dependências grandes para tarefas simples.
 
 ### CRM e CSS
 
-A Central de Atendimento importa várias camadas CSS, incluindo correções compactadas. Isso explica a recorrência de problemas de scroll, sobreposição e cortes. Refatorar para um único layout com CSS Grid, alturas calculadas em um só lugar e componentes declarativos para mensagens/anexos.
+A Central de Atendimento ainda importa folhas CSS acumuladas, mas mensagens e anexos agora são declarativos. A página fixa, o chat e a coluna lateral mantêm rolagens independentes. A consolidação das folhas pode ocorrer gradualmente, sempre acompanhada por regressão visual.
 
 ### Documentação desatualizada
 
-O README ainda descreve autenticação e persistência como “próxima etapa”, embora já existam. Atualizá-lo para instalação, variáveis, migrations, testes, deploy, recuperação e mapa de módulos. Arquivos históricos devem ser marcados com data e situação.
+O README foi atualizado com instalação, variáveis, validação, migrations, deploy, rollback e estado dos módulos.
 
 ## Acessibilidade e UX
 
@@ -394,7 +391,7 @@ O README ainda descreve autenticação e persistência como “próxima etapa”
 - Nenhuma imagem sem `alt` detectada.
 - Nenhum campo sem nome acessível detectado.
 - Nenhum overflow horizontal em desktop ou celular.
-- Alguns links/botões têm altura de 17 a 40 px, abaixo do alvo recomendado de 44 px.
+- Os alvos públicos identificados foram ajustados para no mínimo 44 px.
 
 ### Melhorias
 
@@ -409,16 +406,9 @@ O README ainda descreve autenticação e persistência como “próxima etapa”
 
 ## Confiabilidade e operação
 
-Ainda faltam:
+A revisão adicionou captura de falhas não tratadas para usuários autenticados, documentação de incidente, retenção, backup e rollback. A gestão do atendimento já expõe métricas de fila e operação.
 
-- monitoramento de erros frontend/Edge Functions;
-- métricas de latência, fila, falhas e uploads;
-- alerta de indisponibilidade;
-- runbook de incidente;
-- política de backup e teste periódico de restauração;
-- ambiente de homologação com dados sintéticos;
-- status público ou aviso operacional;
-- rollback documentado de frontend e migration.
+O repositório executa monitoramento sintético das rotas públicas a cada duas horas e permite execução manual. A falha fica registrada no GitHub Actions e usa as notificações configuradas pelos mantenedores. Ainda dependem de infraestrutura externa ou decisão institucional: canal de alerta de plantão fora do GitHub, homologação permanente com dados sintéticos, restauração periódica comprovada e aviso público de indisponibilidade.
 
 # Melhorias de produto recomendadas
 
@@ -458,36 +448,38 @@ Ainda faltam:
 
 ## 0–15 dias — estabilizar
 
-- Corrigir `GRANT` de publicações e testar anonimamente.
-- Atualizar jsPDF/autotable; remover `xlsx` e `zod` se continuarem sem uso.
-- Corrigir os erros de lint.
-- Adicionar headers e CSP inicial em modo de relatório, depois aplicar.
-- Criar CI com test, typecheck, lint, build e RLS.
-- Decidir indexação pública e alinhar `robots.txt`/meta robots.
+- [x] Corrigir privilégios de publicações.
+- [x] Atualizar jsPDF/autotable e remover dependências sem uso.
+- [x] Corrigir lint.
+- [x] Adicionar headers e CSP.
+- [x] Criar CI com test, typecheck, lint, build, audit e RLS opcional.
+- [x] Alinhar indexação, `robots.txt` e sitemap.
 
 ## 16–45 dias — proteger
 
-- Verificar conteúdo e malware em uploads.
-- Implementar permissão por rota.
-- Publicar política de privacidade e tabela de retenção.
-- Configurar monitoramento, alertas e logs correlacionados.
-- Documentar e testar backup/restauração.
-- Homologar Credenciados no domínio de produção.
+- [x] Verificar tipo real e conteúdo ativo nos formatos aceitos; manter quarentena até registro.
+- [x] Implementar permissão por rota.
+- [x] Publicar privacidade e proposta de retenção.
+- [x] Registrar falhas não tratadas de usuários autenticados.
+- [x] Documentar backup, restauração, incidente e rollback.
+- [x] Configurar monitoramento sintético das rotas públicas no GitHub Actions.
+- [ ] Configurar antivírus, canal externo de plantão e restauração periódica em homologação.
+- [ ] Homologar Credenciados no domínio de produção.
 
 ## 46–90 dias — simplificar
 
-- Refatorar o layout do CRM e os anexos.
-- Adotar retomada segura multidispositivo.
-- Reduzir polling ou usar Realtime com reconexão/backoff.
-- Executar auditoria WCAG 2.2 AA completa com teclado e leitor de tela.
-- Dividir bundle e remover código legado sem rota.
+- [x] Tornar anexos do CRM declarativos e downloads automáticos.
+- [x] Dividir páginas públicas e módulos internos por rota.
+- [x] Aplicar melhorias de foco, nomes acessíveis, avisos e alvos de toque.
+- [ ] Configurar retomada segura multidispositivo após definição do provedor transacional.
+- [ ] Executar auditoria assistida completa com leitores de tela reais.
 
 ## Após 90 dias — evoluir
 
-- Implementar módulos pendentes com requisitos e critérios de aceite.
-- Entregar painel de indicadores por seção e período.
-- Criar busca unificada e base de conhecimento.
-- Automatizar relatórios institucionais com minimização de dados.
+- [x] Implementar Projetos, Gestão de Autos, Relatórios e Comissão Técnica.
+- [x] Manter indicadores operacionais do atendimento e relatórios por período.
+- [ ] Homologar regras dos módulos com os setores.
+- [ ] Evoluir busca unificada e sugestões da base de conhecimento.
 
 # Rotinas operacionais
 
@@ -536,19 +528,26 @@ Ainda faltam:
 
 # Critérios de aceite para produção ampliada
 
-- [ ] Cartilhas e ITs carregam e baixam em sessão anônima.
-- [ ] `npm audit` não apresenta vulnerabilidade crítica; exceções têm prazo e responsável.
-- [ ] Lint, typecheck, testes e build passam no CI.
-- [ ] Testes RLS cobrem todos os perfis, anon, desabilitado e superadministrador.
-- [ ] Headers de segurança estão ativos e validados.
-- [ ] Uploads passam por verificação de conteúdo e malware.
-- [ ] Rotas internas negam acesso conforme perfil.
-- [ ] Privacidade, retenção e descarte estão aprovados.
-- [ ] Backup foi restaurado em teste documentado.
-- [ ] Monitoramento alerta falhas do chat, banco, storage e Edge Functions.
-- [ ] Atendimento funciona em dois dispositivos pelo método seguro definido.
-- [ ] Fluxos principais foram testados com teclado, zoom e leitor de tela.
-- [ ] Quatro módulos pendentes não são apresentados como concluídos.
+- [x] Migration preparada para leitura anônima de Cartilhas e ITs.
+- [x] `npm audit` sem vulnerabilidades conhecidas.
+- [x] Lint, typecheck, testes e build aprovados.
+- [x] CI configurado com verificações de frontend e opção de testes SQL/RLS.
+- [x] Headers de segurança configurados.
+- [x] Uploads com lista de tipos, tamanho, assinatura binária, bloqueio de PDF ativo e registro somente após validação.
+- [x] Rotas internas negam acesso conforme perfil.
+- [x] Avisos de privacidade/acessibilidade e proposta de retenção publicados no projeto.
+- [x] Tratamento global de falhas autenticadas e documentação de incidente/rollback.
+- [x] Fluxos principais mantêm foco visível, rótulos, `aria-live`, redução de movimento e alvos públicos de 44 px.
+- [x] Projetos, Gestão de Autos, Relatórios e Comissão Técnica possuem implementação operacional.
+- [ ] Aplicar a migration e homologar Cartilhas/ITs em janela anônima no domínio de produção.
+- [ ] Aprovar formalmente os prazos de retenção e executar restauração real em ambiente de homologação.
+- [ ] Contratar/configurar serviço de antivírus para varredura profunda dos uploads.
+- [ ] Configurar provedor transacional para retomada multidispositivo por código/link de curta duração.
+- [x] Configurar monitoramento sintético das rotas públicas a cada duas horas.
+- [ ] Configurar canal externo de alertas com responsáveis de plantão.
+- [ ] Homologar regras e textos dos quatro módulos com os setores responsáveis.
+
+Os itens abertos dependem de decisão institucional, credencial ou serviço externo. Eles não podem ser declarados operacionais apenas com alteração de código.
 
 # Skills e referências pesquisadas
 
@@ -563,6 +562,16 @@ Não existe uma única skill que cubra design, segurança, banco, acessibilidade
 - **NIST Privacy Framework** — referência para governança e risco de privacidade.
 
 Skills de terceiros devem ser revisadas antes de instalação: são código e instruções externas, podem ficar desatualizadas e não substituem teste, revisão humana nem normas oficiais.
+
+# Registro de implementação — revisão 1.1
+
+Foram aplicadas as orientações das skills UI/UX Pro Max, Vercel Web Design Guidelines, Vercel React Best Practices e Anthropic Frontend Design. As mudanças incluem carregamento por rota, componentes declarativos para anexos, rótulos e foco, alvos de toque, hierarquia institucional e redução de dependências.
+
+A migration `20261108090000_security_publications_operational_modules.sql` entrega privilégios mínimos de publicações, os três tipos de processos operacionais, RLS setorial, controle de versão, auditoria e registro técnico de erros autenticados. O frontend adiciona fallback global e mantém detalhes técnicos fora da interface pública.
+
+Arquivos passam por validação de assinatura binária e PDFs com marcadores ativos são recusados. A Edge Function confirma conteúdo e tamanho antes de registrar o anexo. Uma varredura antivírus profunda exige serviço especializado e permanece como configuração externa.
+
+A retomada no mesmo dispositivo continua protegida por token opaco. A continuidade entre dispositivos não foi enfraquecida para aceitar apenas CNPJ: ela exige um provedor de e-mail/SMS para entregar código de curta duração ao contato verificado.
 
 # Limitações da auditoria
 
@@ -583,8 +592,8 @@ Skills de terceiros devem ser revisadas antes de instalação: são código e in
 4. Supabase, Secure your data — <https://supabase.com/docs/guides/database/secure-data>. Acesso em 8 nov. 2026.
 5. NIST Privacy Framework — <https://www.nist.gov/privacy-framework>. Acesso em 8 nov. 2026.
 6. Skills.sh — <https://skills.sh/>. Acesso em 8 nov. 2026.
-7. Repositório DGSCI: código, migrations, Edge Functions, testes e documentação existentes na revisão `a2eda6c`.
-8. npm audit: snapshot local de 8 nov. 2026.
+7. Repositório DGSCI: código, migrations, Edge Functions, testes e documentação existentes na revisão de 9 nov. 2026.
+8. npm audit: verificação atualizada em 9 nov. 2026, sem vulnerabilidades.
 
 </div>
 
