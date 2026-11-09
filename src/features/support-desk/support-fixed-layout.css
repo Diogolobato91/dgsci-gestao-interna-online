@@ -20,3 +20,9 @@
 @media (min-width:1101px) and (max-width:1280px){
   .support-desk-workspace.has-customer-panel{grid-template-columns:230px minmax(360px,1fr) minmax(290px,320px)!important}
 }
+
+
+/* A central prioriza a conversa: indicadores resumidos não ocupam a altura de trabalho. */
+.support-desk-page .support-desk-workspace{min-height:0;flex:1 1 auto}
+.support-desk-title{margin-bottom:16px}
+@media(max-width:760px){.support-desk-title{margin-bottom:12px}}
