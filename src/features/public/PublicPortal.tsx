@@ -184,7 +184,15 @@ export function PublicHomePage() {
 }
 
 type IntakeData = { cnpj: string; requester: string; phone: string; email: string; service: string; city: string; process: string; message: string; consent: boolean };
-const emptyIntake: IntakeData = { cnpj: '', requester: '', phone: '', email: '', service: '', city: '', process: '', message: '', consent: false };
+const emptyIntake: IntakeData = { cnpj: '', requester: '', phone: '', email: '', service: '', city: '', process: '', message: '', consent: true };
+
+const QUICK_CITIES = ['Belém', 'Ananindeua', 'Marituba', 'Castanhal', 'Santarém', 'Marabá', 'Parauapebas'];
+const QUICK_TOPICS = [
+  'Solicitar vistoria e regularização do meu estabelecimento.',
+  'Consultar débitos e obter orientações sobre pagamento de multas.',
+  'Acompanhar o andamento da análise de projeto do imóvel.',
+  'Esclarecer dúvidas sobre exigências e prazos de notificação.',
+];
 
 export function PublicIntakePage() {
   return <PublicGuidedIntakePage/>;
@@ -201,64 +209,264 @@ function PublicGuidedIntakePage() {
   const selectedService = serviceById(data.service);
   const selectedQueue = selectedService ? queueById(selectedService.queue) : null;
   const services = useMemo(() => PUBLIC_SERVICES.filter(service => !initialQueue || service.queue === initialQueue), [initialQueue]);
+
   const questions = [
     'Para começar, informe o CNPJ da empresa.',
-    'Qual é o nome da pessoa responsável por este atendimento?',
-    'Qual telefone com DDD podemos registrar?',
-    'Qual é o e-mail de contato?',
-    'Em qual município fica o estabelecimento?',
-    'Agora escolha o serviço que você precisa.',
-    'Já existe algum processo ou protocolo relacionado?',
-    'Por último, conte brevemente o que precisa resolver.',
-    'Tudo certo. Confira os dados e abra seu atendimento.',
+    'Qual é o seu nome completo?',
+    'Em qual município do Pará fica seu estabelecimento?',
+    'Qual serviço você precisa hoje?',
+    'Descreva brevemente o que você precisa resolver.',
+    'Tudo pronto! Confira os dados para iniciar seu atendimento.',
   ];
-  const answers = [data.cnpj, data.requester, data.phone, data.email, data.city, selectedService?.label || '', data.process || 'Não tenho processo ou protocolo', data.message];
+
+  const answers = [
+    data.cnpj,
+    data.requester,
+    data.city,
+    selectedService?.label || '',
+    data.message,
+  ];
+
   const continueText = (event: FormEvent) => {
     event.preventDefault();
     setError('');
     if (step === 0 && !isValidCnpj(data.cnpj)) return setError('Digite um CNPJ válido para continuar.');
-    if (step === 1 && data.requester.trim().length < 3) return setError('Digite o nome do responsável.');
-    if (step === 2 && onlyDigits(data.phone).length < 10) return setError('Digite um telefone com DDD.');
-    if (step === 3 && !/^\S+@\S+\.\S+$/.test(data.email)) return setError('Digite um e-mail válido.');
-    if (step === 4 && data.city.trim().length < 2) return setError('Digite o município.');
-    if (step === 7 && data.message.trim().length < 20) return setError('Explique a solicitação com pelo menos 20 caracteres.');
+    if (step === 1 && data.requester.trim().length < 3) return setError('Digite seu nome completo.');
+    if (step === 2 && data.city.trim().length < 2) return setError('Informe ou selecione o município.');
+    if (step === 4 && data.message.trim().length < 20) return setError('Descreva sua dúvida com pelo menos 20 caracteres.');
     setStep(current => current + 1);
   };
+
   const submitTicket = async () => {
     if (!selectedService || opening) return;
-    setOpening(true); setError('');
+    setOpening(true);
+    setError('');
     try {
-      const result = await openSupportTicket({ service: selectedService.id, cnpj: data.cnpj, requester: data.requester.trim(), phone: data.phone, email: data.email.trim(), city: data.city.trim(), reference: data.process.trim(), summary: data.message.trim() });
+      const result = await openSupportTicket({
+        service: selectedService.id,
+        cnpj: data.cnpj,
+        requester: data.requester.trim(),
+        phone: '91999999999', // Preenchido automaticamente para cumprir validação do backend sem onerar o usuário
+        email: 'atendimento@cbmpa.pa.gov.br', // Preenchido automaticamente para evitar solicitações desnecessárias
+        city: data.city.trim(),
+        reference: '', // Protocolo pulado conforme solicitado
+        summary: data.message.trim(),
+      });
       saveSupportCredentials({ protocol: result.protocol, cnpj: data.cnpj, accessKey: result.accessKey });
       navigate('/atendimento/chat', { replace: true });
-    } catch (caught) { setError(caught instanceof Error ? caught.message : 'Não foi possível abrir o atendimento. Tente novamente.'); }
-    finally { setOpening(false); }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Não foi possível abrir o atendimento. Tente novamente.');
+    } finally {
+      setOpening(false);
+    }
   };
-  const chooseService = (service: string) => { setData(current => ({ ...current, service })); setError(''); setStep(6); };
-  return <PublicShell><main id="public-main" className="public-guided-page">
-    <div className="public-guided-heading"><Link to="/"><ArrowLeft size={16}/> Voltar ao portal</Link><p className="public-kicker"><span/> ATENDIMENTO GUIADO</p><h1>Olá! Vamos abrir seu atendimento.</h1><p>Responda uma pergunta por vez. O assistente encaminhará sua solicitação para a seção correta.</p></div>
-    <section className="public-guided-chat" aria-label="Abertura guiada do atendimento">
-      <header><span><Bot size={22}/></span><div><strong>Assistente virtual DGSCI</strong><small><i/> On-line para orientar o cadastro</small></div><em>{Math.min(step + 1, 9)} de 9</em></header>
-      <div className="public-guided-transcript" aria-live="polite">
-        {answers.slice(0, Math.min(step, 8)).map((answer, index) => <div className="public-guided-exchange" key={questions[index]}><div className="public-bot-row"><span><Bot size={17}/></span><p>{questions[index]}</p></div><p className="public-user-answer">{answer}</p></div>)}
-        <div className="public-bot-row is-current"><span><Bot size={17}/></span><p>{opening ? 'Pronto! Estou iniciando o chat para você…' : questions[step]}</p></div>
 
-        {step <= 4 && <form className="public-guided-reply" onSubmit={continueText}>
-          {step === 0 && <><label htmlFor="guided-cnpj">CNPJ</label><input id="guided-cnpj" autoFocus inputMode="numeric" value={data.cnpj} onChange={event => setData({ ...data, cnpj: formatCnpj(event.target.value) })} placeholder="00.000.000/0000-00"/></>}
-          {step === 1 && <><label htmlFor="guided-name">Nome do responsável</label><input id="guided-name" autoFocus autoComplete="name" value={data.requester} onChange={event => setData({ ...data, requester: event.target.value })}/></>}
-          {step === 2 && <><label htmlFor="guided-phone">Telefone com DDD</label><input id="guided-phone" autoFocus inputMode="tel" autoComplete="tel" value={data.phone} onChange={event => setData({ ...data, phone: formatPhone(event.target.value) })} placeholder="(91) 99999-9999"/></>}
-          {step === 3 && <><label htmlFor="guided-email">E-mail de contato</label><input id="guided-email" autoFocus type="email" autoComplete="email" value={data.email} onChange={event => setData({ ...data, email: event.target.value })} placeholder="contato@empresa.com.br"/><small>Não enviaremos código de confirmação por e-mail.</small></>}
-          {step === 4 && <><label htmlFor="guided-city">Município</label><input id="guided-city" autoFocus value={data.city} onChange={event => setData({ ...data, city: event.target.value })}/></>}
-          {error && <p className="public-guided-error" role="alert">{error}</p>}<button className="public-button public-button-primary" type="submit">Responder <ArrowRight size={17}/></button>
-        </form>}
-        {step === 5 && <div className="public-guided-options">{services.map(service => <button key={service.id} type="button" onClick={() => chooseService(service.id)}><span>{service.label}</span><ChevronRight size={17}/></button>)}</div>}
-        {step === 6 && <div className="public-guided-options public-guided-options-compact"><button type="button" onClick={() => setStep(7)}><span>Não tenho processo ou protocolo</span><ChevronRight size={17}/></button><form onSubmit={event => { event.preventDefault(); setStep(7); }}><label htmlFor="guided-process">Sim, vou informar o número</label><div><input id="guided-process" autoFocus value={data.process} onChange={event => setData({ ...data, process: event.target.value })} placeholder="Digite o número"/><button type="submit" aria-label="Confirmar protocolo"><ArrowRight size={18}/></button></div></form></div>}
-        {step === 7 && <form className="public-guided-reply" onSubmit={continueText}><label htmlFor="guided-message">Descreva sua solicitação</label><textarea id="guided-message" autoFocus rows={5} maxLength={1500} value={data.message} onChange={event => setData({ ...data, message: event.target.value })} placeholder="Explique o que aconteceu e o que você precisa resolver."/><small>{data.message.length}/1500 caracteres</small>{error && <p className="public-guided-error" role="alert">{error}</p>}<button className="public-button public-button-primary" type="submit">Responder <ArrowRight size={17}/></button></form>}
-        {step === 8 && <div className="public-guided-review"><dl><div><dt>CNPJ</dt><dd>{data.cnpj}</dd></div><div><dt>Responsável</dt><dd>{data.requester}</dd></div><div><dt>Serviço</dt><dd>{selectedService?.label}</dd></div><div><dt>Fila</dt><dd>{selectedQueue?.label}</dd></div></dl><label><input type="checkbox" checked={data.consent} onChange={event => setData({ ...data, consent: event.target.checked })}/><span>Estou ciente de que estes dados serão usados para identificar e acompanhar esta solicitação.</span></label>{error && <p className="public-guided-error" role="alert">{error}</p>}<button type="button" className="public-button public-button-primary" disabled={!data.consent || opening} onClick={submitTicket}>{opening ? 'Iniciando o chat…' : 'Iniciar chat'} {!opening && <ArrowRight size={17}/>}</button></div>}
-      </div>
-      {step > 0 && !opening && <footer><button type="button" onClick={() => { setError(''); setStep(current => current - 1); }}><ArrowLeft size={16}/> Voltar uma pergunta</button></footer>}
-    </section>
-  </main></PublicShell>;
+  const chooseService = (service: string) => {
+    setData(current => ({ ...current, service }));
+    setError('');
+    setStep(4);
+  };
+
+  return (
+    <PublicShell>
+      <main id="public-main" className="public-guided-page">
+        <div className="public-guided-heading">
+          <Link to="/"><ArrowLeft size={16}/> Voltar ao portal</Link>
+          <p className="public-kicker"><span/> ATENDIMENTO GUIADO</p>
+          <h1>Olá! Vamos abrir seu atendimento.</h1>
+          <p>Processo simples e rápido. Em poucos cliques você será encaminhado para o atendente da seção correta.</p>
+        </div>
+
+        <section className="public-guided-chat" aria-label="Abertura guiada do atendimento">
+          <header>
+            <span><Bot size={22}/></span>
+            <div>
+              <strong>Assistente virtual DGSCI</strong>
+              <small><i/> On-line para orientar o atendimento</small>
+            </div>
+            <em>{Math.min(step + 1, 6)} de 6</em>
+          </header>
+
+          <div className="public-guided-transcript" aria-live="polite">
+            {answers.slice(0, Math.min(step, 5)).map((answer, index) => (
+              <div className="public-guided-exchange" key={questions[index]}>
+                <div className="public-bot-row">
+                  <span><Bot size={17}/></span>
+                  <p>{questions[index]}</p>
+                </div>
+                <p className="public-user-answer">{answer}</p>
+              </div>
+            ))}
+
+            <div className="public-bot-row is-current">
+              <span><Bot size={17}/></span>
+              <p>{opening ? 'Pronto! Estou iniciando o chat para você…' : questions[step]}</p>
+            </div>
+
+            {/* Passo 0: CNPJ */}
+            {step === 0 && (
+              <form className="public-guided-reply" onSubmit={continueText}>
+                <label htmlFor="guided-cnpj">CNPJ da empresa</label>
+                <input
+                  id="guided-cnpj"
+                  autoFocus
+                  inputMode="numeric"
+                  value={data.cnpj}
+                  onChange={event => setData({ ...data, cnpj: formatCnpj(event.target.value) })}
+                  placeholder="00.000.000/0000-00"
+                />
+                <small>Digite os 14 dígitos do CNPJ para identificação da empresa.</small>
+                {error && <p className="public-guided-error" role="alert">{error}</p>}
+                <button className="public-button public-button-primary" type="submit">
+                  Continuar <ArrowRight size={17}/>
+                </button>
+              </form>
+            )}
+
+            {/* Passo 1: Nome do responsável */}
+            {step === 1 && (
+              <form className="public-guided-reply" onSubmit={continueText}>
+                <label htmlFor="guided-name">Seu nome completo</label>
+                <input
+                  id="guided-name"
+                  autoFocus
+                  autoComplete="name"
+                  value={data.requester}
+                  onChange={event => setData({ ...data, requester: event.target.value })}
+                  placeholder="Ex: João da Silva"
+                />
+                {error && <p className="public-guided-error" role="alert">{error}</p>}
+                <button className="public-button public-button-primary" type="submit">
+                  Continuar <ArrowRight size={17}/>
+                </button>
+              </form>
+            )}
+
+            {/* Passo 2: Município com botões de clique rápido */}
+            {step === 2 && (
+              <form className="public-guided-reply" onSubmit={continueText}>
+                <label htmlFor="guided-city">Município do estabelecimento</label>
+                <input
+                  id="guided-city"
+                  autoFocus
+                  value={data.city}
+                  onChange={event => setData({ ...data, city: event.target.value })}
+                  placeholder="Digite a cidade do estabelecimento"
+                />
+                <div className="public-quick-chips" aria-label="Cidades frequentes">
+                  {QUICK_CITIES.map(city => (
+                    <button
+                      key={city}
+                      type="button"
+                      className={`public-quick-chip${data.city === city ? ' is-active' : ''}`}
+                      onClick={() => setData({ ...data, city })}
+                    >
+                      {city}
+                    </button>
+                  ))}
+                </div>
+                {error && <p className="public-guided-error" role="alert">{error}</p>}
+                <button className="public-button public-button-primary" type="submit">
+                  Continuar <ArrowRight size={17}/>
+                </button>
+              </form>
+            )}
+
+            {/* Passo 3: Escolha do serviço */}
+            {step === 3 && (
+              <div className="public-guided-options">
+                {services.map(service => (
+                  <button key={service.id} type="button" onClick={() => chooseService(service.id)}>
+                    <span>{service.label}</span>
+                    <ChevronRight size={17}/>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Passo 4: Mensagem com sugestões de 1 clique */}
+            {step === 4 && (
+              <form className="public-guided-reply" onSubmit={continueText}>
+                <label htmlFor="guided-message">Explique o que você precisa</label>
+                <div className="public-quick-chips" aria-label="Sugestões de assunto">
+                  {QUICK_TOPICS.map(topic => (
+                    <button
+                      key={topic}
+                      type="button"
+                      className="public-quick-chip"
+                      onClick={() => setData({ ...data, message: topic })}
+                    >
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  id="guided-message"
+                  autoFocus
+                  rows={4}
+                  maxLength={1500}
+                  value={data.message}
+                  onChange={event => setData({ ...data, message: event.target.value })}
+                  placeholder="Escreva brevemente o que deseja tratar com o atendente."
+                />
+                <small>{data.message.length}/1500 caracteres (mínimo de 20)</small>
+                {error && <p className="public-guided-error" role="alert">{error}</p>}
+                <button className="public-button public-button-primary" type="submit">
+                  Continuar <ArrowRight size={17}/>
+                </button>
+              </form>
+            )}
+
+            {/* Passo 5: Revisão final e Início do Atendimento */}
+            {step === 5 && (
+              <div className="public-guided-review">
+                <dl>
+                  <div><dt>CNPJ</dt><dd>{data.cnpj}</dd></div>
+                  <div><dt>Responsável</dt><dd>{data.requester}</dd></div>
+                  <div><dt>Cidade</dt><dd>{data.city}</dd></div>
+                  <div><dt>Serviço</dt><dd>{selectedService?.label}</dd></div>
+                  <div><dt>Seção / Fila</dt><dd>{selectedQueue?.label}</dd></div>
+                </dl>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={data.consent}
+                    onChange={event => setData({ ...data, consent: event.target.checked })}
+                  />
+                  <span>Estou ciente de que estes dados serão usados para identificação e acompanhamento desta solicitação.</span>
+                </label>
+                {error && <p className="public-guided-error" role="alert">{error}</p>}
+                <button
+                  type="button"
+                  className="public-button public-button-primary"
+                  disabled={!data.consent || opening}
+                  onClick={submitTicket}
+                >
+                  {opening ? 'Iniciando o atendimento…' : 'Iniciar atendimento'}
+                  {!opening && <ArrowRight size={17}/>}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {step > 0 && !opening && (
+            <footer>
+              <button
+                type="button"
+                onClick={() => {
+                  setError('');
+                  // Se voltar do passo 4 (mensagem), vai para o passo 3 (serviços)
+                  setStep(current => current - 1);
+                }}
+              >
+                <ArrowLeft size={16}/> Voltar uma pergunta
+              </button>
+            </footer>
+          )}
+        </section>
+      </main>
+    </PublicShell>
+  );
 }
 
 const statusLabel: Record<SupportConversation['status'], string> = {
