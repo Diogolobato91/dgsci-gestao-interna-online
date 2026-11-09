@@ -34,4 +34,21 @@
 .public-directory-contact a{font-weight:700;text-decoration:underline;text-decoration-color:#b8bdc2;text-underline-offset:3px}
 .public-directory-contact a:hover{color:var(--public-red);text-decoration-color:currentColor}
 .public-directory-contact-empty{display:inline-block!important;color:#7b8187!important;background:none!important;border-radius:0!important;padding:0!important;font-weight:600!important}
-@media(max-width:700px){.public-directory-heading h1{font-size:clamp(32px,10vw,43px)}.public-directory-table table{min-width:860px}}
+@media(max-width:700px){
+ .public-directory-heading h1{font-size:clamp(32px,10vw,43px)}
+ .public-directory-card{border:0;background:transparent;padding:0}
+ .public-directory-tabs,.public-directory-search,.public-directory-meta{margin-left:0;margin-right:0}
+ .public-directory-search input{font-size:12px}
+ .public-directory-table{overflow:visible;border:0;border-radius:0}
+ .public-directory-table table,.public-directory-table tbody{display:block;width:100%;min-width:0}
+ .public-directory-table thead{display:none}
+ .public-directory-table tbody{display:grid;gap:12px}
+ .public-directory-table tr{display:block;background:#fff;border:1px solid #dedfdb;border-left:4px solid var(--public-red);border-radius:9px;overflow:hidden;box-shadow:0 4px 14px rgba(32,36,42,.04)}
+ .public-directory-table td{display:grid;grid-template-columns:82px minmax(0,1fr);gap:12px;align-items:start;width:100%;padding:11px 13px;border-top:1px solid #ecece8;font-size:12px;line-height:1.5}
+ .public-directory-table td:first-child{border-top:0;padding-top:15px;padding-bottom:15px;background:#fafaf8}
+ .public-directory-table td:before{content:attr(data-label);color:#858b91;font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding-top:2px}
+ .public-directory-table td strong{font-size:13px;line-height:1.45}
+ .public-directory-contact{min-width:0;gap:7px}
+ .public-directory-contact a,.public-directory-contact small{font-size:12px}
+ .public-directory-table td:last-child span{justify-self:start}
+}

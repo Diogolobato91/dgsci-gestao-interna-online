@@ -8,7 +8,7 @@ function headers(origin:string){return{
   'Access-Control-Allow-Origin':origin,
   'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type',
   'Content-Type':'application/json; charset=utf-8',
-  'Cache-Control':'public, max-age=300',
+  'Cache-Control':'no-store, max-age=0',
   'Vary':'Origin',
 };}
 function response(body:unknown,status:number,origin:string){return new Response(JSON.stringify(body),{status,headers:headers(origin)});}
