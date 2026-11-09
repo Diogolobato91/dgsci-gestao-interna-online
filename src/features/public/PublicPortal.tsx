@@ -525,7 +525,7 @@ export function PublicCustomerChatPage() {
   const upload = async (file: File) => {
     if (!credentials || uploading) return;
     setUploading(true); setError('');
-    try { await uploadSupportAttachment(credentials, file); await sendSupportMessage(credentials, `Arquivo anexado: ${file.name}`); await refresh(true); }
+    try { await uploadSupportAttachment(credentials, file); await refresh(true); }
     catch (caught) { setError(caught instanceof Error ? caught.message : 'Não foi possível anexar o arquivo.'); }
     finally { setUploading(false); }
   };
@@ -570,7 +570,7 @@ export function PublicCustomerChatPage() {
         {conversation.has_more && <button className="public-chat-load-more" type="button" disabled={loadingOlder} onClick={() => void loadOlder()}>{loadingOlder ? 'Carregando…' : 'Carregar 10 mensagens anteriores'}</button>}
         {conversation.messages.map(item => {
           const match = item.body.match(/^Arquivo (?:enviado|anexado):\s*(.+)$/i);
-          const attachment = match ? conversation.attachments?.find(file => file.file_name === match[1] && file.url) : null;
+          const attachment = item.attachment || (match ? conversation.attachments?.find(file => file.file_name === match[1] && file.url) : null);
           return <article key={item.id} className={`is-${item.author}`}><small>{item.author === 'customer' ? 'Você' : item.actor_label || (item.author === 'agent' ? 'Atendimento DGSCI' : 'Sistema')}</small>{attachment?.url ? <button type="button" className="public-chat-file" onClick={() => void downloadAttachment(attachment.url!, attachment.file_name)}><strong>{attachment.file_name}</strong><small>{Math.ceil(attachment.size_bytes / 1024)} KB · baixar arquivo</small></button> : <p>{item.body}</p>}<time dateTime={item.created_at}>{new Date(item.created_at).toLocaleString('pt-BR', { timeZone: 'America/Belem', dateStyle: 'short', timeStyle: 'short' })}</time></article>;
         })}
         <div ref={messagesEnd} />
