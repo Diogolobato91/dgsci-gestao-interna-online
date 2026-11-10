@@ -2,6 +2,7 @@ export type OpenTicketInput={service:string;cnpj:string;requester:string;phone?:
 export type ConversationInput={protocol:string;cnpj:string;accessKey:string};
 export type SupportChatServices={
  allow:(scope:'open'|'conversation'|'message',request:Request)=>Promise<boolean>;
+ isOpen?:()=>boolean;
  open:(input:OpenTicketInput,accessHash:string)=>Promise<Record<string,unknown>|null>;
  conversation:(input:ConversationInput&{before?:string},accessHash:string)=>Promise<Record<string,unknown>|null>;
  message:(input:ConversationInput&{message:string},accessHash:string)=>Promise<Record<string,unknown>|null>;
@@ -28,6 +29,7 @@ export async function handleSupportChat(request:Request,services:SupportChatServ
  if(!await services.allow(scope,request))return json(429,{message:'Muitas tentativas. Aguarde alguns minutos e tente novamente.'},origin);
  try{
   if(action==='open'){
+   if(services.isOpen&&!services.isOpen())return json(400,{message:'O atendimento funciona das 8h às 18h. Retorne dentro desse horário.'},origin);
    if(!validText(body.service,2,80)||!validText(body.cnpj,14,18)||!validText(body.requester,3,160)||!validText(body.city,2,120)||!validText(body.summary,10,1500))return json(400,{message:'Confira os dados obrigatórios.'},origin);
    const accessKey=createAccessKey(),accessHash=await sha256(cleanKey(accessKey));
    const ticket=await services.open({service:String(body.service),cnpj:String(body.cnpj),requester:String(body.requester),phone:typeof body.phone==='string'?body.phone:undefined,email:typeof body.email==='string'?body.email:undefined,city:String(body.city),reference:String(body.reference??''),summary:String(body.summary)},accessHash);

@@ -194,6 +194,16 @@ const QUICK_TOPICS = [
   'Esclarecer dúvidas sobre exigências e prazos de notificação.',
 ];
 
+function supportHourInBelem(date = new Date()) {
+  const hour = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Belem', hour: '2-digit', hour12: false }).formatToParts(date).find(part => part.type === 'hour')?.value;
+  return Number(hour ?? -1);
+}
+
+function supportIsOpen(date = new Date()) {
+  const hour = supportHourInBelem(date);
+  return hour >= 8 && hour < 18;
+}
+
 export function PublicIntakePage() {
   return <PublicGuidedIntakePage/>;
 }
@@ -206,9 +216,15 @@ function PublicGuidedIntakePage() {
   const [data, setData] = useState<IntakeData>(emptyIntake);
   const [error, setError] = useState('');
   const [opening, setOpening] = useState(false);
+  const [serviceOpen, setServiceOpen] = useState(() => supportIsOpen());
   const selectedService = serviceById(data.service);
   const selectedQueue = selectedService ? queueById(selectedService.queue) : null;
   const services = useMemo(() => PUBLIC_SERVICES.filter(service => !initialQueue || service.queue === initialQueue), [initialQueue]);
+  useEffect(() => {
+    const update = () => setServiceOpen(supportIsOpen());
+    const timer = window.setInterval(update, 60000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const questions = [
     'Digite o CNPJ da empresa.',
@@ -239,6 +255,11 @@ function PublicGuidedIntakePage() {
 
   const submitTicket = async () => {
     if (!selectedService || opening) return;
+    if (!supportIsOpen()) {
+      setServiceOpen(false);
+      setError('O atendimento funciona das 8h às 18h. Retorne dentro desse horário.');
+      return;
+    }
     setOpening(true);
     setError('');
     try {
@@ -271,8 +292,8 @@ function PublicGuidedIntakePage() {
         <div className="public-guided-heading">
           <Link to="/"><ArrowLeft size={16}/> Voltar ao portal</Link>
           <p className="public-kicker"><span/> ATENDIMENTO GUIADO</p>
-          <h1>Olá! Vamos abrir seu atendimento.</h1>
-          <p>Responda uma pergunta por vez. Você poderá voltar se precisar corrigir algo.</p>
+          <h1>{serviceOpen ? 'Olá! Vamos abrir seu atendimento.' : 'Atendimento indisponível no momento'}</h1>
+          <p>{serviceOpen ? 'Responda uma pergunta por vez. O atendimento funciona das 8h às 18h.' : 'Nosso atendimento funciona diariamente das 8h às 18h. Retorne dentro desse horário para iniciar uma conversa.'}</p>
         </div>
 
         <section className="public-guided-chat" aria-label="Abertura guiada do atendimento">
@@ -280,12 +301,13 @@ function PublicGuidedIntakePage() {
             <span><Bot size={22}/></span>
             <div>
               <strong>Assistente virtual DGSCI</strong>
-              <small><i/> On-line para orientar o atendimento</small>
+              <small className={serviceOpen ? '' : 'is-offline'}><i/> {serviceOpen ? 'On-line · atendimento das 8h às 18h' : 'Indisponível · atendimento das 8h às 18h'}</small>
             </div>
-            <em>{Math.min(step + 1, 6)} de 6</em>
+            {serviceOpen && <em>{Math.min(step + 1, 6)} de 6</em>}
           </header>
 
           <div className="public-guided-transcript" aria-live="polite">
+            {!serviceOpen ? <div className="public-guided-closed"><div className="public-bot-row is-current"><span><Bot size={17}/></span><p>No momento, nossa equipe está indisponível. O atendimento funciona das 8h às 18h. Por favor, retorne dentro desse horário.</p></div><Link className="public-button public-button-secondary" to="/">Voltar ao site da DGSCI</Link></div> : <>
             {answers.slice(0, Math.min(step, 5)).map((answer, index) => (
               <div className="public-guided-exchange" key={questions[index]}>
                 <div className="public-bot-row">
@@ -445,9 +467,10 @@ function PublicGuidedIntakePage() {
                 </button>
               </div>
             )}
+            </>}
           </div>
 
-          {step > 0 && !opening && (
+          {serviceOpen && step > 0 && !opening && (
             <footer>
               <button
                 type="button"

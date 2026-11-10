@@ -21,6 +21,7 @@ async function validStoredAttachment(path:string,mimeType:string,expectedSize:nu
 }
 
 Deno.serve(async request=>handleSupportChat(request,{
+ isOpen:()=>{const hour=Number(new Intl.DateTimeFormat('en-US',{timeZone:'America/Belem',hour:'2-digit',hour12:false}).format(new Date()));return hour>=8&&hour<18;},
  allow:async(scope,req)=>{
   const forwarded=req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||req.headers.get('cf-connecting-ip')||'unknown';
   const fingerprint=await sha256(`${scope}:${forwarded}:${req.headers.get('user-agent')||'unknown'}`);
