@@ -88,7 +88,7 @@ function PublicHeader() {
           <a href="/#servicos" onClick={() => setMenuOpen(false)}>Serviços</a>
           <Link to="/instrucoes-tecnicas" onClick={() => setMenuOpen(false)}>Instruções Técnicas</Link>
           <Link to="/cartilhas" onClick={() => setMenuOpen(false)}>Cartilhas</Link>
-          <Link to="/credenciados" onClick={() => setMenuOpen(false)}>Credenciados</Link>
+          <Link className="public-nav-credentialed" to="/credenciados" onClick={() => setMenuOpen(false)}>Empresas e profissionais credenciados</Link>
           <a href="/#duvidas" onClick={() => setMenuOpen(false)}>Dúvidas</a>
         </nav>
         <div className="public-header-actions">
@@ -183,8 +183,8 @@ export function PublicHomePage() {
   );
 }
 
-type IntakeData = { cnpj: string; requester: string; phone: string; email: string; service: string; city: string; process: string; message: string; consent: boolean };
-const emptyIntake: IntakeData = { cnpj: '', requester: '', phone: '', email: '', service: '', city: '', process: '', message: '', consent: true };
+type IntakeData = { cnpj: string; requester: string; service: string; city: string; message: string; consent: boolean };
+const emptyIntake: IntakeData = { cnpj: '', requester: '', service: '', city: '', message: '', consent: true };
 
 const QUICK_CITIES = ['Belém', 'Ananindeua', 'Marituba', 'Castanhal', 'Santarém', 'Marabá', 'Parauapebas'];
 const QUICK_TOPICS = [
@@ -211,12 +211,12 @@ function PublicGuidedIntakePage() {
   const services = useMemo(() => PUBLIC_SERVICES.filter(service => !initialQueue || service.queue === initialQueue), [initialQueue]);
 
   const questions = [
-    'Para começar, informe o CNPJ da empresa.',
-    'Qual é o seu nome completo?',
-    'Em qual município do Pará fica seu estabelecimento?',
-    'Qual serviço você precisa hoje?',
-    'Descreva brevemente o que você precisa resolver.',
-    'Tudo pronto! Confira os dados para iniciar seu atendimento.',
+    'Digite o CNPJ da empresa.',
+    'Qual é o seu nome?',
+    'Onde fica a empresa?',
+    'O que você precisa?',
+    'Conte, em poucas palavras, o que aconteceu.',
+    'Confira os dados e inicie o atendimento.',
   ];
 
   const answers = [
@@ -233,7 +233,7 @@ function PublicGuidedIntakePage() {
     if (step === 0 && !isValidCnpj(data.cnpj)) return setError('Digite um CNPJ válido para continuar.');
     if (step === 1 && data.requester.trim().length < 3) return setError('Digite seu nome completo.');
     if (step === 2 && data.city.trim().length < 2) return setError('Informe ou selecione o município.');
-    if (step === 4 && data.message.trim().length < 20) return setError('Descreva sua dúvida com pelo menos 20 caracteres.');
+    if (step === 4 && data.message.trim().length < 10) return setError('Escreva pelo menos 10 caracteres.');
     setStep(current => current + 1);
   };
 
@@ -246,10 +246,8 @@ function PublicGuidedIntakePage() {
         service: selectedService.id,
         cnpj: data.cnpj,
         requester: data.requester.trim(),
-        phone: '91999999999', // Preenchido automaticamente para cumprir validação do backend sem onerar o usuário
-        email: 'atendimento@cbmpa.pa.gov.br', // Preenchido automaticamente para evitar solicitações desnecessárias
         city: data.city.trim(),
-        reference: '', // Protocolo pulado conforme solicitado
+        reference: '',
         summary: data.message.trim(),
       });
       saveSupportCredentials({ protocol: result.protocol, cnpj: data.cnpj, accessKey: result.accessKey });
@@ -274,7 +272,7 @@ function PublicGuidedIntakePage() {
           <Link to="/"><ArrowLeft size={16}/> Voltar ao portal</Link>
           <p className="public-kicker"><span/> ATENDIMENTO GUIADO</p>
           <h1>Olá! Vamos abrir seu atendimento.</h1>
-          <p>Processo simples e rápido. Em poucos cliques você será encaminhado para o atendente da seção correta.</p>
+          <p>Responda uma pergunta por vez. Você poderá voltar se precisar corrigir algo.</p>
         </div>
 
         <section className="public-guided-chat" aria-label="Abertura guiada do atendimento">
@@ -315,7 +313,7 @@ function PublicGuidedIntakePage() {
                   onChange={event => setData({ ...data, cnpj: formatCnpj(event.target.value) })}
                   placeholder="00.000.000/0000-00"
                 />
-                <small>Digite os 14 dígitos do CNPJ para identificação da empresa.</small>
+                <small>Digite somente os números. A pontuação aparece sozinha.</small>
                 {error && <p className="public-guided-error" role="alert">{error}</p>}
                 <button className="public-button public-button-primary" type="submit">
                   Continuar <ArrowRight size={17}/>
@@ -387,7 +385,7 @@ function PublicGuidedIntakePage() {
             {/* Passo 4: Mensagem com sugestões de 1 clique */}
             {step === 4 && (
               <form className="public-guided-reply" onSubmit={continueText}>
-                <label htmlFor="guided-message">Explique o que você precisa</label>
+                <label htmlFor="guided-message">Escolha uma opção ou escreva</label>
                 <div className="public-quick-chips" aria-label="Sugestões de assunto">
                   {QUICK_TOPICS.map(topic => (
                     <button
@@ -407,9 +405,9 @@ function PublicGuidedIntakePage() {
                   maxLength={1500}
                   value={data.message}
                   onChange={event => setData({ ...data, message: event.target.value })}
-                  placeholder="Escreva brevemente o que deseja tratar com o atendente."
+                  placeholder="Ex.: preciso renovar a vistoria do estabelecimento."
                 />
-                <small>{data.message.length}/1500 caracteres (mínimo de 20)</small>
+                <small>{data.message.length}/1500 caracteres (mínimo de 10)</small>
                 {error && <p className="public-guided-error" role="alert">{error}</p>}
                 <button className="public-button public-button-primary" type="submit">
                   Continuar <ArrowRight size={17}/>

@@ -18,7 +18,7 @@ async function invoke<T>(body:Record<string,unknown>):Promise<T>{
  return data as T;
 }
 
-export const openSupportTicket=(input:{service:string;cnpj:string;requester:string;phone:string;email:string;city:string;reference:string;summary:string})=>invoke<OpenSupportResult>({action:'open',...input});
+export const openSupportTicket=(input:{service:string;cnpj:string;requester:string;phone?:string;email?:string;city:string;reference:string;summary:string})=>invoke<OpenSupportResult>({action:'open',...input});
 export const getSupportConversation=(credentials:SupportCredentials,before?:string)=>invoke<SupportConversation>({action:'conversation',...credentials,...(before?{before}:{})});
 export const sendSupportMessage=(credentials:SupportCredentials,message:string)=>invoke<SupportMessage>({action:'message',...credentials,message});
 export const submitSupportSatisfaction=(credentials:SupportCredentials,score:number,comment:string)=>invoke<{saved:boolean}>({action:'satisfaction',...credentials,score,comment});

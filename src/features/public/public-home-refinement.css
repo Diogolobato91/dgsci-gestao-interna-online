@@ -1,8 +1,10 @@
 /* Revisão de hierarquia e navegação institucional. */
 .public-header-inner{max-width:1320px;gap:18px}
 .public-header nav{gap:4px}
-.public-header nav a{min-height:44px;padding:0 11px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;line-height:1.2;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease}
+.public-header nav a{min-height:44px;padding:0 11px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;line-height:1.2;transition:background-color .2s ease,color .2s ease,box-shadow .2s ease,transform .16s ease}
 .public-header nav a:hover,.public-header nav a:focus-visible{background:var(--public-red);color:#fff;box-shadow:0 7px 18px rgba(167,25,39,.16)}
+.public-header nav a:active{transform:translateY(1px)}
+.public-header nav .public-nav-credentialed{max-width:178px;text-align:center;white-space:normal}
 .public-header-actions{gap:8px}
 .public-staff-link{min-height:44px;padding:0 9px;border-radius:7px;transition:background-color .2s ease,color .2s ease}
 .public-staff-link:hover,.public-staff-link:focus-visible{background:#f7e9eb;color:var(--public-red)}
@@ -25,9 +27,9 @@
 .public-brand-footer{align-items:flex-start}
 .public-brand-footer small{max-width:280px;line-height:1.45}
 @media(max-width:1180px){.public-header nav a{padding:0 8px;font-size:12px}.public-hero{grid-template-columns:1fr 1fr}.public-hero-media img{height:400px}}
-@media(max-width:980px){.public-header nav{gap:8px}.public-header nav a{width:100%;justify-content:flex-start;padding:0 12px}.public-hero{grid-template-columns:1fr;min-height:auto}.public-hero-media{max-width:none}.public-hero-media img{height:auto;aspect-ratio:16/9}.public-faq-groups{grid-template-columns:1fr}}
+@media(max-width:980px){.public-header nav{gap:8px}.public-header nav a{width:100%;max-width:none!important;justify-content:flex-start;padding:0 12px;text-align:left}.public-hero{grid-template-columns:1fr;min-height:auto}.public-hero-media{max-width:none}.public-hero-media img{height:auto;aspect-ratio:16/9}.public-faq-groups{grid-template-columns:1fr}}
 @media(max-width:700px){.public-hero-media img{height:auto}.public-faq{padding:46px 20px!important}.public-faq-groups>article{padding:15px}}
-@media(prefers-reduced-motion:reduce){.public-header nav a,.public-staff-link,.public-faq-answer,.public-faq-item>button svg{transition:none}}
+@media(prefers-reduced-motion:reduce){.public-header nav a,.public-staff-link,.public-faq-answer,.public-faq-item>button svg{transition:none}.public-header nav a:active{transform:none}}
 
 /* Atendimento guiado em formato de conversa. */
 .public-guided-page{min-height:calc(100vh - 150px);padding:48px 24px 80px;background:#f4f3f1}
