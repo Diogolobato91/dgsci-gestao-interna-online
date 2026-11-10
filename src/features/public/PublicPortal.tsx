@@ -485,6 +485,7 @@ export function PublicCustomerChatPage() {
   const [ratingSent, setRatingSent] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const messagesEnd = useRef<HTMLDivElement>(null);
   const messageCount = useRef(0);
   const closed = conversation?.status === 'completed' || conversation?.status === 'cancelled';
@@ -509,6 +510,12 @@ export function PublicCustomerChatPage() {
     return () => window.clearInterval(timer);
   }, [credentials, closed, refresh]);
   useEffect(() => { if ((conversation?.messages.length || 0) >= messageCount.current) messagesEnd.current?.scrollIntoView({ behavior: messageCount.current ? 'smooth' : 'auto', block: 'nearest' }); messageCount.current = conversation?.messages.length || 0; }, [conversation?.messages.length]);
+  useEffect(() => {
+    if (!conversation?.response_deadline || conversation.status !== 'waiting_customer') return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [conversation?.response_deadline, conversation?.status]);
+  const secondsLeft = conversation?.response_deadline ? Math.max(0, Math.ceil((new Date(conversation.response_deadline).getTime() - now) / 1000)) : 0;
   const downloadAttachment = async (url: string, fileName: string) => {
     try { await downloadFile(url, fileName); }
     catch { setError('Não foi possível baixar o arquivo. Atualize a conversa e tente novamente.'); }
@@ -562,8 +569,11 @@ export function PublicCustomerChatPage() {
   return <PublicShell><main id="public-main" className="public-chat-page">
     <div className="public-chat-heading"><Link className="public-back-link" to="/"><ArrowLeft size={16} aria-hidden="true" /> Voltar ao portal</Link><p className="public-kicker"><span /> ATENDIMENTO ON-LINE</p><h1>Conversa com a DGSCI</h1></div>
     {loading && !conversation ? <div className="public-chat-state" role="status">Carregando atendimento…</div> : conversation ? <section className="public-chat-shell">
-      <header><div><small>{conversation.queue_label}</small><strong>{conversation.service_label}</strong></div><span className={`public-chat-status is-${conversation.status}`}><Clock3 size={15} aria-hidden="true" />{statusLabel[conversation.status]}</span></header>
+      <header><div><small>{conversation.queue_label}</small><strong>{conversation.service_label}</strong><time dateTime={conversation.created_at}>Iniciado em {new Date(conversation.created_at).toLocaleString('pt-BR', { timeZone: 'America/Belem', dateStyle: 'short', timeStyle: 'short' })}</time></div><span className={`public-chat-status is-${conversation.status}`}><Clock3 size={15} aria-hidden="true" />{statusLabel[conversation.status]}</span></header>
       <div className="public-queue-position" aria-live="polite">{conversation.status === 'queued' ? <><strong>{conversation.people_ahead}</strong><span>{conversation.people_ahead === 1 ? 'pessoa à sua frente nesta fila' : 'pessoas à sua frente nesta fila'}</span></> : <><MessageSquareText size={22} aria-hidden="true" /><span>{statusLabel[conversation.status]}</span></>}</div>
+      {conversation.status === 'queued' && <div className="public-chat-guidance" role="status"><Clock3 size={17} aria-hidden="true"/><p><strong>Você está na fila.</strong> Aguarde nesta página. Quando o atendimento começar, responda em até 10 minutos para manter a conversa aberta.</p></div>}
+      {conversation.status === 'waiting_customer' && conversation.response_deadline && <div className="public-chat-guidance is-warning" role="status" aria-live="polite"><Clock3 size={17} aria-hidden="true"/><p><strong>Aguardando sua resposta.</strong> Este atendimento será encerrado por inatividade em {String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:{String(secondsLeft % 60).padStart(2, '0')}.</p></div>}
+      {conversation.status === 'completed' && <div className="public-chat-guidance is-complete" role="status"><Check size={17} aria-hidden="true"/><p><strong>Atendimento encerrado.</strong> A conversa permanece disponível para consulta neste dispositivo.</p></div>}
       <div className="public-chat-messages" aria-live="polite" aria-label="Mensagens do atendimento">
         {conversation.has_more && <button className="public-chat-load-more" type="button" disabled={loadingOlder} onClick={() => void loadOlder()}>{loadingOlder ? 'Carregando…' : 'Carregar 10 mensagens anteriores'}</button>}
         {conversation.messages.map(item => {

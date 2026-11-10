@@ -154,6 +154,7 @@ test('execução e validação da migration e suíte de testes SQL em PostgreSQL
   await db.exec(fs.readFileSync(path.join(root,'supabase','migrations','20261106203000_support_admin_message_while_queued.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'supabase','migrations','20261106213000_support_transfer_timeline.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'supabase','migrations','20261109213000_support_attachment_message_linking.sql'),'utf-8'));
+  await db.exec(fs.readFileSync(path.join(root,'supabase','migrations','20261110173000_support_customer_lifecycle.sql'),'utf-8'));
   await db.exec(fs.readFileSync(path.join(root,'tests','support-attachment-linking-rls.sql'),'utf-8'));
   assert.ok(true, 'Todos os testes SQL foram executados com sucesso');
 });

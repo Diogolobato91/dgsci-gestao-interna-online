@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, LockKeyhole, UserCheck, ShieldAlert, LogOut, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LockKeyhole, UserCheck, ShieldAlert, LogOut, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { MILITARY_RANKS } from '@/lib/rankHierarchy';
 import { maskCpf, validateRegistrationForm, cleanDigits } from '@/lib/userValidation';
@@ -110,17 +110,18 @@ export default function LoginForm() {
 
   // 2. Fluxo público: Login ou Solicitação de Cadastro
   return (
-    <main className="preview-entry">
+    <main className={`preview-entry${creating ? ' is-registering' : ''}`}>
+      <a className="login-home-link" href="/" aria-label="Voltar ao site da DGSCI"><ArrowLeft size={15} aria-hidden="true" />Voltar ao site</a>
       <section>
-        <img src="/portal/assets/dgsci-logo.png" alt="DGSCI" width="62" height="77" />
-        <p className="portal-eyebrow">DGSCI / CBMPA</p>
+        <div className="login-brand">
+          <img src="/portal/assets/dgsci-logo.png" alt="Brasão da DGSCI" width="62" height="77" />
+          <p className="portal-eyebrow">DGSCI / CBMPA</p>
+        </div>
         <h1>
           Sistema de<br />
           <span>Gestão Interna</span>
         </h1>
         <p>Acesso aos registros administrativos, controles e documentos da DGSCI / CBMPA.</p>
-        <a className="login-home-link" href="/">← Voltar ao site da DGSCI</a>
-
         {creating ? (
           /* FORMULÁRIO DE CADASTRO COM APROVAÇÃO */
           <form
