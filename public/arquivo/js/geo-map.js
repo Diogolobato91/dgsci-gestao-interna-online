@@ -4,8 +4,9 @@
  * Conexão direta com a base cartográfica de Belém e RMB.
  */
 
-// Token Oficial Mapbox fornecido pela equipe DGSCI / CBMPA
-const MAPBOX_TOKEN = window.MAPBOX_TOKEN || (typeof atob !== 'undefined' ? atob('cGsuZXlKMUlqb2laR2x2WjI5c2IySmhkRzhpTENKaElqb2lZMjExZDNwaGRIaG1NRE5pZHpKNmNUUjBhV0pqTm1oek15SjkuZmJURk9RY2h4VTh1ZUZlRFVDVWdqdw==') : '');
+// Painel legado desativado: o mapa atual usa MapLibre e base PMTiles local.
+// Nenhum token de provedor externo deve ser mantido no cliente.
+const MAPBOX_TOKEN = '';
 
 // Coordenadas cartográficas oficiais dos bairros de Belém e Região Metropolitana (CBMPA)
 const BAIRRO_COORDINATES = {
