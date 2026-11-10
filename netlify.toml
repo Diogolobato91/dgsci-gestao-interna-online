@@ -13,6 +13,7 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=(self), payment=(), usb=(), browsing-topics=()"
     Cross-Origin-Opener-Policy = "same-origin"
     Cross-Origin-Resource-Policy = "same-site"
+    Cache-Control = "no-store, max-age=0"
 
 [[headers]]
   for = "/assets/*"
