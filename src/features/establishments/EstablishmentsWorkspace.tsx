@@ -41,7 +41,7 @@ function Companies({companies,canEdit,onEdit}:{companies:Establishment[];canEdit
 export default function EstablishmentsWorkspace(){
  const location=useLocation();const {user}=useAuth();const canEdit=canManageSupport(user);const {snapshot,loading,error,reload}=useEstablishments();const [editor,setEditor]=useState<{item:Establishment|null}|null>(null);const [view,setView]=useState<(typeof views)[number]['id']>(location.pathname==='/mapa'?'map':'overview');
  useEffect(()=>setView(location.pathname==='/mapa'?'map':'overview'),[location.pathname]);const companies=snapshot?.companies??[];
- return <section className="establishments-workspace workspace-page">
+ return <section className={`establishments-workspace workspace-page${view==='map'?' is-map-view':''}`}>
   <PageHeader eyebrow="Base institucional" title="Estabelecimentos" description="Indicadores, localização territorial e consulta aos cadastros da DGSCI." icon={Building2} actions={<><ActionButton disabled={loading} onClick={reload}><RefreshCw size={16}/>{loading?'Consultando…':'Atualizar cadastros'}</ActionButton>{canEdit&&<ActionButton variant="primary" onClick={()=>setEditor({item:null})}>Cadastrar estabelecimento</ActionButton>}</>}/>
   <div className="establishments-tabs"><div className="workspace-segments" role="group" aria-label="Visualização dos estabelecimentos">{views.map(({id,title,Icon})=><button key={id} aria-pressed={view===id} onClick={()=>setView(id)}><Icon size={16}/>{title}</button>)}</div><p role="status" aria-live="polite">{loading?'Consultando banco de estabelecimentos…':error||(snapshot?.timestamp?`Dados atualizados em ${new Date(snapshot.timestamp).toLocaleString('pt-BR',{timeZone:'America/Belem'})}`:'Base institucional')}</p></div>
   {loading&&!snapshot
