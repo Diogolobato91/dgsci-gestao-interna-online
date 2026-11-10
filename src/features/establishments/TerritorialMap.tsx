@@ -52,7 +52,29 @@ export default function TerritorialMap({companies,onEdit,canEdit}:{companies:Est
 
  useEffect(()=>{
   const map=mapRef.current,group=pointsRef.current,renderer=canvasRef.current;if(!map||!group||!renderer)return;group.clearLayers();
-  for(const item of filtered){const color=colorBy==='sector'?safeColor(item.setorHex):(STATUS[text(item.normalizedStatus)]?.color??'#64748b');const marker=L.circleMarker([item._lat,item._lng],{renderer,radius:6,weight:2,color:'#fff',fillColor:color,fillOpacity:.9,bubblingMouseEvents:false});marker.bindPopup(()=>popupContent(item,canEdit,onEdit),{maxWidth:300,minWidth:250,offset:[0,-4],autoPanPadding:[30,30]});marker.addTo(group);}
+  const addPoint=(item:PointItem)=>{const color=colorBy==='sector'?safeColor(item.setorHex):(STATUS[text(item.normalizedStatus)]?.color??'#64748b');const marker=L.circleMarker([item._lat,item._lng],{renderer,radius:6,weight:2,color:'#fff',fillColor:color,fillOpacity:.9,bubblingMouseEvents:false});marker.bindPopup(()=>popupContent(item,canEdit,onEdit),{maxWidth:300,minWidth:250,offset:[0,-4],autoPanPadding:[30,30]});marker.addTo(group);};
+  const renderPoints=()=>{
+   group.clearLayers();const zoom=map.getZoom();
+   if(zoom>14){filtered.forEach(addPoint);return;}
+   const cellSize=zoom<11?72:zoom<13?64:56;
+   const clusters:{items:PointItem[];x:number;y:number}[]=[],buckets=new Map<string,number[]>();
+   for(const item of filtered){
+    const point=map.project([item._lat,item._lng],zoom),gx=Math.floor(point.x/cellSize),gy=Math.floor(point.y/cellSize);let nearest=-1,distance=cellSize;
+    for(let x=gx-1;x<=gx+1;x++)for(let y=gy-1;y<=gy+1;y++)for(const index of buckets.get(`${x}:${y}`)??[]){const cluster=clusters[index],current=Math.hypot(point.x-cluster.x,point.y-cluster.y);if(current<distance){nearest=index;distance=current;}}
+    if(nearest>=0){const cluster=clusters[nearest],count=cluster.items.length;cluster.x=(cluster.x*count+point.x)/(count+1);cluster.y=(cluster.y*count+point.y)/(count+1);cluster.items.push(item);}
+    else{const index=clusters.push({items:[item],x:point.x,y:point.y})-1,key=`${gx}:${gy}`;buckets.set(key,[...(buckets.get(key)??[]),index]);}
+   }
+   for(const {items} of clusters){
+    if(items.length===1){addPoint(items[0]);continue;}
+    const center:L.LatLngExpression=[items.reduce((sum,item)=>sum+item._lat,0)/items.length,items.reduce((sum,item)=>sum+item._lng,0)/items.length];
+    const radius=items.length<10?17:items.length<100?21:26;
+    const cluster=L.circleMarker(center,{renderer,radius,weight:3,color:'#fff',fillColor:'#a9152d',fillOpacity:.94,bubblingMouseEvents:false});
+    cluster.bindTooltip(items.length.toLocaleString('pt-BR'),{permanent:true,direction:'center',className:'territorial-cluster-count',opacity:1});
+    cluster.on('click',()=>map.setView(center,Math.min(zoom+2,15),{animate:true}));cluster.addTo(group);
+   }
+  };
+  renderPoints();map.on('zoomend',renderPoints);
+  return()=>{map.off('zoomend',renderPoints);group.clearLayers();};
  },[filtered,colorBy,canEdit,onEdit]);
 
  const fit=()=>{const map=mapRef.current;if(!map||!filtered.length)return;map.fitBounds(L.latLngBounds(filtered.map(point=>[point._lat,point._lng] as L.LatLngTuple)),{padding:[55,55],maxZoom:14,animate:true});};
