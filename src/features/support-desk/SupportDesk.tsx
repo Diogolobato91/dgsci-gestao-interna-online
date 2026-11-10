@@ -82,9 +82,9 @@ export default function SupportDesk(){
  useEffect(()=>{const last=messages[messages.length-1]?.item_key||null;if(last&&last!==lastMessageId.current){const pane=document.querySelector<HTMLElement>('.support-messages');pane?.scrollTo({top:pane.scrollHeight,behavior:lastMessageId.current?'smooth':'auto'});}lastMessageId.current=last;},[messages]);
  useEffect(()=>{
   if(!supabase)return;
-  const channel=supabase.channel(`support-desk-${user?.id||'user'}`).on('postgres_changes',{event:'*',schema:'public',table:'support_tickets'},()=>void loadInbox(true)).on('postgres_changes',{event:'INSERT',schema:'public',table:'support_messages'},payload=>{const row=payload.new as Message;if(row.ticket_id===selectedId)void loadMessages(selectedId);if(row.author_kind==='customer'&&typeof Notification!=='undefined'&&Notification.permission==='granted')new Notification('Nova mensagem no atendimento DGSCI',{body:'Um cliente enviou uma nova mensagem.'});void loadInbox(true);}).subscribe();
+  const channel=supabase.channel(`support-desk-${user?.id||'user'}`).on('postgres_changes',{event:'*',schema:'public',table:'support_tickets'},()=>void loadInbox(true)).on('postgres_changes',{event:'INSERT',schema:'public',table:'support_messages'},payload=>{const row=payload.new as Message;if(row.ticket_id===selectedId)void Promise.all([loadMessages(selectedId),loadAttachments(selectedId)]);if(row.author_kind==='customer'&&typeof Notification!=='undefined'&&Notification.permission==='granted')new Notification('Nova mensagem no atendimento DGSCI',{body:'Um cliente enviou uma nova mensagem.'});void loadInbox(true);}).subscribe();
   return()=>{void supabase.removeChannel(channel);};
- },[loadInbox,loadMessages,selectedId,user?.id]);
+ },[loadAttachments,loadInbox,loadMessages,selectedId,user?.id]);
 
  const visible=useMemo(()=>inbox.tickets.filter(ticket=>{
   if(filter==='active'&&['completed','cancelled'].includes(ticket.status))return false;
