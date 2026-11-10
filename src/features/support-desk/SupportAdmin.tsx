@@ -6,6 +6,7 @@ import SupportAnalytics from './SupportAnalytics';
 import './support-desk.css';
 import './support-desk-typography.css';
 import './support-team.css';
+import './support-productivity.css';
 
 type Tab='overview'|'team'|'replies'|'history'|'ratings';
 type Agent={user_id:string;display_name:string;sectors:string[];queue_ids:string[];available:boolean;capacity:number;version:number;active_count:number;completed_today:number;average_first_response_minutes:number;work_start?:string;work_end?:string;work_days?:number[]};
