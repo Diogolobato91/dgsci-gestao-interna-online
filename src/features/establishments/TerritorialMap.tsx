@@ -37,9 +37,9 @@ export default function TerritorialMap({companies,onEdit,canEdit}:{companies:Est
   if(!container.current||mapRef.current)return;
   let map:L.Map;
   try{
-   map=L.map(container.current,{center:[-1.39,-48.46],zoom:11,minZoom:8,maxZoom:17,zoomControl:false,attributionControl:true,preferCanvas:true});
+   map=L.map(container.current,{center:[-1.39,-48.46],zoom:11,minZoom:8,maxZoom:20,zoomControl:false,attributionControl:true,preferCanvas:true,zoomAnimation:true,fadeAnimation:true,markerZoomAnimation:true,zoomSnap:.5,wheelDebounceTime:30,wheelPxPerZoomLevel:90});
    L.control.zoom({position:'topright'}).addTo(map);
-   const base=leafletLayer({url:`${location.origin}/maps/belem-rmb.pmtiles`,flavor:'light',lang:'pt',minZoom:8,maxZoom:17,maxDataZoom:15,noWrap:true,bounds:[[-1.58,-48.7],[-1,-48.15]],attribution:'© OpenStreetMap contributors · Protomaps'});
+   const base=leafletLayer({url:`${location.origin}/maps/belem-rmb.pmtiles`,flavor:'light',lang:'pt',minZoom:8,maxZoom:20,maxDataZoom:15,noWrap:true,bounds:[[-1.58,-48.7],[-1,-48.15]],attribution:'© OpenStreetMap contributors · Protomaps'});
    base.on('load',()=>{setMapReady(true);setMapError('');map.invalidateSize(false);});
    base.on('tileerror',(event:unknown)=>{console.error('Territorial base map:',event);setMapError('Não foi possível carregar a base cartográfica local.');});
    base.addTo(map);mapRef.current=map;canvasRef.current=L.canvas({padding:.5,tolerance:7});pointsRef.current=L.layerGroup().addTo(map);
@@ -52,11 +52,11 @@ export default function TerritorialMap({companies,onEdit,canEdit}:{companies:Est
 
  useEffect(()=>{
   const map=mapRef.current,group=pointsRef.current,renderer=canvasRef.current;if(!map||!group||!renderer)return;group.clearLayers();
-  const addPoint=(item:PointItem)=>{const color=colorBy==='sector'?safeColor(item.setorHex):(STATUS[text(item.normalizedStatus)]?.color??'#64748b');const marker=L.circleMarker([item._lat,item._lng],{renderer,radius:6,weight:2,color:'#fff',fillColor:color,fillOpacity:.9,bubblingMouseEvents:false});marker.bindPopup(()=>popupContent(item,canEdit,onEdit),{maxWidth:300,minWidth:250,offset:[0,-4],autoPanPadding:[30,30]});marker.addTo(group);};
+  const addPoint=(item:PointItem)=>{const color=colorBy==='sector'?safeColor(item.setorHex):(STATUS[text(item.normalizedStatus)]?.color??'#64748b'),zoom=map.getZoom();const marker=L.circleMarker([item._lat,item._lng],{renderer,radius:zoom>=19?5:6,weight:2,color:'#fff',fillColor:color,fillOpacity:.9,bubblingMouseEvents:false});marker.bindPopup(()=>popupContent(item,canEdit,onEdit),{maxWidth:300,minWidth:250,offset:[0,-6],autoPanPadding:[45,45],keepInView:true});marker.addTo(group);};
   const renderPoints=()=>{
    group.clearLayers();const zoom=map.getZoom();
-   if(zoom>14){filtered.forEach(addPoint);return;}
-   const cellSize=zoom<11?72:zoom<13?64:56;
+   if(zoom>18){filtered.forEach(addPoint);return;}
+   const cellSize=zoom<11?72:zoom<13?64:zoom<16?58:52;
    const clusters:{items:PointItem[];x:number;y:number}[]=[],buckets=new Map<string,number[]>();
    for(const item of filtered){
     const point=map.project([item._lat,item._lng],zoom),gx=Math.floor(point.x/cellSize),gy=Math.floor(point.y/cellSize);let nearest=-1,distance=cellSize;
@@ -70,14 +70,14 @@ export default function TerritorialMap({companies,onEdit,canEdit}:{companies:Est
     const radius=items.length<10?17:items.length<100?21:26;
     const cluster=L.circleMarker(center,{renderer,radius,weight:3,color:'#fff',fillColor:'#a9152d',fillOpacity:.94,bubblingMouseEvents:false});
     cluster.bindTooltip(items.length.toLocaleString('pt-BR'),{permanent:true,direction:'center',className:'territorial-cluster-count',opacity:1});
-    cluster.on('click',()=>map.setView(center,Math.min(zoom+2,15),{animate:true}));cluster.addTo(group);
+    cluster.on('click',()=>map.flyTo(center,Math.min(zoom+2,19),{animate:true,duration:.7,easeLinearity:.22}));cluster.addTo(group);
    }
   };
   renderPoints();map.on('zoomend',renderPoints);
   return()=>{map.off('zoomend',renderPoints);group.clearLayers();};
  },[filtered,colorBy,canEdit,onEdit]);
 
- const fit=()=>{const map=mapRef.current;if(!map||!filtered.length)return;map.fitBounds(L.latLngBounds(filtered.map(point=>[point._lat,point._lng] as L.LatLngTuple)),{padding:[55,55],maxZoom:14,animate:true});};
+ const fit=()=>{const map=mapRef.current;if(!map||!filtered.length)return;map.flyToBounds(L.latLngBounds(filtered.map(point=>[point._lat,point._lng] as L.LatLngTuple)),{padding:[55,55],maxZoom:filtered.length===1?18:14,animate:true,duration:.8,easeLinearity:.22});};
  return <div className="territorial-layout">
   <aside className="territorial-tools" aria-label="Filtros do mapa">
    <div className="territorial-count"><MapPin size={18}/><div><strong>{filtered.length.toLocaleString('pt-BR')}</strong><span>no mapa</span></div></div>
