@@ -20,7 +20,7 @@ const safeColor=(v:unknown)=>/^#[0-9a-f]{6}$/i.test(String(v))?String(v):'#64748
 export default function TerritorialMap({companies,onEdit,canEdit}:{companies:Establishment[];onEdit:(item:Establishment)=>void;canEdit:boolean}){
  const container=useRef<HTMLDivElement>(null),mapRef=useRef<MapInstance|null>(null),popup=useRef<maplibregl.Popup|null>(null);
  const geojsonRef=useRef<GeoJSON.FeatureCollection<GeoJSON.Point>>({type:'FeatureCollection',features:[]});
- const [located,setLocated]=useState<PointItem[]>([]),[unlocated,setUnlocated]=useState(0),[query,setQuery]=useState(''),[status,setStatus]=useState('all'),[sector,setSector]=useState('all'),[colorBy,setColorBy]=useState<'status'|'sector'>('status'),[mapError,setMapError]=useState('');
+ const [located,setLocated]=useState<PointItem[]>([]),[unlocated,setUnlocated]=useState(0),[query,setQuery]=useState(''),[status,setStatus]=useState('all'),[sector,setSector]=useState('all'),[colorBy,setColorBy]=useState<'status'|'sector'>('status'),[mapError,setMapError]=useState(''),[mapReady,setMapReady]=useState(false);
  useEffect(()=>{let active=true;loadLocationCaches().then(caches=>{if(!active)return;const points:PointItem[]=[];let missing=0;for(const company of companies){const base=locateEstablishment(company,caches);if(!base){missing++;continue;}const p=spreadLocation(company,base);points.push({...company,_lng:p.lng,_lat:p.lat,_precision:p.precision});}setLocated(points);setUnlocated(missing);});return()=>{active=false;};},[companies]);
  const sectors=useMemo(()=>[...new Set(companies.map(c=>text(c.setor,'')).filter(Boolean))].sort(),[companies]);
  const filtered=useMemo(()=>{const q=query.toLocaleLowerCase('pt-BR').trim();return located.filter(c=>(status==='all'||c.normalizedStatus===status)&&(sector==='all'||c.setor===sector)&&(!q||`${c.razao} ${c.cnpj} ${c.endereco} ${c.bairro}`.toLocaleLowerCase('pt-BR').includes(q)));},[located,query,status,sector]);
@@ -30,10 +30,13 @@ export default function TerritorialMap({companies,onEdit,canEdit}:{companies:Est
  useEffect(()=>{
   if(!container.current||mapRef.current)return;
   const style={version:8 as const,glyphs:`${location.origin}/maps/fonts/{fontstack}/{range}.pbf`,sprite:`${location.origin}/maps/sprites/light`,sources:{protomaps:{type:'vector' as const,url:`pmtiles://${location.origin}/maps/belem-rmb.pmtiles`,attribution:'© OpenStreetMap contributors · Protomaps'}},layers:layers('protomaps',namedFlavor('light'),{lang:'pt'})};
-  const map=new maplibregl.Map({container:container.current,style,center:[-48.46,-1.39],zoom:10.5,minZoom:8,maxZoom:17,attributionControl:false});
+  let map:MapInstance;
+  try{map=new maplibregl.Map({container:container.current,style,center:[-48.46,-1.39],zoom:10.5,minZoom:8,maxZoom:17,attributionControl:false});}
+  catch(error){console.error('Territorial map initialization:',error);setMapError('O mapa não conseguiu iniciar. Atualize a página para tentar novamente.');return;}
   mapRef.current=map;map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');map.addControl(new maplibregl.AttributionControl({compact:true}),'bottom-right');
   map.on('error',e=>{console.error('Territorial map:',e.error);setMapError('Não foi possível carregar a base cartográfica local.');});
   map.on('load',()=>{
+   setMapReady(true);setMapError('');map.resize();
    map.addSource('establishments',{type:'geojson',data:geojsonRef.current,cluster:true,clusterMaxZoom:14,clusterRadius:48});
    map.addLayer({id:'clusters',type:'circle',source:'establishments',filter:['has','point_count'],paint:{'circle-color':'#a9152d','circle-radius':['step',['get','point_count'],18,25,23,100,29],'circle-stroke-color':'#fff','circle-stroke-width':2}});
    map.addLayer({id:'cluster-count',type:'symbol',source:'establishments',filter:['has','point_count'],layout:{'text-field':['get','point_count_abbreviated'],'text-font':['Noto Sans Medium'],'text-size':12},paint:{'text-color':'#fff'}});
@@ -42,7 +45,10 @@ export default function TerritorialMap({companies,onEdit,canEdit}:{companies:Est
    map.on('click','establishment-points',(e:MapMouseEvent)=>{const feature=map.queryRenderedFeatures(e.point,{layers:['establishment-points']})[0];const item=companies.find(c=>c.id===String(feature?.properties?.id));if(!item)return;popup.current?.remove();const root=document.createElement('div');root.className='territorial-popup';const statusInfo=STATUS[text(item.normalizedStatus)]??{label:text(item.situacao),color:'#64748b'};root.innerHTML=`<span class="map-popup-status" style="--status-color:${statusInfo.color}">${statusInfo.label}</span><strong></strong><p></p><dl><div><dt>CNPJ/CPF</dt><dd></dd></div><div><dt>Setor</dt><dd></dd></div></dl>`;root.querySelector('strong')!.textContent=text(item.razao);root.querySelector('p')!.textContent=`${text(item.endereco)} · ${text(item.bairro)}`;const dds=root.querySelectorAll('dd');dds[0].textContent=text(item.cnpj);dds[1].textContent=text(item.setor);if(canEdit){const button=document.createElement('button');button.type='button';button.textContent='Editar cadastro';button.onclick=()=>onEdit(item);root.append(button);}popup.current=new maplibregl.Popup({offset:12,maxWidth:'300px'}).setLngLat((feature.geometry as GeoJSON.Point).coordinates as [number,number]).setDOMContent(root).addTo(map);});
    for(const layer of ['clusters','establishment-points']){map.on('mouseenter',layer,()=>{map.getCanvas().style.cursor='pointer';});map.on('mouseleave',layer,()=>{map.getCanvas().style.cursor='';});}
   });
-  return()=>{popup.current?.remove();map.remove();mapRef.current=null;};
+  const resize=()=>map.resize();
+  const observer=new ResizeObserver(resize);observer.observe(container.current);
+  const resizeFrame=requestAnimationFrame(resize),resizeTimer=window.setTimeout(resize,500),loadTimer=window.setTimeout(()=>{if(!map.loaded()){map.resize();window.setTimeout(resize,700);}},3500);
+  return()=>{observer.disconnect();cancelAnimationFrame(resizeFrame);clearTimeout(resizeTimer);clearTimeout(loadTimer);popup.current?.remove();map.remove();mapRef.current=null;};
  // The map instance is intentionally created once; data updates through the source below.
  // eslint-disable-next-line react-hooks/exhaustive-deps
  },[]);
@@ -59,6 +65,6 @@ export default function TerritorialMap({companies,onEdit,canEdit}:{companies:Est
    <button type="button" className="workspace-button workspace-button-secondary territorial-fit" onClick={fit}><LocateFixed size={16}/>Enquadrar resultados</button>
    <p><strong>{unlocated.toLocaleString('pt-BR')}</strong> cadastros sem localização suficiente. Endereços aproximados pelo bairro são identificados apenas internamente no cálculo.</p>
   </aside>
-  <div className="territorial-map-wrap"><div ref={container} className="territorial-map" aria-label="Mapa territorial dos estabelecimentos"/>{mapError&&<div className="territorial-map-error" role="alert">{mapError}</div>}<div className="territorial-map-note">Base própria · sem consumo da API Mapbox</div></div>
+  <div className="territorial-map-wrap"><div ref={container} className="territorial-map" aria-label="Mapa territorial dos estabelecimentos"/>{!mapReady&&!mapError&&<div className="territorial-map-loading" role="status"><span className="workspace-spinner"/>Carregando mapa territorial…</div>}{mapError&&<div className="territorial-map-error" role="alert">{mapError}</div>}<div className="territorial-map-note">Base própria · sem consumo da API Mapbox</div></div>
  </div>;
 }
