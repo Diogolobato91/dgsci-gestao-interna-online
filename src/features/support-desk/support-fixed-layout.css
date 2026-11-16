@@ -39,3 +39,5 @@
   .support-conversation>form{padding-top:9px!important;padding-bottom:9px!important}
   .support-conversation textarea{min-height:52px!important;height:52px!important}
 }
+
+.support-ticket-list button em.is-urgent{color:#a71927;font-weight:800}
