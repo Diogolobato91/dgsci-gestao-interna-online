@@ -55,17 +55,15 @@ export default function SupportDesk(){
  const loadInbox=useCallback(async(silent=false)=>{
   if(!supabase)return;
   if(!silent)setLoading(true);
-  const [box,catalogQueues,catalogServices,replies]=await Promise.all([
+  const [box,catalogQueues,catalogServices]=await Promise.all([
    supabase.rpc('get_my_support_inbox'),
    supabase.from('support_queues').select('id,label').order('label'),
    supabase.from('support_services').select('id,label').eq('enabled',true).order('sort_order'),
-   Promise.resolve({data:[],error:null}),
   ]);
   if(box.error){setError(box.error.message.includes('atendimento')?'Seu usuário ainda não está configurado como atendente. A Diretoria ou Subdiretoria pode habilitar suas filas.':'Não foi possível carregar a central de atendimento.');}
   else{const next=box.data as InboxData;setInbox(next);setError('');setSelectedId(current=>{const currentTicket=next.tickets.find(ticket=>ticket.id===current);if(currentTicket&&!['completed','cancelled'].includes(currentTicket.status))return current;return next.tickets.find(ticket=>!['completed','cancelled'].includes(ticket.status))?.id||'';});}
   if(!catalogQueues.error)setQueues(catalogQueues.data||[]);
   if(!catalogServices.error)setServices(catalogServices.data||[]);
-  if(!replies.error)setQuickReplies((replies.data||[]) as QuickReply[]);
   if(admin){const dashboard=await supabase.rpc('get_support_admin_dashboard');if(!dashboard.error)setAgents(((dashboard.data as {agents:TransferAgent[]})?.agents)||[]);}
   if(!silent)setLoading(false);
  },[admin]);
