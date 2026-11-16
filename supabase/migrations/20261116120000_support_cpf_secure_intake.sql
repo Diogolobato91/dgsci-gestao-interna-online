@@ -1,9 +1,9 @@
 -- O atendimento aceita pessoa física ou jurídica sem expor recuperação de senha.
 
-create or replace function private.is_valid_cpf(raw_value text) returns boolean
+create or replace function private.is_valid_cpf(raw text) returns boolean
 language plpgsql immutable set search_path = '' as $$
 declare
-  value text := regexp_replace(coalesce(raw_value, ''), '\D', '', 'g');
+  value text := regexp_replace(coalesce(raw, ''), '\D', '', 'g');
   sum_value integer;
   check_digit integer;
   index_value integer;
