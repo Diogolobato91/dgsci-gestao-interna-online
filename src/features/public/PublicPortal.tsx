@@ -37,9 +37,9 @@ import {
   PUBLIC_QUEUES,
   PUBLIC_SERVICES,
   PublicQueueId,
-  formatCnpj,
+  formatCpfCnpj,
   formatPhone,
-  isValidCnpj,
+  isValidCpfCnpj,
   onlyDigits,
   queueById,
   serviceById,
@@ -59,6 +59,7 @@ import './public-portal.css';
 import './public-chat-fixes.css';
 import './public-home-refinement.css';
 import './public-chat-layout.css';
+import './public-mobile-chat.css';
 import './public-publications-fixes.css';
 import './public-information.css';
 
@@ -145,7 +146,7 @@ export function PublicHomePage() {
             </div>
             <p className="public-trust-line"><ShieldCheck size={16} /> Cada solicitação recebe um protocolo e entra somente na fila da seção escolhida.</p>
           </div>
-          <figure className="public-hero-media"><img src="/portal/assets/home/vistoria-dgsci.jpg" alt="Registros de vistorias técnicas e inspeções realizadas pelo Corpo de Bombeiros Militar do Pará"/><figcaption>Vistorias técnicas e inspeções de sistemas de segurança contra incêndio.</figcaption></figure>
+          <figure className="public-hero-media"><picture><source srcSet="/portal/assets/home/vistoria-dgsci.webp" type="image/webp"/><img src="/portal/assets/home/vistoria-dgsci.jpg" width="1672" height="941" fetchPriority="high" decoding="async" alt="Registros de vistorias técnicas e inspeções realizadas pelo Corpo de Bombeiros Militar do Pará"/></picture><figcaption>Vistorias técnicas e inspeções de sistemas de segurança contra incêndio.</figcaption></figure>
         </section>
 
 
@@ -177,7 +178,7 @@ export function PublicHomePage() {
           <article><h3>Multa e Interdição</h3>{faqItem('fines-regularize','Como faço para recorrer ou regularizar pendências?','No primeiro licenciamento, após a vistoria, corrija as exigências e informe o cumprimento pelo SISGAT ou presencialmente no CAT ou SAT. O prazo indicado é de 60 dias, prorrogável por mais 90 dias. Após a autuação, podem ser aplicáveis a declaração de saneamento, com pagamento de 10% da multa, ou o TAACB, com pagamento de 35%, conforme a situação. Na renovação, corrija as pendências e solicite o saneamento ou o TAACB pelos canais oficiais.')}{faqItem('fines-contact','Como falar com o chefe da seção?','Abra um atendimento nesta plataforma ou solicite reunião por meio de FAT protocolado presencialmente no quartel mais próximo.')}</article>
         </div></section>
 
-        <section className="public-final-cta"><div><p className="public-kicker"><span /> CENTRAL DE ATENDIMENTO</p><h2>Precisa falar com a DGSCI?</h2><p>Informe o CNPJ e o assunto para entrar na fila da seção responsável.</p></div><Link className="public-button public-button-primary" to="/atendimento">Iniciar atendimento <ArrowRight size={18} /></Link></section>
+        <section className="public-final-cta"><div><p className="public-kicker"><span /> CENTRAL DE ATENDIMENTO</p><h2>Precisa falar com a DGSCI?</h2><p>Informe seu CPF ou CNPJ e o assunto para entrar na fila da seção responsável.</p></div><Link className="public-button public-button-primary" to="/atendimento">Iniciar atendimento <ArrowRight size={18} /></Link></section>
       </main>
     </PublicShell>
   );
@@ -227,7 +228,7 @@ function PublicGuidedIntakePage() {
   }, []);
 
   const questions = [
-    'Digite o CNPJ da empresa.',
+    'Digite seu CPF ou CNPJ.',
     'Qual é o seu nome?',
     'Onde fica a empresa?',
     'O que você precisa?',
@@ -246,7 +247,7 @@ function PublicGuidedIntakePage() {
   const continueText = (event: FormEvent) => {
     event.preventDefault();
     setError('');
-    if (step === 0 && !isValidCnpj(data.cnpj)) return setError('Digite um CNPJ válido para continuar.');
+    if (step === 0 && !isValidCpfCnpj(data.cnpj)) return setError('Digite um CPF ou CNPJ válido para continuar.');
     if (step === 1 && data.requester.trim().length < 3) return setError('Digite seu nome completo.');
     if (step === 2 && data.city.trim().length < 2) return setError('Informe ou selecione o município.');
     if (step === 4 && data.message.trim().length < 10) return setError('Escreva pelo menos 10 caracteres.');
@@ -323,17 +324,17 @@ function PublicGuidedIntakePage() {
               <p>{opening ? 'Pronto! Estou iniciando o chat para você…' : questions[step]}</p>
             </div>
 
-            {/* Passo 0: CNPJ */}
+            {/* Passo 0: CPF ou CNPJ */}
             {step === 0 && (
               <form className="public-guided-reply" onSubmit={continueText}>
-                <label htmlFor="guided-cnpj">CNPJ da empresa</label>
+                <label htmlFor="guided-cnpj">CPF ou CNPJ</label>
                 <input
                   id="guided-cnpj"
                   autoFocus
                   inputMode="numeric"
                   value={data.cnpj}
-                  onChange={event => setData({ ...data, cnpj: formatCnpj(event.target.value) })}
-                  placeholder="00.000.000/0000-00"
+                  onChange={event => setData({ ...data, cnpj: formatCpfCnpj(event.target.value) })}
+                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
                 />
                 <small>Digite somente os números. A pontuação aparece sozinha.</small>
                 {error && <p className="public-guided-error" role="alert">{error}</p>}
@@ -441,7 +442,7 @@ function PublicGuidedIntakePage() {
             {step === 5 && (
               <div className="public-guided-review">
                 <dl>
-                  <div><dt>CNPJ</dt><dd>{data.cnpj}</dd></div>
+                  <div><dt>CPF ou CNPJ</dt><dd>{data.cnpj}</dd></div>
                   <div><dt>Responsável</dt><dd>{data.requester}</dd></div>
                   <div><dt>Cidade</dt><dd>{data.city}</dd></div>
                   <div><dt>Serviço</dt><dd>{selectedService?.label}</dd></div>

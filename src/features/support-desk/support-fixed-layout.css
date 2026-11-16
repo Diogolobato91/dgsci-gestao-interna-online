@@ -9,14 +9,15 @@
 @media(prefers-reduced-motion:reduce){.support-customer-pane{transition:none!important}}
 
 /* Em notebook, a ficha usa espaço próprio: nunca cobre a conversa. */
-@media (min-width:1101px) and (max-width:1500px){
-  .support-desk-workspace{grid-template-columns:250px minmax(0,1fr)!important}
-  .support-customer-pane{display:none!important;position:static!important;width:auto!important;height:100%!important;border-left:1px solid #dfe1e3;box-shadow:none!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
-  .support-desk-workspace.has-customer-panel{grid-template-columns:250px minmax(420px,1fr) minmax(310px,350px)!important}
-  .support-desk-workspace .support-customer-pane.is-open{display:flex!important}
+@media (min-width:1281px) and (max-width:1500px){
+  .support-desk-workspace,.support-desk-workspace.has-customer-panel{grid-template-columns:220px minmax(360px,1fr) minmax(265px,295px)!important}
+  .support-customer-pane,.support-desk-workspace .support-customer-pane.is-open{display:flex!important;position:static!important;width:auto!important;height:100%!important;border-left:1px solid #dfe1e3;box-shadow:none!important;transform:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+  .support-customer-toggle,.support-customer-close{display:none!important}
   .support-customer-backdrop{display:none!important}
-  .support-customer-close{display:grid}
 }
 @media (min-width:1101px) and (max-width:1280px){
+  .support-desk-workspace{grid-template-columns:230px minmax(360px,1fr)!important}
   .support-desk-workspace.has-customer-panel{grid-template-columns:230px minmax(360px,1fr) minmax(290px,320px)!important}
 }
+
+.support-empty.is-complete{color:#216b3d;background:#f5fbf7}.support-empty.is-complete strong{color:#216b3d}

@@ -30,13 +30,14 @@ export async function handleSupportChat(request:Request,services:SupportChatServ
  try{
   if(action==='open'){
    if(services.isOpen&&!services.isOpen())return json(400,{message:'O atendimento funciona das 8h às 18h. Retorne dentro desse horário.'},origin);
-   if(!validText(body.service,2,80)||!validText(body.cnpj,14,18)||!validText(body.requester,3,160)||!validText(body.city,2,120)||!validText(body.summary,10,1500))return json(400,{message:'Confira os dados obrigatórios.'},origin);
+   if(String(body.service)==='password-reset')return json(400,{message:'Serviço indisponível.'},origin);
+   if(!validText(body.service,2,80)||!validText(body.cnpj,11,18)||!validText(body.requester,3,160)||!validText(body.city,2,120)||!validText(body.summary,10,1500))return json(400,{message:'Confira os dados obrigatórios.'},origin);
    const accessKey=createAccessKey(),accessHash=await sha256(cleanKey(accessKey));
    const ticket=await services.open({service:String(body.service),cnpj:String(body.cnpj),requester:String(body.requester),phone:typeof body.phone==='string'?body.phone:undefined,email:typeof body.email==='string'?body.email:undefined,city:String(body.city),reference:String(body.reference??''),summary:String(body.summary)},accessHash);
    if(!ticket)return json(400,{message:'Não foi possível abrir o atendimento.'},origin);
    return json(201,{...ticket,accessKey},origin);
   }
-  if(!validText(body.protocol,8,40)||!validText(body.cnpj,14,18)||cleanKey(body.accessKey).length!==12)return json(400,{message:'Confira o CNPJ, o protocolo e a chave de acesso.'},origin);
+  if(!validText(body.protocol,8,40)||!validText(body.cnpj,11,18)||cleanKey(body.accessKey).length!==12)return json(400,{message:'Confira o CPF/CNPJ, o protocolo e a chave de acesso.'},origin);
   const input={protocol:String(body.protocol),cnpj:String(body.cnpj),accessKey:formatAccessKey(String(body.accessKey))},accessHash=await sha256(cleanKey(body.accessKey));
   if(action==='conversation'){
    const conversation=await services.conversation({...input,before:typeof body.before==='string'?body.before:undefined},accessHash);

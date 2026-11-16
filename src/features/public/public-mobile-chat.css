@@ -1,0 +1,31 @@
+@media (max-width: 700px) {
+  .public-guided-reply input,
+  .public-guided-reply textarea,
+  .public-guided-options input,
+  .public-chat-composer textarea { font-size: 16px; }
+
+  .public-guided-reply .public-button,
+  .public-guided-options > button { min-height: 48px; }
+
+  .public-chat-page {
+    height: calc(100dvh - 64px);
+    padding: 8px;
+  }
+
+  .public-chat-heading { margin-bottom: 7px; }
+  .public-chat-heading h1 { font-size: 18px; }
+  .public-chat-shell { border-radius: 8px; }
+  .public-chat-shell > header { min-height: 54px; padding: 9px 11px; }
+  .public-chat-shell > header strong { font-size: 13px; }
+  .public-chat-status { padding: 6px 9px; }
+  .public-chat-messages { padding: 12px 10px; gap: 10px; }
+  .public-chat-messages article { max-width: 92%; padding: 9px 11px; }
+  .public-chat-messages article p { font-size: 13px; }
+  .public-chat-composer { padding: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  .public-chat-composer > label { margin-bottom: 6px; }
+  .public-chat-composer > div { grid-template-columns: 48px minmax(0, 1fr) 52px; gap: 7px; align-items: stretch; }
+  .public-chat-attach { width: 48px; height: 48px; align-self: end; }
+  .public-chat-composer textarea { grid-column: 2; min-height: 54px; max-height: 112px; resize: none; }
+  .public-chat-composer .public-button { grid-column: 3; width: 52px; min-width: 52px; min-height: 48px; padding: 0; align-self: end; font-size: 0; }
+  .public-chat-composer .public-button svg { width: 20px; height: 20px; }
+}

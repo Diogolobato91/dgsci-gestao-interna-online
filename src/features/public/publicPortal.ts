@@ -1,4 +1,4 @@
-export type PublicQueueId = 'inspection' | 'fines' | 'projects' | 'accreditation' | 'access';
+export type PublicQueueId = 'inspection' | 'fines' | 'projects' | 'accreditation';
 
 export type PublicService = {
   id: string;
@@ -39,13 +39,6 @@ export const PUBLIC_QUEUES: PublicQueue[] = [
     shortLabel: 'Credenciamento',
     description: 'Novo credenciamento, renovação, documentação e acompanhamento.',
   },
-  {
-    id: 'access',
-    label: 'Acesso e Senha',
-    shortLabel: 'Acesso e Senha',
-    description: 'Reset de senha atendido pela equipe disponível, independentemente da seção.',
-    universal: true,
-  },
 ];
 
 export const PUBLIC_SERVICES: PublicService[] = [
@@ -66,7 +59,6 @@ export const PUBLIC_SERVICES: PublicService[] = [
   { id: 'renew-accreditation', label: 'Renovar credenciamento', queue: 'accreditation' },
   { id: 'track-accreditation', label: 'Acompanhar credenciamento', queue: 'accreditation' },
   { id: 'accreditation-documents', label: 'Documentação de credenciamento', queue: 'accreditation' },
-  { id: 'password-reset', label: 'Resetar senha', queue: 'access' },
 ];
 
 export function queueById(id: PublicQueueId) {
@@ -88,6 +80,31 @@ export function formatCnpj(value: string) {
     .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
     .replace(/\.(\d{3})(\d)/, '.$1/$2')
     .replace(/(\d{4})(\d)/, '$1-$2');
+}
+
+export function formatCpfCnpj(value: string) {
+  const digits = onlyDigits(value).slice(0, 14);
+  if (digits.length <= 11) return digits
+    .replace(/^(\d{3})(\d)/, '$1.$2')
+    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1-$2');
+  return formatCnpj(digits);
+}
+
+export function isValidCpf(value: string) {
+  const digits = onlyDigits(value);
+  if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
+  const digit = (length: number) => {
+    let sum = 0;
+    for (let index = 0; index < length; index += 1) sum += Number(digits[index]) * (length + 1 - index);
+    const remainder = (sum * 10) % 11;
+    return remainder === 10 ? 0 : remainder;
+  };
+  return digit(9) === Number(digits[9]) && digit(10) === Number(digits[10]);
+}
+
+export function isValidCpfCnpj(value: string) {
+  return isValidCpf(value) || isValidCnpj(value);
 }
 
 export function isValidCnpj(value: string) {
