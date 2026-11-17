@@ -15,6 +15,7 @@ const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Fortaleza'}).
 const statusLabel={draft:'Em preenchimento',closed:'Encerrada',reviewed:'Conferida'};
 const accessLabel={chief:'Chefe do Plantão',assistant:'Auxiliar do Plantão',expert:'Perito de Incêndio',manager:'Administração'};
 const formatDate=(value:string)=>new Intl.DateTimeFormat('pt-BR',{dateStyle:'full',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));
+const formatDateTime=(value:string)=>new Intl.DateTimeFormat('pt-BR',{dateStyle:'short',timeStyle:'short',timeZone:'America/Fortaleza'}).format(new Date(value));
 const message=(reason:unknown)=>reason instanceof Error?reason.message:'Não foi possível concluir a operação.';
 const blankContent=():Content=>({receipt:{time:'07:00',previous_chief:'',notes:'Recebi o serviço com todas as ordens em vigor.'},substitutions:[],cleaning:{changed:'false',notes:''},rounds:[],flag:{changed:'false',notes:''},energy:[],fueling:{changed:'false',notes:''},vehicles:{changed:'false',notes:''},materials:[],documents:[],inspections:[],participations:[]});
 
@@ -32,7 +33,7 @@ function ListEditor({title,rows,fields,onChange,disabled,addLabel='Adicionar reg
  return <div className="duty-list"><div className="duty-list-heading"><p>{title}</p>{!disabled&&<button type="button" onClick={()=>onChange([...rows,Object.fromEntries(fields.map(field=>[field.key,'']))])}><Plus size={15}/>{addLabel}</button>}</div>{rows.length===0?<p className="duty-empty-line">Nenhum registro informado.</p>:rows.map((row,index)=><article key={index}><span className="duty-row-number">{String(index+1).padStart(2,'0')}</span><div>{fields.map(field=>field.wide?<NotesField key={field.key} label={field.label} value={row[field.key]} disabled={disabled} placeholder={field.placeholder} onChange={value=>update(index,field.key,value)}/>:<TextField key={field.key} label={field.label} value={row[field.key]} type={field.type} disabled={disabled} placeholder={field.placeholder} onChange={value=>update(index,field.key,value)}/>)}</div>{!disabled&&<button type="button" className="duty-remove" aria-label={`Remover registro ${index+1}`} onClick={()=>onChange(rows.filter((_,i)=>i!==index))}><Trash2 size={15}/></button>}</article>)}</div>;
 }
 
-const text=(value?:string)=>value?.trim()||'Não houve.';
+const text=(value?:string)=>value?.trim()||'—';
 function PrintRows({rows,fields}:{rows:Entry[];fields:{key:string;label:string}[]}){
  return rows.length?<ol className="duty-print-list">{rows.map((row,index)=><li key={index}>{fields.map(field=><span key={field.key}><b>{field.label}:</b> {text(row[field.key])}</span>)}</li>)}</ol>:<p>Não houve.</p>;
 }
@@ -55,7 +56,10 @@ function DutyPrintDocument({part}:{part:Part}){
   <section><h2><b>XI</b> Perícia de incêndio</h2><PrintRows rows={part.content.inspections} fields={[{key:'date',label:'Data'},{key:'request_time',label:'Hora'},{key:'expert',label:'Perito'},{key:'requester',label:'Solicitante'},{key:'phone',label:'Telefone'},{key:'address',label:'Endereço'},{key:'nature',label:'Natureza'},{key:'vehicle',label:'Viatura'},{key:'summary',label:'Providências'}]}/></section>
   <section><h2><b>XII</b> Participações e ocorrências</h2><PrintRows rows={part.content.participations} fields={[{key:'time',label:'Horário'},{key:'title',label:'Assunto'},{key:'description',label:'Descrição'}]}/></section>
   <section><h2><b>XIII</b> Passagem do serviço</h2><p>No horário de <strong>{text(part.handover.time)}</strong>, passei o serviço de Chefe do Plantão ao meu sucessor legal, <strong>{text(part.handover.successor)}</strong>, com todas as ordens em vigor. {part.handover.notes?.trim()}</p></section>
-  <footer><div><span>CHEFE DO PLANTÃO</span><strong>{part.chief_name}</strong><small>{part.closed_at?'Assinado eletronicamente em '+new Date(part.closed_at).toLocaleString('pt-BR'):'Documento em preenchimento — assinatura pendente'}</small></div><div><span>VISTO DA ADMINISTRAÇÃO</span><strong>{part.reviewed_at?'Parte conferida':'Visto pendente'}</strong><small>{part.reviewed_at?new Date(part.reviewed_at).toLocaleString('pt-BR'):''}</small></div></footer>
+  <footer>
+   <div>{part.closed_at&&<span className="duty-electronic-signature">Assinado eletronicamente<br/><b>{formatDateTime(part.closed_at)}</b></span>}<i/><strong>{part.chief_name}</strong><small>CHEFE DO PLANTÃO</small>{!part.closed_at&&<em>Assinatura pendente</em>}</div>
+   <div>{part.reviewed_at&&<span className="duty-electronic-signature">Visto eletrônico<br/><b>{formatDateTime(part.reviewed_at)}</b></span>}<i/><strong>{part.reviewed_at?'Parte conferida':'Visto pendente'}</strong><small>VISTO DA ADMINISTRAÇÃO</small></div>
+  </footer>
   <p className="duty-print-auth">Documento emitido pelo Sistema DGSCI • Parte {partNumber}/{part.calendar_year} • Versão {part.version}</p>
  </article>;
 }

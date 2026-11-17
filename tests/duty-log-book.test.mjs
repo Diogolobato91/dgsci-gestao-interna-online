@@ -49,4 +49,7 @@ test('impressão possui documento institucional próprio',()=>{
   assert.match(page,/duty-print-auth/);
   assert.match(css,/@page\{size:A4 portrait/);
   assert.match(css,/\.duty-print-document header/);
+  assert.match(css,/\.portal-skip/);
+  assert.match(css,/\.duty-electronic-signature/);
+  assert.match(css,/section\{[^}]*break-inside:auto/);
 });
