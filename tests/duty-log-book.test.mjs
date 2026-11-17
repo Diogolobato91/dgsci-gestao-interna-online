@@ -6,6 +6,8 @@ const migration=fs.readFileSync('supabase/migrations/20261117173000_duty_log_boo
 const page=fs.readFileSync('src/features/duty-log/DutyLogPage.tsx','utf8');
 const navigation=fs.readFileSync('src/config/navigation.ts','utf8');
 const superadminMigration=fs.readFileSync('supabase/migrations/20261117193000_duty_log_superadmin_controls.sql','utf8');
+const chiefPermissionsMigration=fs.readFileSync('supabase/migrations/20261117213000_duty_log_chief_permissions.sql','utf8');
+const css=fs.readFileSync('src/features/duty-log/duty-log.css','utf8');
 
 test('livro numera a Parte pelo dia do ano e impede duplicidade diária',()=>{
   assert.match(migration,/service_date date not null unique/i);
@@ -33,4 +35,18 @@ test('edição e exclusão excepcionais pertencem somente ao superadministrador'
   assert.match(superadminMigration,/A exclusão é exclusiva do superadministrador/i);
   assert.match(superadminMigration,/admin_deleted/i);
   assert.match(page,/EXCLUIR PARTE/);
+});
+
+test('somente chefe do plantão ou superadministrador abre e encerra a Parte',()=>{
+  assert.match(chiefPermissionsMigration,/access_role<>'chief' and not private\.is_duty_log_superadmin/i);
+  assert.match(chiefPermissionsMigration,/and \(access_role='chief' or superadmin\)/i);
+  assert.doesNotMatch(chiefPermissionsMigration,/access_role not in \('chief','manager'\)/i);
+});
+
+test('impressão possui documento institucional próprio',()=>{
+  assert.match(page,/DutyPrintDocument/);
+  assert.match(page,/LIVRO DO PLANTÃO/);
+  assert.match(page,/duty-print-auth/);
+  assert.match(css,/@page\{size:A4 portrait/);
+  assert.match(css,/\.duty-print-document header/);
 });
