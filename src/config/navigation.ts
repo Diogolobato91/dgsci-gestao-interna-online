@@ -16,12 +16,14 @@ import {
   MapPin,
   UserCheck,
   MessageSquare,
-  BookOpen
+  BookOpen,
+  BookOpenCheck
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
 const integratedItems: MenuItem[] = [
   {id:'atendimentos',title:'Central de Atendimento',icon:MessageSquare,path:'/atendimentos',section:'Atendimento on-line'},
+  {id:'livro-plantao',title:'Livro do Plantão',icon:BookOpenCheck,path:'/livro-plantao',section:'Serviço operacional'},
   {id:'credenciamento',title:'Credenciamento',icon:FileCheck,path:'/credenciamento'},
   { id: 'estabelecimentos', title: 'Estabelecimentos', icon: Building2, path: '/estabelecimentos' },
   { id: 'sat-command', title: "CMT e SUB SAT'S", icon: Users, path: '/cmt-sub-sats' },
