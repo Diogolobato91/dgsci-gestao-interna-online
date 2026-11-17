@@ -5,6 +5,7 @@ import test from 'node:test';
 const migration=fs.readFileSync('supabase/migrations/20261117173000_duty_log_book.sql','utf8');
 const page=fs.readFileSync('src/features/duty-log/DutyLogPage.tsx','utf8');
 const navigation=fs.readFileSync('src/config/navigation.ts','utf8');
+const superadminMigration=fs.readFileSync('supabase/migrations/20261117193000_duty_log_superadmin_controls.sql','utf8');
 
 test('livro numera a Parte pelo dia do ano e impede duplicidade diária',()=>{
   assert.match(migration,/service_date date not null unique/i);
@@ -24,4 +25,12 @@ test('interface contempla as treze seções sem oferecer anexos',()=>{
   for(const title of ['Recebimento do serviço','Escala, permutas e substituições','Faxina','Ronda e monitoramento','Pavilhão Nacional','Consumo de energia elétrica','Abastecimento e alterações de viaturas','Cautela de materiais','Juntada de documentos','Perícia de incêndio','Participações e ocorrências','Passagem do serviço']) assert.match(page,new RegExp(title,'i'));
   assert.doesNotMatch(page,/type=["']file["']/i);
   assert.match(navigation,/Livro do Plantão/);
+});
+
+test('edição e exclusão excepcionais pertencem somente ao superadministrador',()=>{
+  assert.match(superadminMigration,/member\.role='administrator'/i);
+  assert.match(superadminMigration,/A edição excepcional é exclusiva do superadministrador/i);
+  assert.match(superadminMigration,/A exclusão é exclusiva do superadministrador/i);
+  assert.match(superadminMigration,/admin_deleted/i);
+  assert.match(page,/EXCLUIR PARTE/);
 });
