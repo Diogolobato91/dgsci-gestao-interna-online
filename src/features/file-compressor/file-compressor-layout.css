@@ -6,4 +6,22 @@
 .compressor-auto-options strong{color:#334052}
 .compressor-auto-options span{font-size:12px;line-height:1.5}
 .compressor-how-card .compressor-note{margin-top:16px}
+.compressor-main-card{padding:24px;background:#fff;border:1px solid #e2e7ed;border-radius:14px;box-shadow:0 4px 16px #1d2a3d08}
+.compressor-dropzone-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.compressor-dropzone-heading h2{margin:0;color:#263241;font-size:18px;font-weight:650;letter-spacing:-.2px}
+.compressor-dropzone-heading p{margin:6px 0 0;color:#687485;font-size:12px;line-height:1.5}
+.compressor-dropzone-heading>span{display:flex;align-items:center;gap:7px;color:#3b7659;font-size:11px;white-space:nowrap}
+.compressor-main-card .compressor-dropzone{min-height:260px;gap:12px;border-width:2px;border-radius:12px}
+.compressor-main-card .compressor-upload-icon{width:52px;height:52px}
+.compressor-main-card .compressor-dropzone strong{font-size:14px}
+.compressor-main-card .compressor-dropzone>span:last-child{max-width:none;font-size:11px}
+.compressor-main-card .compressor-file-row{margin-top:16px;padding:14px}
+.compressor-main-card .compressor-actions{margin:16px 0 0;padding:15px 0 0;border:0;border-top:1px solid #edf0f4;border-radius:0}
+.compressor-result.is-empty{display:flex;align-items:center;min-height:92px;margin-top:16px;padding:18px 22px;border:1px dashed #d8dee7;background:#fafbfd}
+.compressor-result-empty{display:flex;align-items:center;gap:13px;color:#8893a2}
+.compressor-result-empty>div{display:grid;gap:4px}
+.compressor-result-empty strong{color:#465263;font-size:12px;font-weight:600}
+.compressor-result-empty span{font-size:10px;line-height:1.5}
+.compressor-result.is-ready{margin-top:16px}
 @media(max-width:850px){.compressor-card{min-height:0}.compressor-dropzone{min-height:180px}}
+@media(max-width:650px){.compressor-main-card{padding:17px}.compressor-dropzone-heading{align-items:flex-start;flex-direction:column}.compressor-main-card .compressor-dropzone{min-height:190px}.compressor-main-card .compressor-actions{align-items:stretch;flex-direction:column}.compressor-main-card .compressor-actions .workspace-button{width:100%}.compressor-result.is-empty{min-height:80px;padding:15px}}
