@@ -1,4 +1,9 @@
 .file-compressor-page{max-width:1500px}
 .compressor-card{min-height:360px}
 .compressor-dropzone{min-height:230px}
+.compressor-auto-options{display:grid;gap:12px;margin:20px 0}
+.compressor-auto-options>div{display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 14px;border:1px solid #e7ebf0;border-radius:9px;background:#fafbfd;color:#778295}
+.compressor-auto-options strong{color:#334052}
+.compressor-auto-options span{font-size:12px;line-height:1.5}
+.compressor-how-card .compressor-note{margin-top:16px}
 @media(max-width:850px){.compressor-card{min-height:0}.compressor-dropzone{min-height:180px}}
