@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AlertCircle, Check, Download, FileArchive, FileImage, HardDrive, ImageDown, LoaderCircle, ShieldCheck, Upload, X } from 'lucide-react';
 import { PageHeader } from '@/components/workspace/Workspace';
 import './file-compressor.css';
+import './file-compressor-layout.css';
 
 type Mode = 'image' | 'file';
 type Result = { url: string; name: string; size: number; originalSize: number; mimeType: string };
@@ -90,12 +91,12 @@ export default function FileCompressorPage() {
   const isTiff = file ? /\.(tif|tiff)$/i.test(file.name) || /tiff/i.test(file.type) : false;
 
   return <section className="workspace-page file-compressor-page">
-    <PageHeader eyebrow="Consulta compartilhada" title="Compressor de Arquivos" description="Reduza imagens ou tente compactar outros arquivos diretamente no seu dispositivo." icon={FileArchive} />
-    <div className="compressor-privacy"><ShieldCheck size={19}/><div><strong>Processamento privado no navegador</strong><span>O arquivo não é enviado ao sistema, ao banco de dados ou ao armazenamento em nuvem.</span></div></div>
+    <PageHeader eyebrow="Consulta compartilhada" title="Compressor de Arquivos" description="Escolha um arquivo, defina como quer recebê-lo e baixe a versão compactada." icon={FileArchive} />
+    <div className="compressor-privacy"><ShieldCheck size={19}/><div><strong>Seu arquivo fica no seu dispositivo</strong><span>Ele não é enviado ao sistema nem salvo no banco de dados.</span></div></div>
 
     <div className="compressor-layout">
       <div className="compressor-card">
-        <div className="compressor-card-heading"><span className="compressor-step">1</span><div><h2>Escolha o arquivo</h2><p>Até 200 MB. O arquivo permanece neste dispositivo.</p></div></div>
+        <div className="compressor-card-heading"><span className="compressor-step">1</span><div><h2>1. Escolha um arquivo</h2><p>Selecione ou arraste um arquivo para esta área. Limite: 200 MB.</p></div></div>
         <input ref={inputRef} type="file" className="compressor-hidden-input" onChange={(event) => chooseFile(event.target.files?.[0])} />
         <button type="button" className="compressor-dropzone" onClick={() => inputRef.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); chooseFile(event.dataTransfer.files[0]); }} aria-label="Selecionar ou soltar arquivo">
           <span className="compressor-upload-icon"><Upload size={22}/></span><strong>{file ? 'Trocar arquivo' : 'Clique para escolher ou solte aqui'}</strong><span>{file ? 'Você pode selecionar outro arquivo a qualquer momento.' : 'Imagens, documentos, arquivos compactados e outros formatos'}</span>
@@ -104,9 +105,9 @@ export default function FileCompressorPage() {
       </div>
 
       <div className="compressor-card">
-        <div className="compressor-card-heading"><span className="compressor-step">2</span><div><h2>Defina como compactar</h2><p>{mode === 'image' ? 'Conversão com perda controlada para reduzir imagens.' : 'Compactação sem perda em arquivo .gz.'}</p></div></div>
+        <div className="compressor-card-heading"><span className="compressor-step">2</span><div><h2>2. Escolha como quer o resultado</h2><p>Para imagens, escolha um formato. Para outros arquivos, use compactação GZIP.</p></div></div>
         <div className="compressor-settings">
-          <label>Operação<select value={mode} onChange={(event) => { setMode(event.target.value as Mode); setError(''); clearResult(); }}><option value="image">Otimizar imagem para WebP ou JPEG</option><option value="file">Compactar qualquer arquivo em GZIP</option></select></label>
+          <label>Quero<select value={mode} onChange={(event) => { setMode(event.target.value as Mode); setError(''); clearResult(); }}><option value="image">Reduzir uma imagem</option><option value="file">Compactar outro tipo de arquivo (GZIP)</option></select></label>
         </div>
         {mode === 'image' ? <div className="compressor-settings">
           <label>Formato de saída<select value={format} onChange={(event) => setFormat(event.target.value as 'image/webp' | 'image/jpeg')}><option value="image/webp">WebP — recomendado, costuma gerar menor arquivo</option><option value="image/jpeg">JPEG — compatibilidade ampla</option></select></label>

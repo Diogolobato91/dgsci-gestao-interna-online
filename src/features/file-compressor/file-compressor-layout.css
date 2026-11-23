@@ -1,0 +1,4 @@
+.file-compressor-page{max-width:1500px}
+.compressor-card{min-height:360px}
+.compressor-dropzone{min-height:230px}
+@media(max-width:850px){.compressor-card{min-height:0}.compressor-dropzone{min-height:180px}}
