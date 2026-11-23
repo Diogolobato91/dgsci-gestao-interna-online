@@ -22,6 +22,7 @@ const PublicationsAdmin = lazy(() => import('@/features/publications/Publication
 const OperationalCasesPage = lazy(() => import('@/features/operations/OperationalCasesPage'));
 const OperationalReportsPage = lazy(() => import('@/features/operations/OperationalReportsPage'));
 const DutyLogPage = lazy(() => import('@/features/duty-log/DutyLogPage'));
+const FileCompressorPage = lazy(() => import('@/features/file-compressor/FileCompressorPage'));
 
 const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
 const DashboardGeral = lazy(() => import("@/pages/DashboardGeral"));
@@ -112,6 +113,7 @@ const AppRoutes = () => (
         <Route path="atendimentos" element={<SupportDesk />} />
         <Route path="atendimentos/administracao" element={<AuthorizedRoute profiles={['Subdiretoria','Diretoria']}><SupportAdmin /></AuthorizedRoute>} />
         <Route path="livro-plantao" element={<DutyLogPage />} />
+        <Route path="compressor-arquivos" element={<FileCompressorPage />} />
         <Route path="gestao-publicacoes" element={<AuthorizedRoute profiles={['Subdiretoria']}><PublicationsAdmin /></AuthorizedRoute>} />
         <Route path="biblioteca" element={<SupportLibrary />} />
         <Route path="comunicados" element={<SupportLibrary />} />
