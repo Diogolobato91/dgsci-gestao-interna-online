@@ -6,6 +6,7 @@ import './file-compressor-layout.css';
 
 type Result = { url: string; name: string; size: number; originalSize: number; mimeType: string };
 type WorkerMessage = { type: 'progress'; value: number; label: string } | { type: 'result'; buffer: ArrayBuffer; mimeType: string; extension: string } | { type: 'error'; message: string };
+type PdfWorkerMessage = WorkerMessage;
 const MAX_FILE_SIZE = 200 * 1024 * 1024;
 const formatBytes = (bytes: number) => bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(0)} KB` : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
@@ -64,25 +65,34 @@ export default function FileCompressorPage() {
     catch { setError('Não foi possível ler este arquivo.'); setBusy(false); worker.terminate(); }
   };
 
-  const compressFile = async () => {
+  const compressPdf = async () => {
     if (!file) return;
-    if (!('CompressionStream' in window)) { setError('A compactação geral requer um navegador atualizado (Chrome, Edge, Firefox ou Safari recentes).'); return; }
-    setBusy(true); setError(''); setProgress(0); setProgressLabel('Compactando localmente…');
-    let bytesRead = 0;
-    let lastUpdate = 0;
-    const countedStream = new TransformStream<Uint8Array, Uint8Array>({ transform(chunk, controller) { bytesRead += chunk.byteLength; if (bytesRead - lastUpdate > 2 * 1024 * 1024) { lastUpdate = bytesRead; setProgress(Math.min(95, Math.round((bytesRead / file.size) * 95))); } controller.enqueue(chunk); } });
+    setBusy(true); setError(''); setProgress(0); setProgressLabel('Lendo PDF…');
+    const worker = new Worker(new URL('./pdf-compressor.worker.ts', import.meta.url), { type: 'module' });
+    worker.onmessage = (event: MessageEvent<PdfWorkerMessage>) => {
+      const message = event.data;
+      if (message.type === 'progress') { setProgress(message.value); setProgressLabel(message.label); return; }
+      if (message.type === 'error') { setError(message.message); setBusy(false); worker.terminate(); return; }
+      const blob = new Blob([message.buffer], { type: message.mimeType });
+      const basename = file.name.replace(/\.pdf$/i, '') || 'documento';
+      saveResult(blob, `${basename}-compactado.pdf`, file.size, 'application/pdf');
+      worker.terminate();
+    };
+    worker.onerror = () => { setError('Não foi possível otimizar este PDF neste navegador.'); setBusy(false); worker.terminate(); };
     try {
-      const compressedStream = file.stream().pipeThrough(countedStream).pipeThrough(new CompressionStream('gzip'));
-      const blob = await new Response(compressedStream).blob();
-      saveResult(blob, `${file.name}.gz`, file.size, 'application/gzip');
-      setProgress(100);
-    } catch {
-      setError('A compactação foi interrompida pelo navegador. Confira a memória disponível e tente novamente.'); setBusy(false);
-    }
+      const buffer = await file.arrayBuffer();
+      worker.postMessage({ buffer }, [buffer]);
+    } catch { setError('Não foi possível ler este PDF.'); setBusy(false); worker.terminate(); }
   };
 
   const isImage = (candidate: File) => candidate.type.startsWith('image/') || /\.(tif|tiff|jpe?g|png|webp|gif|bmp|avif)$/i.test(candidate.name);
-  const compress = () => file && isImage(file) ? compressImage() : compressFile();
+  const isPdf = (candidate: File) => candidate.type === 'application/pdf' || /\.pdf$/i.test(candidate.name);
+  const compress = () => {
+    if (!file) return;
+    if (isImage(file)) void compressImage();
+    else if (isPdf(file)) void compressPdf();
+    else setError('Este formato ainda não tem um otimizador próprio. Para preservar o arquivo, ele não será convertido para .gz.');
+  };
   const savings = result ? Math.round((1 - result.size / result.originalSize) * 100) : 0;
   const isTiff = file ? /\.(tif|tiff)$/i.test(file.name) || /tiff/i.test(file.type) : false;
 
@@ -101,13 +111,13 @@ export default function FileCompressorPage() {
       </div>
 
       <div className="compressor-card compressor-how-card">
-        <div className="compressor-card-heading"><span className="compressor-step"><HardDrive size={15}/></span><div><h2>O que acontece depois?</h2><p>A otimização é escolhida automaticamente pelo tipo do arquivo.</p></div></div>
-        <div className="compressor-auto-options"><div><FileImage size={21}/><span><strong>Imagens</strong> serão convertidas para WebP.</span></div><div><FileArchive size={21}/><span><strong>Outros arquivos</strong> receberão compactação GZIP.</span></div></div>
-        <p className="compressor-note"><AlertCircle size={16}/><span>O GZIP não reduz todos os formatos: PDFs, vídeos e imagens já compactadas podem ficar iguais ou maiores. Você verá a comparação antes de baixar.</span></p>
+        <div className="compressor-card-heading"><span className="compressor-step"><HardDrive size={15}/></span><div><h2>Otimização automática</h2><p>O arquivo continua no formato original.</p></div></div>
+        <div className="compressor-auto-options"><div><FileImage size={21}/><span><strong>Imagens</strong> são otimizadas como WebP.</span></div><div><FileArchive size={21}/><span><strong>PDFs</strong> são reorganizados e continuam PDF.</span></div></div>
+        <p className="compressor-note"><AlertCircle size={16}/><span>Arquivos que já têm compressão podem não diminuir. Se não houver ganho, você verá os tamanhos antes de baixar.</span></p>
       </div>
     </div>
 
-    {isTiff && <p className="compressor-memory"><HardDrive size={16}/> TIFF é aberto localmente. A memória usada pode ser várias vezes maior que o arquivo. Há um limite de 32 megapixels para proteger o dispositivo.</p>}
+    {isTiff && <p className="compressor-memory"><HardDrive size={16}/> Imagens grandes podem usar várias vezes o tamanho do arquivo em memória. Para TIFF, o limite é 100 megapixels; se faltar memória, tente fechar outros programas.</p>}
     {error && <div className="compressor-alert" role="alert"><AlertCircle size={18}/><span>{error}</span></div>}
     {busy && <div className="compressor-progress" role="status"><div><LoaderCircle size={18} className="compressor-spin"/><span>{progressLabel}</span><strong>{progress}%</strong></div><progress value={progress} max="100"/></div>}
 

@@ -14,7 +14,7 @@ type WorkerScope = {
   postMessage(message: unknown, transfer?: Transferable[]): void;
 };
 const workerScope = self as unknown as WorkerScope;
-const MAX_PIXELS = 32_000_000;
+const MAX_PIXELS = 100_000_000;
 
 function getTagNumber(value: unknown): number {
   if (Array.isArray(value)) return Number(value[0] || 0);
@@ -42,7 +42,7 @@ workerScope.onmessage = async (event: MessageEvent<WorkerRequest>) => {
       }));
       const totalPixels = dimensions.reduce((sum, page) => sum + page.width * page.height, 0);
       if (dimensions.some((page) => !page.width || !page.height) || totalPixels > MAX_PIXELS) {
-        throw new Error('A imagem excede o limite seguro de 32 megapixels deste processamento no navegador. Reduza a resolução em um aplicativo de imagem e tente novamente.');
+        throw new Error('A imagem excede o limite de segurança de 100 megapixels deste navegador.');
       }
       const pages: Record<string, Uint8Array> = {};
       let firstPageBlob: Blob | null = null;
@@ -80,7 +80,7 @@ workerScope.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     const bitmap = await createImageBitmap(new Blob([buffer], { type: fileType }));
     if (bitmap.width * bitmap.height > MAX_PIXELS) {
       bitmap.close();
-      throw new Error('A imagem excede o limite seguro de 32 megapixels deste processamento no navegador. Reduza a resolução e tente novamente.');
+      throw new Error('A imagem excede o limite de segurança de 100 megapixels deste navegador.');
     }
     const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
     const context = canvas.getContext('2d');
