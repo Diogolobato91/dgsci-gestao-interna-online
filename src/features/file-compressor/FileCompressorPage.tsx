@@ -93,11 +93,6 @@ export default function FileCompressorPage() {
     <PageHeader eyebrow="Consulta compartilhada" title="Compressor de Arquivos" description="Reduza imagens ou tente compactar outros arquivos diretamente no seu dispositivo." icon={FileArchive} />
     <div className="compressor-privacy"><ShieldCheck size={19}/><div><strong>Processamento privado no navegador</strong><span>O arquivo não é enviado ao sistema, ao banco de dados ou ao armazenamento em nuvem.</span></div></div>
 
-    <div className="compressor-mode-tabs" role="tablist" aria-label="Tipo de compactação">
-      <button type="button" role="tab" aria-selected={mode === 'image'} className={mode === 'image' ? 'is-active' : ''} onClick={() => { setMode('image'); setError(''); clearResult(); }}><ImageDown size={18}/>Otimizar imagem</button>
-      <button type="button" role="tab" aria-selected={mode === 'file'} className={mode === 'file' ? 'is-active' : ''} onClick={() => { setMode('file'); setError(''); clearResult(); }}><FileArchive size={18}/>Tentar compactar qualquer arquivo</button>
-    </div>
-
     <div className="compressor-layout">
       <div className="compressor-card">
         <div className="compressor-card-heading"><span className="compressor-step">1</span><div><h2>Escolha o arquivo</h2><p>Até 200 MB. O arquivo permanece neste dispositivo.</p></div></div>
@@ -110,6 +105,9 @@ export default function FileCompressorPage() {
 
       <div className="compressor-card">
         <div className="compressor-card-heading"><span className="compressor-step">2</span><div><h2>Defina como compactar</h2><p>{mode === 'image' ? 'Conversão com perda controlada para reduzir imagens.' : 'Compactação sem perda em arquivo .gz.'}</p></div></div>
+        <div className="compressor-settings">
+          <label>Operação<select value={mode} onChange={(event) => { setMode(event.target.value as Mode); setError(''); clearResult(); }}><option value="image">Otimizar imagem para WebP ou JPEG</option><option value="file">Compactar qualquer arquivo em GZIP</option></select></label>
+        </div>
         {mode === 'image' ? <div className="compressor-settings">
           <label>Formato de saída<select value={format} onChange={(event) => setFormat(event.target.value as 'image/webp' | 'image/jpeg')}><option value="image/webp">WebP — recomendado, costuma gerar menor arquivo</option><option value="image/jpeg">JPEG — compatibilidade ampla</option></select></label>
           <label className="compressor-quality">Qualidade <strong>{quality}%</strong><input type="range" min="50" max="95" step="1" value={quality} onChange={(event) => setQuality(Number(event.target.value))}/><span>Menor qualidade tende a reduzir mais o arquivo.</span></label>
