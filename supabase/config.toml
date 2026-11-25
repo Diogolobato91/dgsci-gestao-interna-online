@@ -1,3 +1,6 @@
 [functions.accreditation-sheet]
 verify_jwt = false
 
+[functions.memorial-portal]
+verify_jwt = false
+

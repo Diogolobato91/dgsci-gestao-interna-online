@@ -23,6 +23,8 @@ const OperationalCasesPage = lazy(() => import('@/features/operations/Operationa
 const OperationalReportsPage = lazy(() => import('@/features/operations/OperationalReportsPage'));
 const DutyLogPage = lazy(() => import('@/features/duty-log/DutyLogPage'));
 const FileCompressorPage = lazy(() => import('@/features/file-compressor/FileCompressorPage'));
+const MemorialsPage = lazy(() => import('@/features/memorials/MemorialsPage'));
+const PublicMemorialPage = lazy(() => import('@/features/memorials/PublicMemorialPage'));
 
 const EscalaMensal = lazy(() => import("@/pages/EscalaMensal"));
 const DashboardGeral = lazy(() => import("@/pages/DashboardGeral"));
@@ -87,6 +89,7 @@ const AppRoutes = () => (
       <Route path="/instrucoes-tecnicas" element={<PublicPublicationsPage kind="technical_instruction" />} />
       <Route path="/privacidade" element={<PublicPrivacyPage />} />
       <Route path="/acessibilidade" element={<PublicAccessibilityPage />} />
+      <Route path="/memorial/preencher/:token" element={<PublicMemorialPage />} />
       {/* Rota pública - Login */}
       <Route 
         path="/login" 
@@ -113,6 +116,7 @@ const AppRoutes = () => (
         <Route path="atendimentos" element={<SupportDesk />} />
         <Route path="atendimentos/administracao" element={<AuthorizedRoute profiles={['Subdiretoria','Diretoria']}><SupportAdmin /></AuthorizedRoute>} />
         <Route path="livro-plantao" element={<DutyLogPage />} />
+        <Route path="memoriais" element={<AuthorizedRoute profiles={['Subdiretoria']}><MemorialsPage /></AuthorizedRoute>} />
         <Route path="compressor-arquivos" element={<FileCompressorPage />} />
         <Route path="gestao-publicacoes" element={<AuthorizedRoute profiles={['Subdiretoria']}><PublicationsAdmin /></AuthorizedRoute>} />
         <Route path="biblioteca" element={<SupportLibrary />} />

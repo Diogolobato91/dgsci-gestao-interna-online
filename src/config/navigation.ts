@@ -18,7 +18,8 @@ import {
   MessageSquare,
   BookOpen,
   BookOpenCheck,
-  FileArchive
+  FileArchive,
+  FileCheck2
 } from 'lucide-react';
 import { MenuConfig, MenuItem } from '@/types/navigation';
 
@@ -136,6 +137,7 @@ export const navigationConfig: MenuConfig = {
   
   'Subdiretoria': [
     ...commonItemsComplete,
+    {id:'memoriais',title:'Memoriais',icon:FileCheck2,path:'/memoriais',section:'Subdiretoria'},
     {id:'admin-atendimentos',title:'Gestão do Atendimento',icon:BarChart3,path:'/atendimentos/administracao',section:'Atendimento on-line'},
     {id:'gestao-publicacoes',title:'Cartilhas e ITs',icon:BookOpen,path:'/gestao-publicacoes',section:'Subdiretoria'},
     { id: 'escala-mensal', title: 'Escala Mensal', icon: Calendar, path: '/escala-mensal', section: 'Administração' },
