@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { memorialTypes, type MemorialField, type MemorialType } from './templates';
+import { memorialProtocol, memorialTypes, type MemorialField, type MemorialType } from './templates';
 
 export type MemorialPdfRequest={id:string;request_number:number;memorial_type:MemorialType;protocol:string;company_name:string;cnpj:string;contact_name:string;contact_email:string;data:Record<string,string>};
 export type MemorialPdfSignature={name:string;date:string};
@@ -20,7 +20,7 @@ export async function generateMemorialPdf(request:MemorialPdfRequest,mode:'previ
   pdf.setFont('helvetica','normal');pdf.setFontSize(6.7);pdf.text('DEPARTAMENTO GERAL DE SEGURANÇA CONTRA INCÊNDIO',logo?left+13:left,14.2);
   pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.setTextColor(162,25,48);pdf.text(template.officialTitle.toLocaleUpperCase('pt-BR'),105,25,{align:'center',maxWidth:185});
   pdf.setDrawColor(174,180,190);pdf.setLineWidth(.25);pdf.line(left,29,pageWidth-left,29);pdf.setTextColor(59,69,84);pdf.setFont('helvetica','normal');pdf.setFontSize(6.5);
-  pdf.text(`PROTOCOLO: ${request.protocol||'—'}   ·   SOLICITAÇÃO MEM-${String(request.request_number).padStart(6,'0')}`,left,33);pdf.text(`${page===1?'':'CONTINUAÇÃO  ·  '}${page}/${template.pages}`,pageWidth-left,33,{align:'right'});
+  pdf.text(`PROTOCOLO DGSCI: ${memorialProtocol(request.request_number)}${request.protocol?`   ·   PROTOCOLO EXTERNO: ${request.protocol}`:''}`,left,33);pdf.text(`${page===1?'':'CONTINUAÇÃO  ·  '}${page}/${template.pages}`,pageWidth-left,33,{align:'right'});
   if(mode==='preview'){pdf.setFillColor(255,247,228);pdf.roundedRect(left,36,pageWidth-left*2,7,1.2,1.2,'F');pdf.setFont('helvetica','bold');pdf.setFontSize(6.5);pdf.setTextColor(120,79,18);pdf.text('PRÉVIA PARA CONFERÊNCIA — DOCUMENTO AINDA NÃO ASSINADO',pageWidth/2,40.5,{align:'center'});}
  };
  const fieldLayout=(field:MemorialField)=>{
